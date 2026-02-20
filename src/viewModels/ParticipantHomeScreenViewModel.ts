@@ -1,129 +1,103 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/AuthStore';
-import { useEventStore } from '../store/EventStore';
+import {
+  getMyEvents,
+  getMySchedule,
+  getMyTeams,
+} from '../services/participantService';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { Team, Fixture, MatchStatus } from '../models/Event';
+import { Alert } from 'react-native';
 
-type MyTeamData = {
-  team: Team;
+type ApiTeam = {
+  teamId: number;
+  teamName: string;
+  category: string;
   eventName: string;
-  sport: string;
 };
 
-type TodayMatchData = {
-  fixture: Fixture;
+type ApiScheduleRaw = {
+  matchId: number;
+  matchDateTime: string;
+  venue: string;
+  sideA: string;
+  sideB: string;
+  scoreA: number;
+  scoreB: number;
   eventName: string;
+};
+
+type ApiSchedule = {
+  id: number;
+  teamA: string;
+  teamB: string;
+  status: string;
   sport: string;
+  scoreA: number;
+  scoreB: number;
 };
 
 export const useParticipantHomeViewModel = (
   navigation: NativeStackNavigationProp<RootStackParamList>,
 ) => {
-  const { logout, user } = useAuthStore();
-  const { events } = useEventStore();
+  const { user, logout } = useAuthStore();
 
-  const myTeams: MyTeamData[] = useMemo(() => {
-    if (!user) return [];
+  const [myTeams, setMyTeams] = useState<ApiTeam[]>([]);
+  const [myEventsCount, setMyEventsCount] = useState(0);
+  const [todaysMatches, setTodaysMatches] = useState<ApiSchedule[]>([]);
+  const [matchesPlayedCount, setMatchesPlayedCount] = useState(0);
+  const [winsCount, setWinsCount] = useState(0);
 
-    const teams: MyTeamData[] = [];
-    events.forEach((event) => {
-      event.teams.forEach((team) => {
-        const isPlayerInTeam = team.players.some(
-          (player) => player.name.toLowerCase() === user.name.toLowerCase(),
-        );
-        if (isPlayerInTeam) {
-          teams.push({
-            team,
-            eventName: event.name,
-            sport: event.sport,
-          });
-        }
-      });
-    });
-    return teams;
-  }, [events, user]);
+  useEffect(() => {
+    if (!user?.id) return;
 
-  const todaysMatches: TodayMatchData[] = useMemo(() => {
-    if (!user) return [];
+    const resolveName = (id: string) => {
+      const participant = myTeams.find((team) => team.teamId.toString() === id);
+      return participant ? participant.teamName : `Player ${id}`;
+    };
 
-    const today = new Date().toISOString().split('T')[0];
-    const matches: TodayMatchData[] = [];
+    const loadData = async () => {
+      try {
+        const teams = await getMyTeams(user.id);
+        setMyTeams(teams);
 
-    events.forEach((event) => {
-      if (event.date !== today) return;
+        const events = await getMyEvents(user.id);
+        setMyEventsCount(events.length);
 
-      event.fixtures.forEach((fixture) => {
-        const userTeamNames = myTeams.map((teams) => teams.team.name);
-        const isUserInvolved =
-          userTeamNames.includes(fixture.teamA) ||
-          userTeamNames.includes(fixture.teamB) ||
-          fixture.teamA.toLowerCase() === user.name.toLowerCase() ||
-          fixture.teamB.toLowerCase() === user.name.toLowerCase();
+        const rawSchedule = await getMySchedule(user.id);
+        const mapped = rawSchedule.map((match: ApiScheduleRaw) => ({
+          id: match.matchId,
+          teamA: resolveName(match.sideA),
+          teamB: resolveName(match.sideB),
+          scoreA: match.scoreA,
+          scoreB: match.scoreB,
+          status:
+            match.scoreA !== null && match.scoreB !== null
+              ? 'COMPLETED'
+              : 'UPCOMING',
+          sport: match.eventName,
+        }));
 
-        if (isUserInvolved && fixture.status !== MatchStatus.COMPLETED) {
-          matches.push({
-            fixture,
-            eventName: event.name,
-            sport: event.sport,
-          });
-        }
-      });
-    });
+        setTodaysMatches(mapped);
 
-    return matches;
-  }, [events, user, myTeams]);
+        let played = 0;
+        let wins = 0;
+        mapped.forEach((match) => {
+          if (match.status === 'COMPLETED') {
+            played++;
+            if (match.scoreA > match.scoreB) wins++;
+          }
+        });
 
-  const myEventsCount = useMemo(() => {
-    if (!user) return 0;
-    return events.filter((event) =>
-      event.registrations.some(
-        (reg) => reg.name.toLowerCase() === user.name.toLowerCase(),
-      ),
-    ).length;
-  }, [events, user]);
+        setMatchesPlayedCount(played);
+        setWinsCount(wins);
+      } catch {
+        Alert.alert('Error', 'Failed to load participant data');
+      }
+    };
 
-  const matchesPlayedCount = useMemo(() => {
-    if (!user) return 0;
-    let count = 0;
-    const userTeamNames = myTeams.map((teams) => teams.team.name);
-
-    events.forEach((event) => {
-      event.fixtures.forEach((fixture) => {
-        const isUserInvolved =
-          userTeamNames.includes(fixture.teamA) ||
-          userTeamNames.includes(fixture.teamB) ||
-          fixture.teamA.toLowerCase() === user.name.toLowerCase() ||
-          fixture.teamB.toLowerCase() === user.name.toLowerCase();
-
-        if (isUserInvolved && fixture.status === MatchStatus.COMPLETED) {
-          count++;
-        }
-      });
-    });
-    return count;
-  }, [events, user, myTeams]);
-
-  const winsCount = useMemo(() => {
-    if (!user) return 0;
-    let count = 0;
-    const userTeamNames = myTeams.map((teams) => teams.team.name);
-
-    events.forEach((event) => {
-      event.fixtures.forEach((fixture) => {
-        if (fixture.status !== MatchStatus.COMPLETED || !fixture.winner) return;
-
-        const isWinner =
-          userTeamNames.includes(fixture.winner) ||
-          fixture.winner.toLowerCase() === user.name.toLowerCase();
-
-        if (isWinner) {
-          count++;
-        }
-      });
-    });
-    return count;
-  }, [events, user, myTeams]);
+    loadData();
+  }, [user]);
 
   const onLogout = async () => {
     await logout();
@@ -138,9 +112,9 @@ export const useParticipantHomeViewModel = (
     user,
     onLogout,
     myTeams,
-    todaysMatches,
-    myEventsCount,
     myTeamsCount: myTeams.length,
+    myEventsCount,
+    todaysMatches,
     matchesPlayedCount,
     winsCount,
   };

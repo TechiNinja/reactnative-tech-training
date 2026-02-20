@@ -4,7 +4,6 @@ import { APP_STRINGS } from '../../constants/AppStrings';
 import AnalyticsCard from '../../components/AnalyticsCard/AnalyticsCard';
 import {
   Calendar,
-  Clock,
   LogOut,
   TrendingUp,
   Trophy,
@@ -24,6 +23,17 @@ const ParticipantHomeScreen = () => {
 
   const viewModel = useParticipantHomeViewModel(navigation);
 
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case 'COMPLETED':
+        return styles.gameStatusCompleted;
+      case 'LIVE':
+        return styles.gameStatusLive;
+      default:
+        return styles.gameStatusUpcoming;
+    }
+  };
+
   return (
     <ScreenWrapper scrollable={true}>
       <View style={styles.container}>
@@ -36,7 +46,6 @@ const ParticipantHomeScreen = () => {
             <LogOut size={22} color={colors.error} />
           </TouchableOpacity>
         </View>
-
         <View style={styles.analyticsGrid}>
           <View style={styles.row}>
             <AnalyticsCard
@@ -74,15 +83,15 @@ const ParticipantHomeScreen = () => {
           {viewModel.myTeams.length > 0 ? (
             viewModel.myTeams.map((teamData) => (
               <MyTeamCard
-                key={teamData.team.id}
+                key={teamData.teamId}
                 logo={
                   <Text style={styles.logoStyle}>
-                    {teamData.team.name.substring(0, 2).toUpperCase()}
+                    {teamData.teamName.substring(0, 2).toUpperCase()}
                   </Text>
                 }
-                name={teamData.team.name}
-                members={teamData.team.players.map((player) => player.name)}
-                sport={teamData.sport}
+                name={teamData.teamName}
+                members={[teamData.eventName]}
+                sport={teamData.category}
                 wins={0}
                 losses={0}
                 winRate="0%"
@@ -91,7 +100,7 @@ const ParticipantHomeScreen = () => {
           ) : (
             <View style={styles.emptyState}>
               <Text style={styles.emptyText}>
-                {APP_STRINGS.eventScreen.noTeamsYet}
+                {APP_STRINGS.eventScreen.noTeamsFound}
               </Text>
             </View>
           )}
@@ -103,30 +112,72 @@ const ParticipantHomeScreen = () => {
           </Text>
 
           {viewModel.todaysMatches.length > 0 ? (
-            viewModel.todaysMatches.map((matchData) => (
-              <View key={matchData.fixture.id} style={styles.matchCard}>
-                <Text style={styles.matchSport}>{matchData.sport}</Text>
-                <View style={styles.matchTeams}>
-                  <Text style={styles.matchTeamName}>
-                    {matchData.fixture.teamA}
-                  </Text>
-                  <Text style={styles.vsText}>vs</Text>
-                  <Text style={styles.matchTeamName}>
-                    {matchData.fixture.teamB}
-                  </Text>
+            viewModel.todaysMatches.map((matchData) => {
+              const isAWinner = matchData.scoreA > matchData.scoreB;
+              const isBWinner = matchData.scoreB > matchData.scoreA;
+
+              return (
+                <View key={matchData.id} style={styles.matchCard}>
+                  <View style={styles.detailContainer}>
+                    <Text style={styles.matchSport}>{matchData.sport}</Text>
+                    <Text style={getStatusStyle(matchData.status)}>
+                      {matchData.status}
+                    </Text>
+                  </View>
+                  <View style={styles.matchTeamsRow}>
+                    <View style={styles.teamColumn}>
+                      <View style={styles.logoCircle}>
+                        <Text style={styles.logoText}>
+                          {matchData.teamA.substring(0, 2).toUpperCase()}
+                        </Text>
+                      </View>
+                      <Text style={styles.matchTeamName}>
+                        {matchData.teamA}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.scoreText,
+                          isAWinner && styles.winnerScore,
+                        ]}
+                      >
+                        {matchData.scoreA}
+                      </Text>
+                    </View>
+
+                    <Text style={styles.vsText}>vs</Text>
+
+                    <View style={styles.teamColumn}>
+                      <View style={styles.logoCircle}>
+                        <Text style={styles.logoText}>
+                          {matchData.teamB.substring(0, 2).toUpperCase()}
+                        </Text>
+                      </View>
+                      <Text style={styles.matchTeamName}>
+                        {matchData.teamB}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.scoreText,
+                          isBWinner && styles.winnerScore,
+                        ]}
+                      >
+                        {matchData.scoreB}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {matchData.status === 'COMPLETED' && (
+                    <Text style={styles.winnerText}>
+                      Winner: {isAWinner ? matchData.teamA : matchData.teamB}
+                    </Text>
+                  )}
                 </View>
-                <View style={styles.matchInfo}>
-                  <Clock size={14} color={colors.textSecondary} />
-                  <Text style={styles.matchInfoText}>
-                    {matchData.fixture.status}
-                  </Text>
-                </View>
-              </View>
-            ))
+              );
+            })
           ) : (
             <View style={styles.emptyState}>
               <Text style={styles.emptyText}>
-                {APP_STRINGS.eventScreen.noMatchesToday}
+                {APP_STRINGS.eventScreen.notMatchesToday}
               </Text>
             </View>
           )}
