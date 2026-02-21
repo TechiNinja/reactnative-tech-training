@@ -1,13 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
-import {
-  Event,
-  EventStatus,
-  GenderType,
-  FormatType,
-  MatchStatus,
-  Fixture,
-} from '../models/Event';
-import { MOCK_EVENTS } from '../constants/MockEvents';
+import { Event, GenderType, FormatType, Fixture } from '../models/Event';
+import { MOCK_EVENTS } from '../constants/mockEvents';
 
 type EventContextType = {
   events: Event[];

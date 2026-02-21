@@ -49,13 +49,13 @@ const authFetch = async <T>(
 };
 
 export const getMyTeams = (userId: number) => {
-  return authFetch<ApiTeam[]>(`/participant/${userId}/team`);
+  return authFetch<ApiTeam[]>(`/MyTeams/${userId}`);
 };
 
 export const getMyEvents = (userId: number) => {
-  return authFetch<ApiEvent[]>(`/participant/${userId}/events`);
+  return authFetch<ApiEvent[]>(`/MyEvents/${userId}`);
 };
 
 export const getMySchedule = (userId: number) => {
-  return authFetch<ApiScheduleRaw[]>(`/participant/${userId}/schedule`);
+  return authFetch<ApiScheduleRaw[]>(`/MySchedules/${userId}`);
 };
