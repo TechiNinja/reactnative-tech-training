@@ -2,7 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import LoginScreen from '../views/Login/LoginScreen';
 import RegisterScreen from '../views/Register/RegisterScreen';
-import RoleSelectionScreen from '../views/RoleSelection/RoleSelectionScreen';
+// import RoleSelectionScreen from '../views/RoleSelection/RoleSelectionScreen';
 import ForgotPasswordScreen from '../views/ForgotPassword/ForgotPasswordScreen';
 
 export type AuthStackParamList = {
@@ -23,7 +23,7 @@ const AuthNavigator = () => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
-      <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
+      {/* <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} /> */}
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </Stack.Navigator>
   );

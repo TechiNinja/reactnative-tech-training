@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { isValidEmail, isValidPassword } from '../utils/validation';
-import { validationMessages } from '../constants/ValidationMessages';
+import { validationMessages } from '../constants/validationMessages';
 import { useAuthStore } from '../store/AuthStore';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';

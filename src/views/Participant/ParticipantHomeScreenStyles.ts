@@ -22,8 +22,21 @@ export const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginTop: 25,
   },
+  circleLogo: {
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: 21,
+    height: 42,
+    justifyContent: 'center',
+    marginBottom: 4,
+    width: 42,
+  },
   container: {
     paddingHorizontal: 20,
+  },
+  detailContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   emptyState: {
     alignItems: 'center',
@@ -37,6 +50,37 @@ export const styles = StyleSheet.create({
   emptyText: {
     color: colors.textSecondary,
     fontSize: fontsSize.medium,
+  },
+  gameStatusCompleted: {
+    backgroundColor: colors.error + '20',
+    borderColor: colors.error,
+    borderRadius: 14,
+    borderWidth: 1,
+    color: colors.error,
+    fontSize: fontsSize.small,
+    fontWeight: 'bold',
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+  },
+  gameStatusLive: {
+    backgroundColor: colors.participantBackgroud + '20',
+    borderColor: colors.participantBackgroud,
+    borderRadius: 14,
+    borderWidth: 1,
+    color: colors.participantBackgroud,
+    fontWeight: 'bold',
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+  },
+  gameStatusUpcoming: {
+    backgroundColor: colors.usersIconBackground + '20',
+    borderColor: colors.usersIconBackground,
+    borderRadius: 14,
+    borderWidth: 1,
+    color: colors.usersIconBackground,
+    fontWeight: 'bold',
+    paddingHorizontal: 14,
+    paddingVertical: 4,
   },
   greeting: {
     color: colors.textPrimary,
@@ -58,9 +102,22 @@ export const styles = StyleSheet.create({
     marginVertical: 20,
     paddingLeft: 2,
   },
+  logoCircle: {
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
+    marginBottom: 4,
+    width: 40,
+  },
   logoStyle: {
     color: colors.appBackground,
     fontSize: fontsSize.large,
+    fontWeight: 'bold',
+  },
+  logoText: {
+    color: colors.appBackground,
     fontWeight: 'bold',
   },
   matchCard: {
@@ -100,10 +157,26 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 8,
   },
+  matchTeamsRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
   row: {
     flexDirection: 'row',
     gap: 10,
     marginVertical: 5,
+  },
+  scoreBlock: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '30%',
+  },
+  scoreText: {
+    color: colors.textSecondary,
+    fontSize: 18,
+    marginTop: 4,
   },
   tagline: {
     color: colors.textSecondary,
@@ -111,9 +184,28 @@ export const styles = StyleSheet.create({
     marginLeft: 10,
     paddingTop: 10,
   },
+  teamBlock: {
+    alignItems: 'center',
+    width: '35%',
+  },
+  teamColumn: {
+    alignItems: 'center',
+    flex: 1,
+  },
   vsText: {
     color: colors.textSecondary,
-    fontSize: fontsSize.medium,
+    fontSize: fontsSize.regular,
     marginHorizontal: 12,
+  },
+  winnerScore: {
+    color: colors.participantBackgroud,
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  winnerText: {
+    color: colors.participantBackgroud,
+    fontWeight: '600',
+    marginTop: 6,
+    textAlign: 'center',
   },
 });

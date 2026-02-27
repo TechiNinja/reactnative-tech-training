@@ -21,7 +21,7 @@ import LiveMatchesCard from '../../components/MatchesCard/LiveMatchesCard';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
-import { MOCK_MATCHES } from '../../constants/MockMatches';
+import { MOCK_MATCHES } from '../../constants/mockMatches';
 import { useAdminHomeViewModel } from '../../viewModels/AdminHomeScreenViewModel';
 
 const AdminHomeScreen = () => {

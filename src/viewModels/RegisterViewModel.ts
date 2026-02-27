@@ -4,14 +4,13 @@ import {
   isValidName,
   isValidPassword,
 } from '../utils/validation';
-import { validationMessages } from '../constants/ValidationMessages';
+import { validationMessages } from '../constants/validationMessages';
 import { useAuthStore } from '../store/AuthStore';
-import { StoredUser } from '../utils/authStorage';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../navigation/AuthNavigator';
+import { RootStackParamList } from '../navigation/AppNavigator';
 
 export const useRegisterViewModel = (
-  navigation: NativeStackNavigationProp<AuthStackParamList>,
+  navigation: NativeStackNavigationProp<RootStackParamList>,
 ) => {
   const { register } = useAuthStore();
 
@@ -63,24 +62,18 @@ export const useRegisterViewModel = (
     const valid = validateName() && validateEmail() && validatePassword();
     if (!valid) return;
 
-    const newUser: StoredUser = {
-      name,
-      email,
-      password,
-      role: 'participant',
-    };
+    const success = await register(name, email, password);
 
-    await register(newUser);
-
-    navigation.navigate('RoleSelection', {
-      name,
-      email,
-      password,
-    });
+    if (success) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'ParticipantTabs' }],
+      });
+    }
   };
 
   const goToLogin = () => {
-    navigation.navigate('Login');
+    navigation.navigate('Auth', { screen: 'Login' });
   };
 
   const isFormValid =

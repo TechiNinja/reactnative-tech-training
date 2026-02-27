@@ -160,5 +160,6 @@ export const APP_STRINGS = {
     notEnoughSameGenderPairs: 'Not enough same-gender pairs',
     maleSlots: 'Male Slots',
     femaleSlots: 'Female Slots',
+    notMatchesToday: 'No Matches Today',
   },
 };

@@ -1,72 +1,112 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getUser, saveUser, StoredUser } from '../utils/authStorage';
-import { RoleType } from '../constants/Roles';
+import {
+  saveUser,
+  getUser,
+  clearStorage,
+  StoredUser,
+} from '../utils/authStorage';
+import { Alert } from 'react-native';
 
 type AuthContextType = {
   user: StoredUser | null;
-  role: RoleType | null;
-  setRole: (role: RoleType) => void;
-  register: (user: StoredUser) => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
+  register: (
+    fullName: string,
+    email: string,
+    password: string,
+  ) => Promise<boolean>;
   logout: () => Promise<void>;
   loading: boolean;
 };
 
-type AuthContextProps = {
-  children: React.ReactNode;
-};
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<AuthContextProps> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<StoredUser | null>(null);
-  const [role, setRoleState] = useState<RoleType | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadUser = async () => {
       const storedUser = await getUser();
-      if (storedUser) setUser(storedUser);
+      setUser(storedUser);
       setLoading(false);
     };
     loadUser();
   }, []);
 
-  const setRole = (selectedRole: RoleType) => {
-    setRoleState(selectedRole);
-  };
+  const register = async (
+    fullName: string,
+    email: string,
+    password: string,
+  ) => {
+    try {
+      const res = await fetch('http://10.0.2.2:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName, email, password }),
+      });
 
-  const register = async (newUser: StoredUser) => {
-    await saveUser(newUser);
+      if (!res.ok) {
+        const data = await res.json();
+        Alert.alert('Register failed', data?.message ?? 'Something went wrong');
+        return false;
+      }
+
+      const data = await res.json();
+      const token = data.token;
+      const userData: StoredUser = {
+        id: data.id,
+        name: data.fullName,
+        email: data.email,
+        role: data.role.toLowerCase(),
+      };
+
+      setUser(userData);
+      await saveUser(userData, token);
+      return true;
+    } catch {
+      Alert.alert('Register failed', 'Something went wrong');
+      return false;
+    }
   };
 
   const login = async (email: string, password: string) => {
-    const storedUser = await getUser();
-    if (!storedUser) return false;
+    try {
+      const res = await fetch('http://10.0.2.2:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (storedUser.email === email && storedUser.password === password) {
-      const userWithRole: StoredUser = {
-        ...storedUser,
-        role: role ?? storedUser.role,
+      if (!res.ok) return false;
+
+      const data = await res.json();
+      const token = data.token;
+      const userData: StoredUser = {
+        id: data.id,
+        name: data.fullName,
+        email: data.email,
+        role: data.role.toLowerCase(),
       };
 
-      setUser(userWithRole);
-      await saveUser(userWithRole);
+      setUser(userData);
+      await saveUser(userData, token);
       return true;
+    } catch {
+      Alert.alert('Login failed', 'Something went wrong. Please try again.');
+      return false;
     }
-
-    return false;
   };
 
   const logout = async () => {
     setUser(null);
-    setRoleState(null);
+    await clearStorage();
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, role, setRole, register, login, logout, loading }}
-    >
+    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
