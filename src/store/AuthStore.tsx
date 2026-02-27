@@ -6,6 +6,7 @@ import {
   StoredUser,
 } from '../utils/authStorage';
 import { Alert } from 'react-native';
+import { API_ENDPOINTS } from '../config/api';
 
 type AuthContextType = {
   user: StoredUser | null;
@@ -16,6 +17,7 @@ type AuthContextType = {
     password: string,
   ) => Promise<boolean>;
   logout: () => Promise<void>;
+  setRole: (role: string) => void;
   loading: boolean;
 };
 
@@ -26,6 +28,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<StoredUser | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const setRole = (_role: string) => {};
 
   useEffect(() => {
     const loadUser = async () => {
@@ -42,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     password: string,
   ) => {
     try {
-      const res = await fetch('http://10.0.2.2:5000/api/auth/register', {
+      const res = await fetch(API_ENDPOINTS.AUTH.REGISTER, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fullName, email, password }),
@@ -74,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (email: string, password: string) => {
     try {
-      const res = await fetch('http://10.0.2.2:5000/api/auth/login', {
+      const res = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -106,7 +110,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider
+      value={{ user, login, register, logout, setRole, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

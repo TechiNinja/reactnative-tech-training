@@ -34,8 +34,8 @@ export const useCategoryDetailsViewModel = () => {
   const {
     events,
     updateEvent,
-    updateFixtureStatus,
     updateFixtureScore,
+    updateFixtureStatus,
     completeFixture,
   } = useEventStore();
 
@@ -115,10 +115,11 @@ export const useCategoryDetailsViewModel = () => {
       );
     }
     if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
       result = result.filter(
         (fixture) =>
-          fixture.teamA.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          fixture.teamB.toLowerCase().includes(searchQuery.toLowerCase()),
+          fixture.teamA?.toLowerCase().includes(q) ||
+          fixture.teamB?.toLowerCase().includes(q),
       );
     }
     return result;

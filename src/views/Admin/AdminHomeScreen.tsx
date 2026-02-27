@@ -28,7 +28,8 @@ const AdminHomeScreen = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const { onLogoutPress, onAddEvent } = useAdminHomeViewModel(navigation);
+  const { onLogoutPress, onAddEvent, onAddUser } =
+    useAdminHomeViewModel(navigation);
 
   return (
     <ScreenWrapper scrollable={true}>
@@ -89,6 +90,7 @@ const AdminHomeScreen = () => {
               <ActionCard
                 icon={<UserPlus size={20} color={colors.usersIconBackground} />}
                 title={APP_STRINGS.adminScreens.addUser}
+                onPress={onAddUser}
               />
             </View>
             <View style={styles.actionCardWrapper}>

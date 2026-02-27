@@ -64,7 +64,11 @@ export const useEventFormViewModel = ({
   const [name, setName] = useState(isEdit ? event!.name : '');
   const [sport, setSport] = useState(isEdit ? event!.sport : '');
   const [selectedFormats, setSelectedFormats] = useState<FormatType[]>(
-    isEdit ? event!.formats : [FormatType.Singles],
+    isEdit
+      ? event!.format === '2v2'
+        ? [FormatType.Singles, FormatType.Doubles]
+        : [FormatType.Singles]
+      : [FormatType.Singles],
   );
   const [date, setDate] = useState(isEdit ? event!.date : '');
   const [time, setTime] = useState(isEdit ? event!.time : '');
@@ -152,7 +156,7 @@ export const useEventFormViewModel = ({
       id: event?.id ?? Date.now().toString(),
       name,
       sport,
-      formats: selectedFormats,
+      format: selectedFormats.includes(FormatType.Doubles) ? '2v2' : '1v1',
       date,
       time,
       venue,

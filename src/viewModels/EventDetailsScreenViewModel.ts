@@ -46,10 +46,10 @@ export const useEventDetailsViewModel = () => {
 
     const cats: Category[] = [];
     const genders: GenderType[] = [GenderType.Male, GenderType.Female];
-    const formats: FormatType[] = event.formats ?? [
-      FormatType.Singles,
-      FormatType.Doubles,
-    ];
+    const formats: FormatType[] =
+      event.format === '2v2'
+        ? [FormatType.Singles, FormatType.Doubles]
+        : [FormatType.Singles];
 
     if (isChess && formats.includes(FormatType.Singles)) {
       const allSinglesParticipants = event.registrations.filter((player) =>

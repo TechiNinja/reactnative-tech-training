@@ -25,7 +25,7 @@ export const useEventRegistrationViewModel = (
   const [gender, setGender] = useState<GenderType | ''>('');
   const [selectedFormats, setSelectedFormats] = useState<FormatType[]>([]);
 
-  const availableFormats: FormatType[] = event?.formats ?? [
+  const availableFormats: FormatType[] = [
     FormatType.Singles,
     FormatType.Doubles,
   ];
@@ -102,6 +102,21 @@ export const useEventRegistrationViewModel = (
         prev.filter((format) => !fullCategories.includes(format)),
       );
       return;
+    }
+
+    if (event) {
+      const alreadyRegisteredInSelected = event.registrations.some((reg) => {
+        if (reg.name !== playerName || reg.gender !== gender) return false;
+        return selectedFormats.some((format) => reg.formats?.includes(format));
+      });
+
+      if (alreadyRegisteredInSelected) {
+        Alert.alert(
+          APP_STRINGS.eventScreen.registrationFailed,
+          APP_STRINGS.eventScreen.registered,
+        );
+        return;
+      }
     }
 
     registerParticipant(eventId, playerName, gender, selectedFormats);
