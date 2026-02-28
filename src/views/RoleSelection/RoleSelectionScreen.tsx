@@ -3,7 +3,6 @@ import { FlatList, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Trophy } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
-import { roles, RoleType } from '../../constants/Roles';
 import { roleIcons } from '../../utils/roleIcons';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import RoleCard from '../../components/RoleCard/RoleCard';
@@ -13,6 +12,7 @@ import { APP_STRINGS } from '../../constants/AppStrings';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useRoleSelectionViewModel } from '../../viewModels/RoleSelectionViewModel';
+import { roles, RoleType } from '../../constants/roles';
 
 const RoleSelectionScreen = () => {
   const navigation =

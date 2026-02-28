@@ -2,20 +2,23 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 
 import AuthNavigator, { AuthStackParamList } from './AuthNavigator';
-import AdminTabs from './AdminTabs';
+import AdminTabs, { AdminTabParamList } from './AdminTabs';
 import OrganizerTabs from './OrganizerTabs';
 import ParticipantTabs from './ParticipantTabs';
 import EventFormScreen from '../views/EventFormScreen/EventFormScreen';
+import EventRequestFormScreen from '../views/EventRequestFormScreen/EventRequestFormScreen';
 import { Event, GenderType, FormatType } from '../models/Event';
 import { NavigatorScreenParams } from '@react-navigation/native';
 import EventRegistrationScreen from '../views/EventRegistration/EventRegistrationScreen';
 import EventDetailsScreen from '../views/EventDetailsScreen/EventDetailsScreen';
 import CategoryDetailsScreen from '../views/CategoryDetailsScreen/CategoryDetailsScreen';
 import { RoleType } from '../constants/Roles';
+import { EventRequestResponse } from '../models/EventRequest';
+import EventRequestDetailsScreen from '../views/EventRequestDetailsScreen/EventRequestDetailsScreen';
 
 export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
-  AdminTabs: undefined;
+  AdminTabs: NavigatorScreenParams<AdminTabParamList>;
   OrganizerTabs: undefined;
   ParticipantTabs: undefined;
   EventForm: {
@@ -23,11 +26,20 @@ export type RootStackParamList = {
     event?: Event;
     onSubmit?: (event: Event) => void;
   };
+  EventRequestForm: {
+  mode: 'create' | 'edit';
+  request?: EventRequestResponse; // ✅ edit mode ke liye
+  onSubmit?: (request: EventRequestResponse) => void; // optional
+};
   EventRegister: {
     eventId: string;
   };
   EventDetails: {
     eventId: string;
+    role: RoleType;
+  };
+  EventRequestDetails : {
+    request: EventRequestResponse;
     role: RoleType;
   };
   CategoryDetails: {
@@ -50,8 +62,10 @@ const AppNavigator = () => {
       <Stack.Screen name="ParticipantTabs" component={ParticipantTabs} />
 
       <Stack.Screen name="EventForm" component={EventFormScreen} />
+      <Stack.Screen name="EventRequestForm" component={EventRequestFormScreen} />
       <Stack.Screen name="EventRegister" component={EventRegistrationScreen} />
       <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
+      <Stack.Screen name="EventRequestDetails" component={EventRequestDetailsScreen} />
       <Stack.Screen name="CategoryDetails" component={CategoryDetailsScreen} />
     </Stack.Navigator>
   );

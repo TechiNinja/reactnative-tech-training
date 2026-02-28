@@ -21,14 +21,15 @@ import LiveMatchesCard from '../../components/MatchesCard/LiveMatchesCard';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
-import { MOCK_MATCHES } from '../../constants/MockMatches';
+
 import { useAdminHomeViewModel } from '../../viewModels/AdminHomeScreenViewModel';
+import { MOCK_MATCHES } from '../../constants/mockMatches';
 
 const AdminHomeScreen = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const { onLogoutPress, onAddEvent } = useAdminHomeViewModel(navigation);
+  const { onLogoutPress, onAddEvent ,onRaiseRequest } = useAdminHomeViewModel(navigation);
 
   return (
     <ScreenWrapper scrollable={true}>
@@ -80,23 +81,26 @@ const AdminHomeScreen = () => {
           <View style={styles.actionCardContainer}>
             <View style={styles.actionCardWrapper}>
               <ActionCard
-                icon={<Plus size={20} color={colors.primary} />}
-                title={APP_STRINGS.adminScreens.addEvent}
-                onPress={onAddEvent}
+                icon={<Plus size={20} color={colors.participantBackgroud} />}
+                title={APP_STRINGS.adminScreens.raiseEventRequest}
+                onPress={onRaiseRequest}
               />
             </View>
+            
             <View style={styles.actionCardWrapper}>
               <ActionCard
                 icon={<UserPlus size={20} color={colors.usersIconBackground} />}
                 title={APP_STRINGS.adminScreens.addUser}
               />
             </View>
+
             <View style={styles.actionCardWrapper}>
               <ActionCard
-                icon={<Settings size={20} color={colors.textSecondary} />}
+                icon={<Settings size={20} color={colors.primary} />}
                 title={APP_STRINGS.adminScreens.settings}
               />
             </View>
+            
           </View>
         </View>
 

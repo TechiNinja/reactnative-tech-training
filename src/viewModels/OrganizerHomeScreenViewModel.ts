@@ -1,7 +1,7 @@
 import { useAuthStore } from '../store/AuthStore';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { MOCK_MATCHES, UPCOMING_MATCHES } from '../constants/MockMatches';
+import { MOCK_MATCHES, UPCOMING_MATCHES } from '../constants/mockMatches'
 
 export const useOrganizerHomeViewModel = (
   navigation: NativeStackNavigationProp<RootStackParamList>,

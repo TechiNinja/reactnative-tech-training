@@ -147,8 +147,6 @@ export const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   statusBadge: {
-    color : colors.textPrimary,
-    backgroundColor : colors.status,
     borderRadius: 12,
     fontSize: 13,
     fontWeight: '600',

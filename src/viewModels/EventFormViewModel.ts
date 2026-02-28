@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Event, EventStatus, FormatType } from '../models/Event';
-import { validationMessages } from '../constants/ValidationMessages';
+
 import { useEventStore } from '../store/EventStore';
 import { useAuthStore } from '../store/AuthStore';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { validationMessages } from '../constants/validationMessages';
 
 type Mode = 'create' | 'edit';
 
@@ -152,7 +153,7 @@ export const useEventFormViewModel = ({
       id: event?.id ?? Date.now().toString(),
       name,
       sport,
-      formats: selectedFormats,
+      formats: [FormatType.Singles],
       date,
       time,
       venue,

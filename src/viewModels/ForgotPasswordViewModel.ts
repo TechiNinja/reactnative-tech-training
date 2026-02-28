@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { isValidEmail, isValidPassword } from '../utils/validation';
-import { validationMessages } from '../constants/ValidationMessages';
+import { validationMessages } from '../constants/validationMessages';
 
 export const useForgotPasswordViewModel = () => {
   const [email, setEmail] = useState('');

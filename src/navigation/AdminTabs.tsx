@@ -1,14 +1,21 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, Calendar } from 'lucide-react-native';
+import { Home, Calendar, Users } from 'lucide-react-native';
 import { colors } from '../theme/colors';
 
 import AdminHomeScreen from '../views/Admin/AdminHomeScreen';
 import EventsListScreen from '../views/EventListScreen/EventsListScreen';
+import EventRequestListScreen from '../views/EventRequestListScreen/EventRequestListScreen';
 import { fonts } from '../theme/fonts';
 // import TeamsListScreen from '../views/TeamsListScreen/TeamsListScreen';
 
-const Tab = createBottomTabNavigator();
+export type AdminTabParamList = {
+  Home: undefined;
+  Events: undefined;
+  Request: undefined;
+};
+
+const Tab = createBottomTabNavigator<AdminTabParamList>();
 
 const AdminTabs = () => {
   return (
@@ -47,6 +54,15 @@ const AdminTabs = () => {
             );
           }
 
+          if (route.name === 'Request') {
+            return (
+              <Users
+                size={22}
+                color={focused ? colors.primary : colors.textSecondary}
+              />
+            );
+          }
+
           // if (route.name === 'Teams') {
           //   return (
           //     <Users
@@ -63,6 +79,10 @@ const AdminTabs = () => {
       <Tab.Screen name="Home" component={AdminHomeScreen} />
       <Tab.Screen name="Events">
         {() => <EventsListScreen role="admin" />}
+      </Tab.Screen>
+
+      <Tab.Screen name="Request">
+        {() => <EventRequestListScreen role="admin" />}
       </Tab.Screen>
       {/* <Tab.Screen name="Teams" component={TeamsListScreen} /> */}
     </Tab.Navigator>

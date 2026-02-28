@@ -20,8 +20,13 @@ export const useAdminHomeViewModel = (
     navigation.navigate('EventForm', { mode: 'create' });
   };
 
+  const onRaiseRequest = () => {
+    navigation.navigate('EventRequestForm', { mode: 'create' });
+  };
+
   return {
     onLogoutPress,
     onAddEvent,
+    onRaiseRequest,
   };
 };

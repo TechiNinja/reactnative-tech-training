@@ -49,6 +49,13 @@ export const APP_STRINGS = {
     rules: 'Enter rules separated by comma',
     searchTeams: 'Search Teams...',
     searchFixtures: 'Search Fixtures...',
+    logisticRequirements : 'Logistic Requirements',
+    venue : 'Venue',
+    date : 'YYYY-MM-DD',
+    loadingSports : 'Loading sports...',
+    selectSports : 'Select sport',
+    sportsName : 'Sports Name',
+    eventName : 'Event Name',
   },
   roleSelection: {
     chooseRole: 'Choose your role',
@@ -67,6 +74,7 @@ export const APP_STRINGS = {
     addUser: 'Add User',
     settings: 'Settings',
     liveMatches: 'Live Matches',
+    raiseEventRequest : 'Request',
   },
   organizerScreens: {
     greeting: 'Hello, Organizer! 👋',
@@ -160,5 +168,25 @@ export const APP_STRINGS = {
     notEnoughSameGenderPairs: 'Not enough same-gender pairs',
     maleSlots: 'Male Slots',
     femaleSlots: 'Female Slots',
+    
+  },
+
+  RequestScreen : {
+    raiseRequest: 'Raise Request',
+    editRequest : 'Edit Request',
+    noRequestFound : 'No request found',
+    updateRequest : 'Update Request',
+    logisticRequirements : 'Logistic Requirements',
+    venue : 'Requested Venue',
+    endDate : 'End Date',
+    startDate : 'Start Date',
+    format : 'Format',
+    gender : 'Gender',
+    createEvent : "Create Event",
+    update : 'Updated',
+    created : 'Created',
+    operationsReviewerName : 'OperationsReviewerName',
+    remarks : 'Remarks:',
+    logistics : 'Logistics:'
   },
 };

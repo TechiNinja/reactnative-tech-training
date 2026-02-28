@@ -5,10 +5,10 @@ import { colors } from '../../theme/colors';
 import AppButton from '../../components/AppButton/AppButton';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppInput from '../../components/AppInput/AppInput';
-import { validationMessages } from '../../constants/ValidationMessages';
 import { styles } from './ForgotPasswordScreenStyles';
 import { APP_STRINGS } from '../../constants/AppStrings';
 import { useEffect } from 'react';
+import { validationMessages } from '../../constants/validationMessages';
 
 const ForgotPasswordScreen = () => {
   const {
