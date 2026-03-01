@@ -28,8 +28,8 @@ export type RootStackParamList = {
   };
   EventRequestForm: {
   mode: 'create' | 'edit';
-  request?: EventRequestResponse; // ✅ edit mode ke liye
-  onSubmit?: (request: EventRequestResponse) => void; // optional
+  request?: EventRequestResponse; 
+  onSubmit?: (request: EventRequestResponse) => void; 
 };
   EventRegister: {
     eventId: string;
