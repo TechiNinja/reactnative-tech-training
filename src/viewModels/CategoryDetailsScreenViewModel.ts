@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { OrganizerService } from '../services/organizerService';
 import { useEventStore } from '../store/EventStore';
 import { useAuthStore } from '../store/AuthStore';
 import { APP_STRINGS } from '../constants/AppStrings';
@@ -29,7 +30,7 @@ export const useCategoryDetailsViewModel = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<CategoryDetailsRouteProp>();
-  const { eventId, gender, format, role } = route.params;
+  const { eventId, gender, format, role, eventCategoryId } = route.params;
 
   const {
     events,
@@ -276,7 +277,13 @@ export const useCategoryDetailsViewModel = () => {
     });
   };
 
-  const handleCreateTeams = () => {
+  type ApiTeamResponse = {
+    id: number;
+    name: string;
+    members: string[];
+  };
+
+  const handleCreateTeams = async () => {
     if (!event) return;
 
     if (format === FormatType.Singles) {
@@ -286,6 +293,43 @@ export const useCategoryDetailsViewModel = () => {
 
     if (participants.length < 2) {
       Alert.alert(APP_STRINGS.eventScreen.noEnoughRegistrations);
+      return;
+    }
+
+    if (typeof eventCategoryId === 'number') {
+      try {
+        const apiTeams = (await OrganizerService.createTeams(
+          eventCategoryId,
+        )) as ApiTeamResponse[];
+
+        const newTeams: Team[] = apiTeams.map((apiTeam) => ({
+          id: apiTeam.id.toString(),
+          name: apiTeam.name,
+          players: apiTeam.members.map((memberName, index) => ({
+            id: `${apiTeam.id}-${index}`,
+            name: memberName,
+            gender,
+            formats: [format],
+          })),
+          gender,
+          format,
+        }));
+
+        const otherTeams = event.teams.filter(
+          (team) => !(team.gender === gender && team.format === format),
+        );
+
+        updateEvent({
+          ...event,
+          teams: [...otherTeams, ...newTeams],
+          teamsCreated: true,
+        });
+      } catch {
+        Alert.alert(
+          APP_STRINGS.eventScreen.createTeam,
+          'Failed to create teams. Please try again.',
+        );
+      }
       return;
     }
 

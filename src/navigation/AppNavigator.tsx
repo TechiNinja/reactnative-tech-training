@@ -41,6 +41,7 @@ export type RootStackParamList = {
     gender: GenderType;
     format: FormatType;
     role: RoleType;
+    eventCategoryId?: number;
   };
 };
 

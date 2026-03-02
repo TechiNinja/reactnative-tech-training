@@ -7,6 +7,7 @@ import {
   MatchStatus,
 } from '../models/Event';
 import { MOCK_EVENTS } from '../constants/mockEvents';
+import { EVENT_FORMAT_MAP } from '../constants/eventFormatMap';
 
 type EventContextType = {
   events: Event[];
@@ -242,10 +243,9 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({
 
         let fixtures: Fixture[] = [];
 
-        const eventFormat =
-          event.format === '1v1' ? FormatType.Singles : FormatType.Doubles;
+        const eventFormat = EVENT_FORMAT_MAP[event.format];
 
-        if (event.format === '1v1') {
+        if (eventFormat === FormatType.Singles) {
           const males = event.registrations
             .filter((player) => player.gender === GenderType.Male)
             .map((player) => player.name);

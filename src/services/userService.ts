@@ -1,8 +1,7 @@
 import { getToken } from '../utils/authStorage';
 import { User, UserRoleType } from '../models/User';
 import { ID_TO_ROLE } from '../constants/roleIds';
-
-const BASE_URL = 'http://10.0.2.2:5000/api';
+import { API_BASE_URL } from '../config/api';
 
 type ApiUser = {
   id: string | number;
@@ -41,7 +40,7 @@ const authFetch = async <T>(
     'Content-Type': 'application/json',
   };
 
-  const res = await fetch(`${BASE_URL}${url}`, { ...options, headers });
+  const res = await fetch(`${API_BASE_URL}${url}`, { ...options, headers });
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
@@ -69,13 +68,17 @@ const mapApiUserToUser = (apiUser: ApiUser): User => {
   };
 };
 
+const roleMap: Record<string, UserRoleType> = {
+  admin: 'admin',
+  organizer: 'organizer',
+  participant: 'participant',
+  operations: 'operations',
+  ops: 'operations',
+};
+
 const normalizeRole = (role: string): UserRoleType => {
   const normalized = role.toLowerCase();
-  if (normalized === 'admin') return 'admin';
-  if (normalized === 'organizer') return 'organizer';
-  if (normalized === 'participant') return 'participant';
-  if (normalized === 'operations' || normalized === 'ops') return 'operations';
-  return 'participant';
+  return roleMap[normalized] ?? 'participant';
 };
 
 export const getUserList = async (): Promise<User[]> => {

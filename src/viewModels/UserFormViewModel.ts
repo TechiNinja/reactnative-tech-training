@@ -20,6 +20,21 @@ type UserFormErrors = {
   password?: string;
 };
 
+type UpdateUserPayload = {
+  fullName?: string;
+  email?: string;
+  password?: string;
+  roleId?: number;
+  isActive?: boolean;
+};
+
+type CreateUserPayload = {
+  fullName: string;
+  email: string;
+  password: string;
+  roleId: number;
+};
+
 const ROLES: { value: UserRoleType; label: string }[] = [
   { value: 'participant', label: 'Participant' },
   { value: 'organizer', label: 'Organizer' },
@@ -77,30 +92,29 @@ export const useUserFormViewModel = ({
       const roleId = ROLE_TO_ID[role];
 
       if (isEdit && user) {
-        const payload: {
-          fullName?: string;
-          email?: string;
-          password?: string;
-          roleId?: number;
-          isActive?: boolean;
-        } = {
+        const payload: UpdateUserPayload = {
           fullName: name.trim(),
           email: email.trim().toLowerCase(),
           roleId,
           isActive,
         };
+
         if (password.trim()) {
           payload.password = password;
         }
+
         await updateUser(user.id, payload);
       } else {
-        await createUser({
+        const payload: CreateUserPayload = {
           fullName: name.trim(),
           email: email.trim().toLowerCase(),
           password: password.trim(),
           roleId,
-        });
+        };
+
+        await createUser(payload);
       }
+
       navigation.goBack();
     } catch (err) {
       setErrors({
