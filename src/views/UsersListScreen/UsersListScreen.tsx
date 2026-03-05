@@ -60,7 +60,10 @@ const UsersListScreen = () => {
         ) : viewModel.error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{viewModel.error}</Text>
-            <AppButton title="Retry" onPress={viewModel.refreshUsers} />
+            <AppButton
+              title={APP_STRINGS.buttons.retry}
+              onPress={viewModel.refreshUsers}
+            />
           </View>
         ) : viewModel.filteredUsers.length === 0 ? (
           <Text style={styles.noUsersStyle}>

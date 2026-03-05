@@ -1,7 +1,6 @@
-import { getToken } from '../utils/authStorage';
 import { User, UserRoleType } from '../models/User';
 import { ID_TO_ROLE } from '../constants/roleIds';
-import { API_BASE_URL } from '../config/api';
+import { authFetch } from '../utils/authFetch';
 
 type ApiUser = {
   id: string | number;
@@ -28,31 +27,6 @@ type UpdateUserPayload = {
   isActive?: boolean;
 };
 
-const authFetch = async <T>(
-  url: string,
-  options: RequestInit = {},
-): Promise<T> => {
-  const token = await getToken();
-
-  const headers = {
-    ...(options.headers || {}),
-    Authorization: token ? `Bearer ${token}` : '',
-    'Content-Type': 'application/json',
-  };
-
-  const res = await fetch(`${API_BASE_URL}${url}`, { ...options, headers });
-
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    const message =
-      (errorData as { message?: string })?.message ??
-      `Failed request: ${res.status}`;
-    throw new Error(message);
-  }
-
-  return res.json() as Promise<T>;
-};
-
 const mapApiUserToUser = (apiUser: ApiUser): User => {
   const name = apiUser.fullName ?? apiUser.name ?? '';
   const role =
@@ -73,6 +47,7 @@ const roleMap: Record<string, UserRoleType> = {
   organizer: 'organizer',
   participant: 'participant',
   operations: 'operations',
+  'operations team': 'operations',
   ops: 'operations',
 };
 

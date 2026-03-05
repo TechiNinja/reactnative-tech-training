@@ -1,16 +1,17 @@
-import { useState } from 'react';
-import { User, UserRoleType } from '../models/User';
+import { useState, useMemo } from 'react';
+import { UserRoleType } from '../models/User';
 import { validationMessages } from '../constants/validationMessages';
 import { useUserStore } from '../store/UserStore';
 import { ROLE_TO_ID } from '../constants/roleIds';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { APP_STRINGS } from '../constants/AppStrings';
 
 type Mode = 'create' | 'edit';
 
 type UserFormParams = {
   mode: Mode;
-  user?: User;
+  userId?: string;
   navigation: NativeStackNavigationProp<RootStackParamList>;
 };
 
@@ -44,10 +45,16 @@ const ROLES: { value: UserRoleType; label: string }[] = [
 
 export const useUserFormViewModel = ({
   mode,
-  user,
+  userId,
   navigation,
 }: UserFormParams) => {
-  const { createUser, updateUser } = useUserStore();
+  const { createUser, updateUser, users } = useUserStore();
+
+  const user = useMemo(() => {
+    if (!userId) return undefined;
+    return users.find((user) => user.id === userId);
+  }, [userId, users]);
+
   const isEdit = mode === 'edit' && !!user;
 
   const [name, setName] = useState(isEdit ? user!.name : '');
@@ -63,21 +70,16 @@ export const useUserFormViewModel = ({
   const validate = (): boolean => {
     const newErrors: UserFormErrors = {};
 
-    if (!name.trim()) {
-      newErrors.name = validationMessages.REQUIRED_NAME;
-    }
+    if (!name.trim()) newErrors.name = validationMessages.REQUIRED_NAME;
 
-    if (!email.trim()) {
-      newErrors.email = validationMessages.REQUIRED_EMAIL;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!email.trim()) newErrors.email = validationMessages.REQUIRED_EMAIL;
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       newErrors.email = validationMessages.INVALID_EMAIL;
-    }
 
-    if (!isEdit && !password.trim()) {
+    if (!isEdit && !password.trim())
       newErrors.password = validationMessages.REQUIRED_PASSWORD;
-    } else if (password && password.length < 8) {
+    else if (password && password.length < 8)
       newErrors.password = validationMessages.PASSWORD_MIN_LENGTH;
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -99,9 +101,7 @@ export const useUserFormViewModel = ({
           isActive,
         };
 
-        if (password.trim()) {
-          payload.password = password;
-        }
+        if (password.trim()) payload.password = password;
 
         await updateUser(user.id, payload);
       } else {
@@ -118,20 +118,18 @@ export const useUserFormViewModel = ({
       navigation.goBack();
     } catch (err) {
       setErrors({
-        email: err instanceof Error ? err.message : 'Something went wrong',
+        email:
+          err instanceof Error
+            ? err.message
+            : APP_STRINGS.eventScreen.somethingWentWrong,
       });
     } finally {
       setSubmitting(false);
     }
   };
 
-  const onBack = () => {
-    navigation.goBack();
-  };
-
-  const toggleActive = () => {
-    setIsActive((prev) => !prev);
-  };
+  const onBack = () => navigation.goBack();
+  const toggleActive = () => setIsActive((prev) => !prev);
 
   return {
     name,

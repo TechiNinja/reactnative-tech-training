@@ -8,7 +8,7 @@ import ParticipantTabs from './ParticipantTabs';
 import EventFormScreen from '../views/EventFormScreen/EventFormScreen';
 import UserFormScreen from '../views/UserFormScreen/UserFormScreen';
 import { Event, GenderType, FormatType } from '../models/Event';
-import { User } from '../models/User';
+import { UserRoleType } from '../models/User';
 import { NavigatorScreenParams } from '@react-navigation/native';
 import EventRegistrationScreen from '../views/EventRegistration/EventRegistrationScreen';
 import EventDetailsScreen from '../views/EventDetailsScreen/EventDetailsScreen';
@@ -25,10 +25,7 @@ export type RootStackParamList = {
     event?: Event;
     onSubmit?: (event: Event) => void;
   };
-  UserForm: {
-    mode: 'create' | 'edit';
-    user?: User;
-  };
+  UserForm: { mode: 'create' } | { mode: 'edit'; userId: string };
   EventRegister: {
     eventId: string;
   };
@@ -40,7 +37,7 @@ export type RootStackParamList = {
     eventId: string;
     gender: GenderType;
     format: FormatType;
-    role: RoleType;
+    role: UserRoleType;
     eventCategoryId?: number;
   };
 };

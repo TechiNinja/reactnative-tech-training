@@ -4,6 +4,7 @@ import { styles } from './UserCardStyles';
 import { ChevronRight } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
 import { useState } from 'react';
+import { APP_STRINGS } from '../../constants/AppStrings';
 
 type UserCardProps = {
   user: User;
@@ -48,7 +49,9 @@ const UserCard = ({ user, onPress }: UserCardProps) => {
               ]}
             />
             <Text style={styles.statusText}>
-              {user.isActive ? 'Active' : 'Inactive'}
+              {user.isActive
+                ? APP_STRINGS.eventScreen.active
+                : APP_STRINGS.eventScreen.inactive}
             </Text>
           </View>
         </View>

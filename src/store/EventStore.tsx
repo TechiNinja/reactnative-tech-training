@@ -95,6 +95,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({
               formats,
             },
           ],
+          registeredTeams: event.registeredTeams + 1,
         };
       }),
     );

@@ -17,11 +17,12 @@ type UserFormScreenProps = NativeStackScreenProps<
 >;
 
 const UserFormScreen = ({ route, navigation }: UserFormScreenProps) => {
-  const { mode, user } = route.params;
+  const { mode } = route.params;
+  const userId = mode === 'edit' ? route.params.userId : undefined;
 
   const viewModel = useUserFormViewModel({
     mode,
-    user,
+    userId,
     navigation,
   });
 

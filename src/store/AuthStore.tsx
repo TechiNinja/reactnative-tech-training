@@ -7,6 +7,8 @@ import {
 } from '../utils/authStorage';
 import { Alert } from 'react-native';
 import { API_ENDPOINTS } from '../config/api';
+import { UserRoleType } from '../models/User';
+import { APP_STRINGS } from '../constants/AppStrings';
 
 type AuthContextType = {
   user: StoredUser | null;
@@ -17,7 +19,6 @@ type AuthContextType = {
     password: string,
   ) => Promise<boolean>;
   logout: () => Promise<void>;
-  setRole: (role: string) => void;
   loading: boolean;
 };
 
@@ -29,8 +30,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<StoredUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const setRole = (_role: string) => {};
-
   useEffect(() => {
     const loadUser = async () => {
       const storedUser = await getUser();
@@ -39,6 +38,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
     loadUser();
   }, []);
+
+  const mapRole = (roles: string): UserRoleType => {
+    const role = roles.toLowerCase();
+    if (role === 'admin') return 'admin';
+    if (role === 'organizer') return 'organizer';
+    if (role === 'operations') return 'operations';
+    return 'participant';
+  };
 
   const register = async (
     fullName: string,
@@ -54,24 +61,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (!res.ok) {
         const data = await res.json();
-        Alert.alert('Register failed', data?.message ?? 'Something went wrong');
+        Alert.alert(
+          APP_STRINGS.eventScreen.registrationFailed,
+          data?.message ?? APP_STRINGS.eventScreen.somethingWentWrong,
+        );
         return false;
       }
 
       const data = await res.json();
       const token = data.token;
+
       const userData: StoredUser = {
         id: data.id,
         name: data.fullName,
         email: data.email,
-        role: data.role.toLowerCase(),
+        role: mapRole(data.role),
       };
 
       setUser(userData);
       await saveUser(userData, token);
       return true;
     } catch {
-      Alert.alert('Register failed', 'Something went wrong');
+      Alert.alert(
+        APP_STRINGS.eventScreen.registrationFailed,
+        APP_STRINGS.eventScreen.somethingWentWrong,
+      );
       return false;
     }
   };
@@ -88,18 +102,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const data = await res.json();
       const token = data.token;
+
       const userData: StoredUser = {
         id: data.id,
         name: data.fullName,
         email: data.email,
-        role: data.role.toLowerCase(),
+        role: mapRole(data.role),
       };
 
       setUser(userData);
       await saveUser(userData, token);
       return true;
     } catch {
-      Alert.alert('Login failed', 'Something went wrong. Please try again.');
+      Alert.alert(
+        APP_STRINGS.eventScreen.loginFailed,
+        APP_STRINGS.eventScreen.somethingWentWrong,
+      );
       return false;
     }
   };
@@ -110,9 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, login, register, logout, setRole, loading }}
-    >
+    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

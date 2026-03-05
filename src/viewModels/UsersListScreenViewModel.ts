@@ -45,7 +45,7 @@ export const useUsersListViewModel = (
   }, [activeTab, searchQuery, users]);
 
   const onUserPress = (user: User) => {
-    navigation.navigate('UserForm', { mode: 'edit', user });
+    navigation.navigate('UserForm', { mode: 'edit', userId: user.id });
   };
 
   const onAddUser = () => {

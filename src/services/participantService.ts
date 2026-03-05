@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from '../config/api';
-import { getToken } from '../utils/authStorage';
+import { authFetch } from '../utils/authFetch';
 
 export type ApiParticipantRegistration = {
   id: number;
@@ -32,24 +32,6 @@ export type ApiScheduleRaw = {
   scoreA: number;
   scoreB: number;
   eventName: string;
-};
-
-const authFetch = async <T>(
-  url: string,
-  options: RequestInit = {},
-): Promise<T> => {
-  const token = await getToken();
-  const headers = {
-    ...(options.headers || {}),
-    Authorization: token ? `Bearer ${token}` : '',
-    'Content-Type': 'application/json',
-  };
-
-  const res = await fetch(url, { ...options, headers });
-  if (!res.ok) {
-    throw new Error(`Failed request: ${res.status}`);
-  }
-  return res.json() as Promise<T>;
 };
 
 export const getMyTeams = (userId: number) =>

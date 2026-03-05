@@ -18,6 +18,7 @@ export const APP_STRINGS = {
     updatePassword: 'Update Password',
     forgotPassword: 'Forgot Password?',
     signUp: 'Sign Up',
+    retry: 'Retry',
   },
   labels: {
     email: 'Email',
@@ -197,5 +198,10 @@ export const APP_STRINGS = {
     full: 'Event is full',
     individualMatches: 'Individual matches',
     teamOfPlayers: 'Team of players',
+    teamCreationFailed: 'Failed to create teams. Please try again.',
+    somethingWentWrong: 'Something went wrong. Please try again.',
+    loginFailed: 'Login failed',
+    active: 'Active',
+    inactive: 'Inactive',
   },
 };

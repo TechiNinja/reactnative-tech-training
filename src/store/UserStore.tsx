@@ -12,6 +12,7 @@ import {
   updateUserApi,
 } from '../services/userService';
 import { APP_STRINGS } from '../constants/AppStrings';
+import { useAuthStore } from './AuthStore';
 
 type CreateUserParams = {
   fullName: string;
@@ -46,7 +47,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { user } = useAuthStore();
+
   const refreshUsers = useCallback(async () => {
+    if (user?.role !== 'admin') return;
+
     setLoading(true);
     setError(null);
     try {
@@ -62,11 +67,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    refreshUsers();
-  }, [refreshUsers]);
+    if (user?.role === 'admin') {
+      refreshUsers();
+    }
+  }, [user, refreshUsers]);
 
   const createUser = useCallback(async (params: CreateUserParams) => {
     const created = await createUserApi(params);

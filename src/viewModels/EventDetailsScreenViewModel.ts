@@ -26,10 +26,12 @@ export const useEventDetailsViewModel = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<EventDetailsRouteProp>();
-  const { eventId, role } = route.params;
+  const { eventId } = route.params;
 
   const { events, deleteEvent } = useEventStore();
   const { user } = useAuthStore();
+
+  const role = user?.role;
 
   const event = useMemo(
     () => events.find((event) => event.id === eventId) ?? null,
@@ -42,26 +44,31 @@ export const useEventDetailsViewModel = () => {
   const categories: Category[] = useMemo(() => {
     if (!event) return [];
 
-    const abandonedCategories = event?.abandonedCategories ?? [];
+    const abandonedCategories = event.abandonedCategories ?? [];
 
     const cats: Category[] = [];
     const genders: GenderType[] = [GenderType.Male, GenderType.Female];
     const formats: FormatType[] =
-      event.format === '2v2'
-        ? [FormatType.Singles, FormatType.Doubles]
-        : [FormatType.Singles];
+      event.format === '1v1'
+        ? [FormatType.Singles]
+        : event.format === '2v2'
+        ? [FormatType.Doubles]
+        : [FormatType.Singles, FormatType.Doubles];
 
     if (isChess && formats.includes(FormatType.Singles)) {
       const allSinglesParticipants = event.registrations.filter((player) =>
         player.formats?.includes(FormatType.Singles),
       );
+
       const mixedTeams = event.teams.filter(
         (team) =>
           team.format === FormatType.Singles &&
           team.gender === GenderType.Mixed,
       );
+
       const slotsFull =
         allSinglesParticipants.length >= totalParticipantsPerCategory * 2;
+
       const isAbandoned = abandonedCategories.includes('Mixed-Singles');
 
       cats.push({
@@ -88,11 +95,13 @@ export const useEventDetailsViewModel = () => {
           );
 
           const slotsFull = participants.length >= totalParticipantsPerCategory;
+
           const isAbandoned = abandonedCategories.includes(
             `${gender}-${format}`,
           );
 
           const genderLabel = gender === GenderType.Male ? "Men's" : "Women's";
+
           cats.push({
             id: `${gender}-${format}`,
             title: `${genderLabel} ${format}`,
@@ -113,13 +122,17 @@ export const useEventDetailsViewModel = () => {
 
   const isAdminOrOrganizer = role === 'admin' || role === 'organizer';
   const isOwner = event?.createdBy === user?.email;
+
   const hasEventStarted =
     event?.status === EventStatus.LIVE ||
     event?.status === EventStatus.COMPLETED;
+
   const canEditOrDelete =
     (role === 'admin' || (role === 'organizer' && isOwner)) && !hasEventStarted;
+
   const areAllSlotsFull =
     categories.length > 0 && categories.every((cat) => cat.slotsFull);
+
   const canRegister =
     role === 'participant' &&
     event?.status === EventStatus.OPEN &&
@@ -133,7 +146,7 @@ export const useEventDetailsViewModel = () => {
   };
 
   const handleCategoryPress = (category: Category) => {
-    if (!event) return;
+    if (!event || !role) return;
 
     navigation.navigate('CategoryDetails', {
       eventId: event.id,

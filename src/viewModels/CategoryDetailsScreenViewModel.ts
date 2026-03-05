@@ -116,11 +116,11 @@ export const useCategoryDetailsViewModel = () => {
       );
     }
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
+      const query = searchQuery.toLowerCase();
       result = result.filter(
         (fixture) =>
-          fixture.teamA?.toLowerCase().includes(q) ||
-          fixture.teamB?.toLowerCase().includes(q),
+          fixture.teamA?.toLowerCase().includes(query) ||
+          fixture.teamB?.toLowerCase().includes(query),
       );
     }
     return result;
@@ -327,7 +327,7 @@ export const useCategoryDetailsViewModel = () => {
       } catch {
         Alert.alert(
           APP_STRINGS.eventScreen.createTeam,
-          'Failed to create teams. Please try again.',
+          APP_STRINGS.eventScreen.teamCreationFailed,
         );
       }
       return;

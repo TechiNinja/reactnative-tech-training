@@ -1,23 +1,26 @@
-export const API_BASE_URL = 'http://10.0.2.2:5000/api';
+import { Platform } from 'react-native';
+
+const HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+
+export const API_BASE_URL = `http://${HOST}:5000/api`;
 
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: `${API_BASE_URL}/auth/login`,
-    REGISTER: `${API_BASE_URL}/auth/register`,
+    LOGIN: '/auth/login',
+    REGISTER: '/auth/register',
   },
-  USERS: `${API_BASE_URL}/users`,
-  ROLES: `${API_BASE_URL}/roles`,
+  USERS: '/users',
+  ROLES: '/roles',
   PARTICIPANT: {
-    EVENTS: (userId: number) => `${API_BASE_URL}/events/${userId}`,
-    TEAM: (userId: number) => `${API_BASE_URL}/teams/${userId}`,
-    SCHEDULE: (userId: number) => `${API_BASE_URL}/schedules/${userId}`,
-    REGISTER: `${API_BASE_URL}/participantregistrations`,
+    EVENTS: (userId: number) => `/events/${userId}`,
+    TEAM: (userId: number) => `/teams/${userId}`,
+    SCHEDULE: (userId: number) => `/schedules/${userId}`,
+    REGISTER: '/participantregistrations',
   },
   ORGANIZER: {
-    CREATE_TEAMS: `${API_BASE_URL}/categoryteam/create`,
-    GET_TEAMS: (eventCategoryId: number) =>
-      `${API_BASE_URL}/categoryteam/${eventCategoryId}`,
+    CREATE_TEAMS: '/categoryteam/create',
+    GET_TEAMS: (eventCategoryId: number) => `/categoryteam/${eventCategoryId}`,
     GET_PARTICIPANTS: (eventCategoryId: number) =>
-      `${API_BASE_URL}/participantregistrations/${eventCategoryId}`,
+      `/participantregistrations/${eventCategoryId}`,
   },
 };

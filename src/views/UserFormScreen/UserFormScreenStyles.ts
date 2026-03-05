@@ -65,16 +65,6 @@ export const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 12,
   },
-  toggle: {
-    backgroundColor: colors.inputField,
-    borderRadius: 20,
-    height: 32,
-    padding: 4,
-    width: 56,
-  },
-  toggleActive: {
-    backgroundColor: colors.participantBackgroud,
-  },
   toggleLabel: {
     color: colors.textPrimary,
     fontSize: fontsSize.medium,
@@ -91,14 +81,5 @@ export const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: fontsSize.primary,
     marginTop: 4,
-  },
-  toggleThumb: {
-    backgroundColor: colors.textPrimary,
-    borderRadius: 14,
-    height: 24,
-    width: 24,
-  },
-  toggleThumbActive: {
-    transform: [{ translateX: 24 }],
   },
 });
