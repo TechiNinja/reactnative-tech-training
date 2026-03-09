@@ -6,6 +6,7 @@ import {
   getMyTeams,
   ApiScheduleRaw,
 } from '../services/participantService';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Alert } from 'react-native';
@@ -27,9 +28,9 @@ type ApiSchedule = {
   scoreB: number;
 };
 
-export const useParticipantHomeViewModel = (
-  navigation: NativeStackNavigationProp<RootStackParamList>,
-) => {
+export const useParticipantHomeViewModel = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, logout } = useAuthStore();
 
   const [myTeams, setMyTeams] = useState<ApiTeam[]>([]);
@@ -41,20 +42,22 @@ export const useParticipantHomeViewModel = (
   useEffect(() => {
     if (!user?.id) return;
 
-    const resolveName = (id: string) => {
-      const participant = myTeams.find((team) => team.teamId.toString() === id);
-      return participant ? participant.teamName : `Player ${id}`;
-    };
-
     const loadData = async () => {
       try {
-        const teams = await getMyTeams(user.id);
+        const teams = await getMyTeams(Number(user.id));
         setMyTeams(teams);
 
-        const events = await getMyEvents(user.id);
+        const resolveName = (id: string) => {
+          const participant = teams.find(
+            (team) => team.teamId.toString() === id,
+          );
+          return participant ? participant.teamName : `Player ${id}`;
+        };
+
+        const events = await getMyEvents(Number(user.id));
         setMyEventsCount(events.length);
 
-        const rawSchedule = await getMySchedule(user.id);
+        const rawSchedule = await getMySchedule(Number(user.id));
         const mapped = rawSchedule.map((match: ApiScheduleRaw) => ({
           id: match.matchId,
           teamA: resolveName(match.sideA),

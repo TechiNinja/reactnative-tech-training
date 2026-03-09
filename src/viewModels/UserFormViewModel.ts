@@ -121,7 +121,7 @@ export const useUserFormViewModel = ({
         email:
           err instanceof Error
             ? err.message
-            : APP_STRINGS.eventScreen.somethingWentWrong,
+            : APP_STRINGS.auth.somethingWentWrong,
       });
     } finally {
       setSubmitting(false);

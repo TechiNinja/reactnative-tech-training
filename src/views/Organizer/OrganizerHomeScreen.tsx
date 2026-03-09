@@ -17,16 +17,10 @@ import ActionCard from '../../components/ActionsCard/ActionCard';
 import LiveMatchesCard from '../../components/MatchesCard/LiveMatchesCard';
 import { styles } from './OrganizerHomeScreenStyles';
 import UpcomingMatchesCard from '../../components/MatchesCard/UpcomingMatchesCard';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useOrganizerHomeViewModel } from '../../viewModels/OrganizerHomeScreenViewModel';
 
 const OrganizerHomeScreen = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-  const viewModel = useOrganizerHomeViewModel(navigation);
+  const viewModel = useOrganizerHomeViewModel();
 
   return (
     <ScreenWrapper scrollable={true}>
@@ -46,26 +40,26 @@ const OrganizerHomeScreen = () => {
             <AnalyticsCard
               icon={<Calendar size={24} color={colors.primary} />}
               title={APP_STRINGS.organizerScreens.myEvents}
-              data={5}
+              data={viewModel.analytics.myEvents}
             />
             <AnalyticsCard
               icon={
                 <ClipboardList size={24} color={colors.matchesIconBackgound} />
               }
               title={APP_STRINGS.organizerScreens.pendingApprovals}
-              data={12}
+              data={viewModel.analytics.pendingApprovals}
             />
           </View>
           <View style={styles.row}>
             <AnalyticsCard
               icon={<Users size={24} color={colors.usersIconBackground} />}
               title={APP_STRINGS.organizerScreens.teamsRegistered}
-              data={32}
+              data={viewModel.analytics.teamsRegistered}
             />
             <AnalyticsCard
               icon={<Trophy size={24} color={colors.participantBackgroud} />}
               title={APP_STRINGS.organizerScreens.liveMatches}
-              data={2}
+              data={viewModel.analytics.liveMatches}
             />
           </View>
         </View>

@@ -1,11 +1,12 @@
 import { useAuthStore } from '../store/AuthStore';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { MOCK_MATCHES, UPCOMING_MATCHES } from '../constants/mockMatches';
 
-export const useOrganizerHomeViewModel = (
-  navigation: NativeStackNavigationProp<RootStackParamList>,
-) => {
+export const useOrganizerHomeViewModel = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { logout } = useAuthStore();
 
   const onLogout = async () => {
@@ -21,10 +22,18 @@ export const useOrganizerHomeViewModel = (
     navigation.navigate('EventForm', { mode: 'create' });
   };
 
+  const analytics = {
+    myEvents: 5,
+    pendingApprovals: 12,
+    teamsRegistered: 23,
+    liveMatches: 8,
+  };
+
   return {
     onLogout,
     liveMatches: MOCK_MATCHES,
     upcomingMatches: UPCOMING_MATCHES,
     onCreateEvent,
+    analytics,
   };
 };

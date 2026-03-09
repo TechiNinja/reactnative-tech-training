@@ -3,19 +3,15 @@ import { Event, EventStatus, FormatType } from '../models/Event';
 import { validationMessages } from '../constants/validationMessages';
 import { useEventStore } from '../store/EventStore';
 import { useAuthStore } from '../store/AuthStore';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import {
-  EVENT_FORMAT_MAP,
-  EVENT_FORMAT_REVERSE_MAP,
-} from '../constants/eventFormatMap';
 
 type Mode = 'create' | 'edit';
 
 type EventFormParams = {
   mode: Mode;
   event?: Event;
-  navigation: NativeStackNavigationProp<RootStackParamList>;
 };
 
 type EventFormErrors = {
@@ -31,11 +27,9 @@ type EventFormErrors = {
   prizes?: string;
 };
 
-export const useEventFormViewModel = ({
-  mode,
-  event,
-  navigation,
-}: EventFormParams) => {
+export const useEventFormViewModel = ({ mode, event }: EventFormParams) => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { createEvent, updateEvent } = useEventStore();
   const { user } = useAuthStore();
 
@@ -68,11 +62,7 @@ export const useEventFormViewModel = ({
   const [name, setName] = useState(isEdit ? event!.name : '');
   const [sport, setSport] = useState(isEdit ? event!.sport : '');
   const [selectedFormats, setSelectedFormats] = useState<FormatType[]>(
-    isEdit
-      ? EVENT_FORMAT_MAP[event!.format] === FormatType.Doubles
-        ? [FormatType.Singles, FormatType.Doubles]
-        : [FormatType.Singles]
-      : [FormatType.Singles],
+    isEdit ? event!.format : [FormatType.Singles],
   );
   const [date, setDate] = useState(isEdit ? event!.date : '');
   const [time, setTime] = useState(isEdit ? event!.time : '');
@@ -160,12 +150,7 @@ export const useEventFormViewModel = ({
       id: event?.id ?? Date.now().toString(),
       name,
       sport,
-      format:
-        EVENT_FORMAT_REVERSE_MAP[
-          selectedFormats.includes(FormatType.Doubles)
-            ? FormatType.Doubles
-            : FormatType.Singles
-        ],
+      format: selectedFormats,
       date,
       time,
       venue,

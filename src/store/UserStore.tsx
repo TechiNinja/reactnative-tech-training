@@ -59,9 +59,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       setUsers(fetchedUsers);
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : APP_STRINGS.eventScreen.failedUserLoad,
+        err instanceof Error ? err.message : APP_STRINGS.auth.failedUserLoad,
       );
       setUsers([]);
     } finally {

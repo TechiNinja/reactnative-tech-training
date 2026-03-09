@@ -5,7 +5,7 @@ const USER_KEY = 'user';
 const TOKEN_KEY = 'jwtToken';
 
 export type StoredUser = {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: UserRoleType;

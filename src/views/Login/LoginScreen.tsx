@@ -2,21 +2,14 @@ import React, { useState } from 'react';
 import { Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { colors } from '../../theme/colors';
 import { Eye, EyeOff, Lock, Mail, Trophy } from 'lucide-react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useNavigation } from '@react-navigation/native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppInput from '../../components/AppInput/AppInput';
 import AppButton from '../../components/AppButton/AppButton';
 import { styles } from './LoginScreenStyles';
 import { APP_STRINGS } from '../../constants/AppStrings';
-import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useLoginViewModel } from '../../viewModels/LoginViewModel';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
 const LoginScreen = () => {
-  const navigation = useNavigation<NavigationProp>();
-
   const {
     email,
     password,
@@ -30,7 +23,7 @@ const LoginScreen = () => {
     isFormValid,
     goToRegister,
     goToForgotPassword,
-  } = useLoginViewModel(navigation);
+  } = useLoginViewModel();
 
   const [showPassword, setShowPassword] = useState(false);
 

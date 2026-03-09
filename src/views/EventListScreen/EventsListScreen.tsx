@@ -1,26 +1,20 @@
 import React from 'react';
 import { FlatList, Text, View } from 'react-native';
-import { RoleType } from '../../constants/Roles';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import EventCard from '../../components/EventCard/EventCard';
 import { styles } from './EventsListScreenStyles';
 import EventStatusTabs from '../../components/EventStatusTabs/EventStatusTabs';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigation/AppNavigator';
 import AppButton from '../../components/AppButton/AppButton';
 import { APP_STRINGS } from '../../constants/AppStrings';
 import { useEventsListViewModel } from '../../viewModels/EventListScreenViewModel';
+import { UserRoleType } from '../../models/User';
 
 type EventListScreenProps = {
-  role: RoleType;
+  role: UserRoleType;
 };
 
 const EventsListScreen = ({ role }: EventListScreenProps) => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-  const viewModel = useEventsListViewModel(navigation, role);
+  const viewModel = useEventsListViewModel(role);
 
   return (
     <ScreenWrapper scrollable={false}>

@@ -25,10 +25,7 @@ export const useEventRegistrationViewModel = (
   const [gender, setGender] = useState<GenderType | ''>('');
   const [selectedFormats, setSelectedFormats] = useState<FormatType[]>([]);
 
-  const availableFormats: FormatType[] =
-    event?.format === '2v2'
-      ? [FormatType.Singles, FormatType.Doubles]
-      : [FormatType.Singles];
+  const availableFormats: FormatType[] = event?.format ?? [];
 
   const totalSlotsPerCategory = event?.totalTeams ?? 0;
 
@@ -93,7 +90,7 @@ export const useEventRegistrationViewModel = (
     if (fullCategories.length > 0) {
       const genderLabel = gender === GenderType.Male ? "Men's" : "Women's";
       Alert.alert(
-        APP_STRINGS.eventScreen.registrationFailed,
+        APP_STRINGS.auth.registrationFailed,
         `${genderLabel} ${fullCategories.join(
           ', ',
         )} category is now full. Please choose another category.`,
@@ -112,7 +109,7 @@ export const useEventRegistrationViewModel = (
 
       if (alreadyRegisteredInSelected) {
         Alert.alert(
-          APP_STRINGS.eventScreen.registrationFailed,
+          APP_STRINGS.auth.registrationFailed,
           APP_STRINGS.eventScreen.registered,
         );
         return;

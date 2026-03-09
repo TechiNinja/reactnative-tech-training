@@ -12,16 +12,10 @@ import {
 import { colors } from '../../theme/colors';
 import { styles } from './ParticipantHomeScreenStyles';
 import MyTeamCard from '../../components/MyTeamCard/MyTeamCard';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useParticipantHomeViewModel } from '../../viewModels/ParticipantHomeScreenViewModel';
 
 const ParticipantHomeScreen = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-  const viewModel = useParticipantHomeViewModel(navigation);
+  const viewModel = useParticipantHomeViewModel();
 
   const getStatusStyle = (status: string) => {
     switch (status) {

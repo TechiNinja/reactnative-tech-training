@@ -3,12 +3,12 @@ import { Event } from '../../models/Event';
 import { styles } from './EventCardStyles';
 import { colors } from '../../theme/colors';
 import { Calendar, MapPin } from 'lucide-react-native';
-import { RoleType } from '../../constants/Roles';
 import { useState } from 'react';
+import { UserRoleType } from '../../models/User';
 
 type EventCardProps = {
   event: Event;
-  role: RoleType;
+  role: UserRoleType;
   onPress: () => void;
 };
 
