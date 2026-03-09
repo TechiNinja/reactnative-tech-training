@@ -77,7 +77,7 @@ const EventDetailsScreen = () => {
             <View style={styles.infoRow}>
               <Trophy size={18} color={colors.textSecondary} />
               <Text style={styles.infoText}>
-                Formats: {event.formats?.join(', ') ?? 'N/A'}
+                Formats: {event.format === '2v2' ? 'Doubles' : 'Singles'}
               </Text>
             </View>
 

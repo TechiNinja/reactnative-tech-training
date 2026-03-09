@@ -20,8 +20,13 @@ export const useAdminHomeViewModel = (
     navigation.navigate('EventForm', { mode: 'create' });
   };
 
+  const onAddUser = () => {
+    navigation.navigate('UserForm', { mode: 'create' });
+  };
+
   return {
     onLogoutPress,
     onAddEvent,
+    onAddUser,
   };
 };

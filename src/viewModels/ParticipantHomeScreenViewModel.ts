@@ -4,6 +4,7 @@ import {
   getMyEvents,
   getMySchedule,
   getMyTeams,
+  ApiScheduleRaw,
 } from '../services/participantService';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -13,17 +14,6 @@ type ApiTeam = {
   teamId: number;
   teamName: string;
   category: string;
-  eventName: string;
-};
-
-type ApiScheduleRaw = {
-  matchId: number;
-  matchDateTime: string;
-  venue: string;
-  sideA: string;
-  sideB: string;
-  scoreA: number;
-  scoreB: number;
   eventName: string;
 };
 

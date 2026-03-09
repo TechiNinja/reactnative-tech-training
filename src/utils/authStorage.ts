@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { UserRoleType } from '../models/User';
 
 const USER_KEY = 'user';
 const TOKEN_KEY = 'jwtToken';
@@ -7,7 +8,7 @@ export type StoredUser = {
   id: number;
   name: string;
   email: string;
-  role: string;
+  role: UserRoleType;
 };
 
 export const saveUser = async (user: StoredUser, token: string) => {

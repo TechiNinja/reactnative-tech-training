@@ -25,10 +25,10 @@ export const useEventRegistrationViewModel = (
   const [gender, setGender] = useState<GenderType | ''>('');
   const [selectedFormats, setSelectedFormats] = useState<FormatType[]>([]);
 
-  const availableFormats: FormatType[] = event?.formats ?? [
-    FormatType.Singles,
-    FormatType.Doubles,
-  ];
+  const availableFormats: FormatType[] =
+    event?.format === '2v2'
+      ? [FormatType.Singles, FormatType.Doubles]
+      : [FormatType.Singles];
 
   const totalSlotsPerCategory = event?.totalTeams ?? 0;
 
@@ -102,6 +102,21 @@ export const useEventRegistrationViewModel = (
         prev.filter((format) => !fullCategories.includes(format)),
       );
       return;
+    }
+
+    if (event) {
+      const alreadyRegisteredInSelected = event.registrations.some((reg) => {
+        if (reg.name !== playerName || reg.gender !== gender) return false;
+        return selectedFormats.some((format) => reg.formats?.includes(format));
+      });
+
+      if (alreadyRegisteredInSelected) {
+        Alert.alert(
+          APP_STRINGS.eventScreen.registrationFailed,
+          APP_STRINGS.eventScreen.registered,
+        );
+        return;
+      }
     }
 
     registerParticipant(eventId, playerName, gender, selectedFormats);

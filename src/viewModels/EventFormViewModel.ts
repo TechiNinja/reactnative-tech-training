@@ -5,6 +5,10 @@ import { useEventStore } from '../store/EventStore';
 import { useAuthStore } from '../store/AuthStore';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import {
+  EVENT_FORMAT_MAP,
+  EVENT_FORMAT_REVERSE_MAP,
+} from '../constants/eventFormatMap';
 
 type Mode = 'create' | 'edit';
 
@@ -64,7 +68,11 @@ export const useEventFormViewModel = ({
   const [name, setName] = useState(isEdit ? event!.name : '');
   const [sport, setSport] = useState(isEdit ? event!.sport : '');
   const [selectedFormats, setSelectedFormats] = useState<FormatType[]>(
-    isEdit ? event!.formats : [FormatType.Singles],
+    isEdit
+      ? EVENT_FORMAT_MAP[event!.format] === FormatType.Doubles
+        ? [FormatType.Singles, FormatType.Doubles]
+        : [FormatType.Singles]
+      : [FormatType.Singles],
   );
   const [date, setDate] = useState(isEdit ? event!.date : '');
   const [time, setTime] = useState(isEdit ? event!.time : '');
@@ -152,7 +160,12 @@ export const useEventFormViewModel = ({
       id: event?.id ?? Date.now().toString(),
       name,
       sport,
-      formats: selectedFormats,
+      format:
+        EVENT_FORMAT_REVERSE_MAP[
+          selectedFormats.includes(FormatType.Doubles)
+            ? FormatType.Doubles
+            : FormatType.Singles
+        ],
       date,
       time,
       venue,

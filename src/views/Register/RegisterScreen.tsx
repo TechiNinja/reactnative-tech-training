@@ -5,17 +5,17 @@ import { Eye, EyeOff, Lock, Mail, Trophy, User } from 'lucide-react-native';
 import { useRegisterViewModel } from '../../viewModels/RegisterViewModel';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../../navigation/AuthNavigator';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppInput from '../../components/AppInput/AppInput';
 import AppButton from '../../components/AppButton/AppButton';
 import { styles } from './RegisterScreenStyles';
 import { APP_STRINGS } from '../../constants/AppStrings';
 
-type NavigationProp = NativeStackNavigationProp<AuthStackParamList>;
-
 const RegisterScreen = () => {
-  const navigation = useNavigation<NavigationProp>();
+  const navigation = useNavigation();
+  const rootNavigation = (navigation.getParent?.() ??
+    navigation) as NativeStackNavigationProp<RootStackParamList>;
 
   const {
     name,
@@ -33,7 +33,7 @@ const RegisterScreen = () => {
     nameError,
     passwordError,
     goToLogin,
-  } = useRegisterViewModel(navigation);
+  } = useRegisterViewModel(rootNavigation);
 
   const [showPassword, setShowPassword] = useState(false);
 

@@ -1,20 +1,29 @@
-import { getToken } from '../utils/authStorage';
+import { API_ENDPOINTS } from '../config/api';
+import { authFetch } from '../utils/authFetch';
 
-type ApiTeam = {
+export type ApiParticipantRegistration = {
+  id: number;
+  userId: number;
+  name: string;
+  eventCategoryId: number;
+  registeredAt: string;
+};
+
+export type ApiTeam = {
   teamId: number;
   teamName: string;
   category: string;
   eventName: string;
 };
 
-type ApiEvent = {
+export type ApiEvent = {
   eventId: number;
   eventName: string;
   startDate: string;
   endDate: string;
 };
 
-type ApiScheduleRaw = {
+export type ApiScheduleRaw = {
   matchId: number;
   matchDateTime: string;
   venue: string;
@@ -25,37 +34,24 @@ type ApiScheduleRaw = {
   eventName: string;
 };
 
-const BASE_URL = 'http://10.0.2.2:5000/api';
+export const getMyTeams = (userId: number) =>
+  authFetch<ApiTeam[]>(API_ENDPOINTS.PARTICIPANT.TEAM(userId));
 
-const authFetch = async <T>(
-  url: string,
-  options: RequestInit = {},
-): Promise<T> => {
-  const token = await getToken();
+export const getMyEvents = (userId: number) =>
+  authFetch<ApiEvent[]>(API_ENDPOINTS.PARTICIPANT.EVENTS(userId));
 
-  const headers = {
-    ...(options.headers || {}),
-    Authorization: token ? `Bearer ${token}` : '',
-    'Content-Type': 'application/json',
-  };
+export const getMySchedule = (userId: number) =>
+  authFetch<ApiScheduleRaw[]>(API_ENDPOINTS.PARTICIPANT.SCHEDULE(userId));
 
-  const res = await fetch(`${BASE_URL}${url}`, { ...options, headers });
+export const registerParticipant = (userId: number, eventCategoryId: number) =>
+  authFetch<ApiParticipantRegistration>(API_ENDPOINTS.PARTICIPANT.REGISTER, {
+    method: 'POST',
+    body: JSON.stringify({ userId, eventCategoryId }),
+  });
 
-  if (!res.ok) {
-    throw new Error(`Failed request: ${res.status}`);
-  }
-
-  return res.json() as Promise<T>;
-};
-
-export const getMyTeams = (userId: number) => {
-  return authFetch<ApiTeam[]>(`/MyTeams/${userId}`);
-};
-
-export const getMyEvents = (userId: number) => {
-  return authFetch<ApiEvent[]>(`/MyEvents/${userId}`);
-};
-
-export const getMySchedule = (userId: number) => {
-  return authFetch<ApiScheduleRaw[]>(`/MySchedules/${userId}`);
+export const ParticipantService = {
+  getMyTeams,
+  getMyEvents,
+  getMySchedule,
+  registerParticipant,
 };

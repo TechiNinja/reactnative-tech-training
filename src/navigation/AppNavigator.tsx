@@ -6,7 +6,9 @@ import AdminTabs from './AdminTabs';
 import OrganizerTabs from './OrganizerTabs';
 import ParticipantTabs from './ParticipantTabs';
 import EventFormScreen from '../views/EventFormScreen/EventFormScreen';
+import UserFormScreen from '../views/UserFormScreen/UserFormScreen';
 import { Event, GenderType, FormatType } from '../models/Event';
+import { UserRoleType } from '../models/User';
 import { NavigatorScreenParams } from '@react-navigation/native';
 import EventRegistrationScreen from '../views/EventRegistration/EventRegistrationScreen';
 import EventDetailsScreen from '../views/EventDetailsScreen/EventDetailsScreen';
@@ -23,6 +25,7 @@ export type RootStackParamList = {
     event?: Event;
     onSubmit?: (event: Event) => void;
   };
+  UserForm: { mode: 'create' } | { mode: 'edit'; userId: string };
   EventRegister: {
     eventId: string;
   };
@@ -34,7 +37,8 @@ export type RootStackParamList = {
     eventId: string;
     gender: GenderType;
     format: FormatType;
-    role: RoleType;
+    role: UserRoleType;
+    eventCategoryId?: number;
   };
 };
 
@@ -50,6 +54,7 @@ const AppNavigator = () => {
       <Stack.Screen name="ParticipantTabs" component={ParticipantTabs} />
 
       <Stack.Screen name="EventForm" component={EventFormScreen} />
+      <Stack.Screen name="UserForm" component={UserFormScreen} />
       <Stack.Screen name="EventRegister" component={EventRegistrationScreen} />
       <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
       <Stack.Screen name="CategoryDetails" component={CategoryDetailsScreen} />
