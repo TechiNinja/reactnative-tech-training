@@ -90,7 +90,7 @@ export const APP_STRINGS = {
   organizerScreens: {
     greeting: 'Hello, Organizer! 👋',
     myEvents: 'My Events',
-    pendingApprovals: 'Pending\nApprovals',
+    totalRegistrations: 'Total\nRegistrations',
     teamsRegistered: 'Teams\nRegistered',
     liveMatches: 'Live Matches',
     createEvent: 'Create Event',

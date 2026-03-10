@@ -23,4 +23,5 @@ export const API_ENDPOINTS = {
     GET_PARTICIPANTS: (eventCategoryId: number) =>
       `/participantregistrations/${eventCategoryId}`,
   },
+  ANALYTICS: '/analytics',
 };

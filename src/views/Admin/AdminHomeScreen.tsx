@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import { APP_STRINGS } from '../../constants/AppStrings';
 import { styles } from './AdminHomeScreenStyles';
@@ -22,7 +22,7 @@ import { MOCK_MATCHES } from '../../constants/mockMatches';
 import { useAdminHomeViewModel } from '../../viewModels/AdminHomeScreenViewModel';
 
 const AdminHomeScreen = () => {
-  const { onLogoutPress, onAddEvent, onAddUser, analytics } =
+  const { onLogoutPress, onAddEvent, onAddUser, analytics, loading } =
     useAdminHomeViewModel();
 
   return (
@@ -38,34 +38,42 @@ const AdminHomeScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.analyticsGrid}>
-          <View style={styles.row}>
-            <AnalyticsCard
-              icon={<Calendar size={24} color={colors.primary} />}
-              title={APP_STRINGS.adminScreens.totalEvents}
-              data={analytics.totalEvents}
-            />
-            <AnalyticsCard
-              icon={<Users size={24} color={colors.usersIconBackground} />}
-              title={APP_STRINGS.adminScreens.activeUsers}
-              data={analytics.activeUsers}
-            />
-          </View>
-          <View style={styles.row}>
-            <AnalyticsCard
-              icon={<Trophy size={24} color={colors.participantBackgroud} />}
-              title={APP_STRINGS.adminScreens.team}
-              data={analytics.teams}
-            />
-            <AnalyticsCard
-              icon={
-                <TrendingUp size={24} color={colors.matchesIconBackgound} />
-              }
-              title={APP_STRINGS.adminScreens.matchesToday}
-              data={analytics.matchesToday}
-            />
-          </View>
-        </View>
+        {loading ? (
+          <ActivityIndicator color={colors.primary} />
+        ) : (
+          analytics && (
+            <View style={styles.analyticsGrid}>
+              <View style={styles.row}>
+                <AnalyticsCard
+                  icon={<Calendar size={24} color={colors.primary} />}
+                  title={APP_STRINGS.adminScreens.totalEvents}
+                  data={analytics.totalEvents}
+                />
+                <AnalyticsCard
+                  icon={<Users size={24} color={colors.usersIconBackground} />}
+                  title={APP_STRINGS.adminScreens.activeUsers}
+                  data={analytics.activeUsers}
+                />
+              </View>
+              <View style={styles.row}>
+                <AnalyticsCard
+                  icon={
+                    <Trophy size={24} color={colors.participantBackgroud} />
+                  }
+                  title={APP_STRINGS.adminScreens.team}
+                  data={analytics.teams}
+                />
+                <AnalyticsCard
+                  icon={
+                    <TrendingUp size={24} color={colors.matchesIconBackgound} />
+                  }
+                  title={APP_STRINGS.adminScreens.matchesToday}
+                  data={analytics.matchesToday}
+                />
+              </View>
+            </View>
+          )
+        )}
 
         <View>
           <Text style={styles.heading}>

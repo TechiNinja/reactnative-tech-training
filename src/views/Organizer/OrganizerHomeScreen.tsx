@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import { APP_STRINGS } from '../../constants/AppStrings';
 import AnalyticsCard from '../../components/AnalyticsCard/AnalyticsCard';
@@ -35,34 +35,45 @@ const OrganizerHomeScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.analyticsGrid}>
-          <View style={styles.row}>
-            <AnalyticsCard
-              icon={<Calendar size={24} color={colors.primary} />}
-              title={APP_STRINGS.organizerScreens.myEvents}
-              data={viewModel.analytics.myEvents}
-            />
-            <AnalyticsCard
-              icon={
-                <ClipboardList size={24} color={colors.matchesIconBackgound} />
-              }
-              title={APP_STRINGS.organizerScreens.pendingApprovals}
-              data={viewModel.analytics.pendingApprovals}
-            />
-          </View>
-          <View style={styles.row}>
-            <AnalyticsCard
-              icon={<Users size={24} color={colors.usersIconBackground} />}
-              title={APP_STRINGS.organizerScreens.teamsRegistered}
-              data={viewModel.analytics.teamsRegistered}
-            />
-            <AnalyticsCard
-              icon={<Trophy size={24} color={colors.participantBackgroud} />}
-              title={APP_STRINGS.organizerScreens.liveMatches}
-              data={viewModel.analytics.liveMatches}
-            />
-          </View>
-        </View>
+        {viewModel.loading ? (
+          <ActivityIndicator color={colors.primary} />
+        ) : (
+          viewModel.analytics && (
+            <View style={styles.analyticsGrid}>
+              <View style={styles.row}>
+                <AnalyticsCard
+                  icon={<Calendar size={24} color={colors.primary} />}
+                  title={APP_STRINGS.organizerScreens.myEvents}
+                  data={viewModel.analytics.myEvents}
+                />
+                <AnalyticsCard
+                  icon={
+                    <ClipboardList
+                      size={24}
+                      color={colors.matchesIconBackgound}
+                    />
+                  }
+                  title={APP_STRINGS.organizerScreens.totalRegistrations}
+                  data={viewModel.analytics.totalRegistrations}
+                />
+              </View>
+              <View style={styles.row}>
+                <AnalyticsCard
+                  icon={<Users size={24} color={colors.usersIconBackground} />}
+                  title={APP_STRINGS.organizerScreens.teamsRegistered}
+                  data={viewModel.analytics.teamsRegistered}
+                />
+                <AnalyticsCard
+                  icon={
+                    <Trophy size={24} color={colors.participantBackgroud} />
+                  }
+                  title={APP_STRINGS.organizerScreens.liveMatches}
+                  data={viewModel.analytics.liveMatches}
+                />
+              </View>
+            </View>
+          )
+        )}
 
         <View>
           <Text style={styles.heading}>
