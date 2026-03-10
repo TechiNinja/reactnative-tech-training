@@ -50,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return true;
     } catch (error) {
       Alert.alert(
-        APP_STRINGS.auth.registrationFailed,
+        APP_STRINGS.eventScreen.registrationFailed,
         error instanceof Error
           ? error.message
           : APP_STRINGS.auth.somethingWentWrong,

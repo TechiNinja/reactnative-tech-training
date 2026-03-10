@@ -13,8 +13,6 @@ export const APP_STRINGS = {
     createNewPasswordTagline: 'Create a new password for your account',
     somethingWentWrong: 'Something went wrong. Please try again.',
     loginFailed: 'Login failed',
-    registrationFailed: 'Registration failed',
-    failedUserLoad: 'Failed to load users',
   },
   buttons: {
     createAccount: 'Create Account',
@@ -106,6 +104,7 @@ export const APP_STRINGS = {
     matchesPlayed: 'Matches\nPlayed',
     wins: 'Wins',
     captain: 'Captain',
+    failedToLoadData: 'Failed to load participant data',
   },
   eventScreen: {
     eventManage: 'Tap an event to manage',
@@ -205,5 +204,7 @@ export const APP_STRINGS = {
     teamCreationFailed: 'Failed to create teams. Please try again.',
     active: 'Active',
     inactive: 'Inactive',
+    registrationFailed: 'Registration failed',
+    failedUserLoad: 'Failed to load users',
   },
 };

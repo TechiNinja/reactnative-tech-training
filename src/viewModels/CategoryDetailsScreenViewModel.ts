@@ -22,6 +22,8 @@ import { generateTeams } from '../utils/teamUtils';
 import { generateBracket, nextPowerOfTwo } from '../utils/fixtureUtils';
 
 const PARTICIPANTS_TAB = 'PARTICIPANTS';
+const TEAMS_TAB = 'TEAMS';
+const FIXTURES_TAB = 'FIXTURES';
 
 type CategoryDetailsRouteProp = RouteProp<
   RootStackParamList,
@@ -49,8 +51,8 @@ export const useCategoryDetailsViewModel = () => {
   const mainTabs = useMemo(() => {
     const tabs: string[] = [];
     if (role !== 'participant') tabs.push(PARTICIPANTS_TAB);
-    if (format === FormatType.Doubles) tabs.push('TEAMS');
-    tabs.push('FIXTURES');
+    if (format === FormatType.Doubles) tabs.push(TEAMS_TAB);
+    tabs.push(FIXTURES_TAB);
     return tabs;
   }, [role, format]);
 

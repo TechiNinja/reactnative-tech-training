@@ -34,7 +34,7 @@ export const AuthService = {
 
     const data: AuthApiResponse = await res.json();
     const user: StoredUser = {
-      id: String(data.id),
+      id: data.id,
       name: data.fullName,
       email: data.email,
       role: mapRole(data.role),
@@ -56,12 +56,14 @@ export const AuthService = {
 
     if (!res.ok) {
       const data = await res.json();
-      throw new Error(data?.message ?? APP_STRINGS.auth.registrationFailed);
+      throw new Error(
+        data?.message ?? APP_STRINGS.eventScreen.registrationFailed,
+      );
     }
 
     const data: AuthApiResponse = await res.json();
     const user: StoredUser = {
-      id: String(data.id),
+      id: data.id,
       name: data.fullName,
       email: data.email,
       role: mapRole(data.role),

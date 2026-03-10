@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Alert } from 'react-native';
+import { APP_STRINGS } from '../constants/AppStrings';
 
 type ApiTeam = {
   teamId: number;
@@ -44,7 +45,7 @@ export const useParticipantHomeViewModel = () => {
 
     const loadData = async () => {
       try {
-        const teams = await getMyTeams(Number(user.id));
+        const teams = await getMyTeams(user.id);
         setMyTeams(teams);
 
         const resolveName = (id: string) => {
@@ -54,10 +55,10 @@ export const useParticipantHomeViewModel = () => {
           return participant ? participant.teamName : `Player ${id}`;
         };
 
-        const events = await getMyEvents(Number(user.id));
+        const events = await getMyEvents(user.id);
         setMyEventsCount(events.length);
 
-        const rawSchedule = await getMySchedule(Number(user.id));
+        const rawSchedule = await getMySchedule(user.id);
         const mapped = rawSchedule.map((match: ApiScheduleRaw) => ({
           id: match.matchId,
           teamA: resolveName(match.sideA),
@@ -85,7 +86,7 @@ export const useParticipantHomeViewModel = () => {
         setMatchesPlayedCount(played);
         setWinsCount(wins);
       } catch {
-        Alert.alert('Error', 'Failed to load participant data');
+        Alert.alert('Error', APP_STRINGS.participantScreens.failedToLoadData);
       }
     };
 

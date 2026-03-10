@@ -175,7 +175,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({
 
         let fixtures: Fixture[] = [];
 
-        event.format.forEach((eventFormat) => {
+        for (const eventFormat of event.format) {
           if (eventFormat === FormatType.Singles) {
             const males = event.registrations
               .filter(
@@ -207,7 +207,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({
           }
 
           if (eventFormat === FormatType.Doubles) {
-            if (!event.teamsCreated) return;
+            if (!event.teamsCreated) return event;
 
             const males = event.teams
               .filter(
@@ -237,7 +237,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({
               );
             }
           }
-        });
+        }
 
         if (!fixtures.length) return event;
 

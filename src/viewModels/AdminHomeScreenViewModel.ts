@@ -2,6 +2,7 @@ import { useAuthStore } from '../store/AuthStore';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { MOCK_ADMIN_ANALYTICS } from '../constants/mockAnalytics';
 
 export const useAdminHomeViewModel = () => {
   const navigation =
@@ -25,12 +26,7 @@ export const useAdminHomeViewModel = () => {
     navigation.navigate('UserForm', { mode: 'create' });
   };
 
-  const analytics = {
-    totalEvents: 24,
-    activeUsers: 156,
-    teams: 48,
-    matchesToday: 8,
-  };
+  const analytics = MOCK_ADMIN_ANALYTICS;
 
   return {
     onLogoutPress,

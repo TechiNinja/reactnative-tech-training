@@ -90,7 +90,7 @@ export const useEventRegistrationViewModel = (
     if (fullCategories.length > 0) {
       const genderLabel = gender === GenderType.Male ? "Men's" : "Women's";
       Alert.alert(
-        APP_STRINGS.auth.registrationFailed,
+        APP_STRINGS.eventScreen.registrationFailed,
         `${genderLabel} ${fullCategories.join(
           ', ',
         )} category is now full. Please choose another category.`,
@@ -109,7 +109,7 @@ export const useEventRegistrationViewModel = (
 
       if (alreadyRegisteredInSelected) {
         Alert.alert(
-          APP_STRINGS.auth.registrationFailed,
+          APP_STRINGS.eventScreen.registrationFailed,
           APP_STRINGS.eventScreen.registered,
         );
         return;

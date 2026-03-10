@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { MOCK_MATCHES, UPCOMING_MATCHES } from '../constants/mockMatches';
+import { MOCK_ORGANIZER_ANALYTICS } from '../constants/mockAnalytics';
 
 export const useOrganizerHomeViewModel = () => {
   const navigation =
@@ -22,12 +23,7 @@ export const useOrganizerHomeViewModel = () => {
     navigation.navigate('EventForm', { mode: 'create' });
   };
 
-  const analytics = {
-    myEvents: 5,
-    pendingApprovals: 12,
-    teamsRegistered: 23,
-    liveMatches: 8,
-  };
+  const analytics = MOCK_ORGANIZER_ANALYTICS;
 
   return {
     onLogout,
