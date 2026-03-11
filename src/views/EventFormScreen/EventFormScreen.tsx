@@ -18,13 +18,12 @@ type EventFormScreenProps = NativeStackScreenProps<
   'EventForm'
 >;
 
-const EventFormScreen = ({ route, navigation }: EventFormScreenProps) => {
+const EventFormScreen = ({ route }: EventFormScreenProps) => {
   const { mode, event } = route.params;
 
   const viewModel = useEventFormViewModel({
     mode,
     event,
-    navigation,
   });
 
   return (

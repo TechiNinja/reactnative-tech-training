@@ -87,7 +87,7 @@ export interface Event {
   venue: string;
 
   status: EventStatus;
-  format: '1v1' | '2v2';
+  format: FormatType[];
 
   registeredTeams: number;
   totalTeams: number;

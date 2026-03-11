@@ -14,6 +14,7 @@ import { colors } from '../../theme/colors';
 import { styles } from './EventDetailsScreenStyles';
 import { APP_STRINGS } from '../../constants/AppStrings';
 import { useEventDetailsViewModel } from '../../viewModels/EventDetailsScreenViewModel';
+import { FormatType } from '../../models/Event';
 
 const EventDetailsScreen = () => {
   const {
@@ -77,7 +78,12 @@ const EventDetailsScreen = () => {
             <View style={styles.infoRow}>
               <Trophy size={18} color={colors.textSecondary} />
               <Text style={styles.infoText}>
-                Formats: {event.format === '2v2' ? 'Doubles' : 'Singles'}
+                Formats:{' '}
+                {event.format
+                  .map((format) =>
+                    format === FormatType.Singles ? 'Singles' : 'Doubles',
+                  )
+                  .join(', ')}
               </Text>
             </View>
 

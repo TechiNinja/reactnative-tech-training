@@ -11,6 +11,8 @@ export const APP_STRINGS = {
     signUpSubtitle: 'Get started with your sports journey',
     resetPassword: 'Reset Password',
     createNewPasswordTagline: 'Create a new password for your account',
+    somethingWentWrong: 'Something went wrong. Please try again.',
+    loginFailed: 'Login failed',
   },
   buttons: {
     createAccount: 'Create Account',
@@ -19,6 +21,8 @@ export const APP_STRINGS = {
     forgotPassword: 'Forgot Password?',
     signUp: 'Sign Up',
     retry: 'Retry',
+    cancel: 'Cancel',
+    continue: 'Continue',
   },
   labels: {
     email: 'Email',
@@ -86,7 +90,7 @@ export const APP_STRINGS = {
   organizerScreens: {
     greeting: 'Hello, Organizer! 👋',
     myEvents: 'My Events',
-    pendingApprovals: 'Pending\nApprovals',
+    totalRegistrations: 'Total\nRegistrations',
     teamsRegistered: 'Teams\nRegistered',
     liveMatches: 'Live Matches',
     createEvent: 'Create Event',
@@ -100,6 +104,7 @@ export const APP_STRINGS = {
     matchesPlayed: 'Matches\nPlayed',
     wins: 'Wins',
     captain: 'Captain',
+    failedToLoadData: 'Failed to load participant data',
   },
   eventScreen: {
     eventManage: 'Tap an event to manage',
@@ -176,7 +181,6 @@ export const APP_STRINGS = {
     maleSlots: 'Male Slots',
     femaleSlots: 'Female Slots',
     notMatchesToday: 'No Matches Today',
-    failedUserLoad: 'Failed to load users',
     activeUserText: 'User can access the platform',
     inactiveUserText: 'User will not be able to sign in',
     abandoned: 'Abandoned',
@@ -189,7 +193,6 @@ export const APP_STRINGS = {
     oddRegistrationsAlert: 'Odd number of participants; one may get a bye.',
     categoryAbandoned: 'Category Abandoned',
     categoryAbandonedDescription: 'This category has been abandoned.',
-    registrationFailed: 'Registration failed',
     categories: 'Categories',
     noRegisteredParticipants: 'No registered participants',
     prizes: 'Prizes',
@@ -199,9 +202,9 @@ export const APP_STRINGS = {
     individualMatches: 'Individual matches',
     teamOfPlayers: 'Team of players',
     teamCreationFailed: 'Failed to create teams. Please try again.',
-    somethingWentWrong: 'Something went wrong. Please try again.',
-    loginFailed: 'Login failed',
     active: 'Active',
     inactive: 'Inactive',
+    registrationFailed: 'Registration failed',
+    failedUserLoad: 'Failed to load users',
   },
 };

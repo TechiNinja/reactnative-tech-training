@@ -6,13 +6,12 @@ import {
   StoredUser,
 } from '../utils/authStorage';
 import { Alert } from 'react-native';
-import { API_ENDPOINTS } from '../config/api';
-import { UserRoleType } from '../models/User';
 import { APP_STRINGS } from '../constants/AppStrings';
+import { AuthService } from '../services/authService';
 
 type AuthContextType = {
   user: StoredUser | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<StoredUser | null>;
   register: (
     fullName: string,
     email: string,
@@ -39,52 +38,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     loadUser();
   }, []);
 
-  const mapRole = (roles: string): UserRoleType => {
-    const role = roles.toLowerCase();
-    if (role === 'admin') return 'admin';
-    if (role === 'organizer') return 'organizer';
-    if (role === 'operations') return 'operations';
-    return 'participant';
-  };
-
   const register = async (
     fullName: string,
     email: string,
     password: string,
   ) => {
     try {
-      const res = await fetch(API_ENDPOINTS.AUTH.REGISTER, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fullName, email, password }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        Alert.alert(
-          APP_STRINGS.eventScreen.registrationFailed,
-          data?.message ?? APP_STRINGS.eventScreen.somethingWentWrong,
-        );
-        return false;
-      }
-
-      const data = await res.json();
-      const token = data.token;
-
-      const userData: StoredUser = {
-        id: data.id,
-        name: data.fullName,
-        email: data.email,
-        role: mapRole(data.role),
-      };
-
-      setUser(userData);
-      await saveUser(userData, token);
+      const result = await AuthService.register(fullName, email, password);
+      setUser(result.user);
+      await saveUser(result.user, result.token);
       return true;
-    } catch {
+    } catch (error) {
       Alert.alert(
         APP_STRINGS.eventScreen.registrationFailed,
-        APP_STRINGS.eventScreen.somethingWentWrong,
+        error instanceof Error
+          ? error.message
+          : APP_STRINGS.auth.somethingWentWrong,
       );
       return false;
     }
@@ -92,33 +61,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (email: string, password: string) => {
     try {
-      const res = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!res.ok) return false;
-
-      const data = await res.json();
-      const token = data.token;
-
-      const userData: StoredUser = {
-        id: data.id,
-        name: data.fullName,
-        email: data.email,
-        role: mapRole(data.role),
-      };
-
-      setUser(userData);
-      await saveUser(userData, token);
-      return true;
+      const result = await AuthService.login(email, password);
+      if (!result) return null;
+      setUser(result.user);
+      await saveUser(result.user, result.token);
+      return result.user;
     } catch {
       Alert.alert(
-        APP_STRINGS.eventScreen.loginFailed,
-        APP_STRINGS.eventScreen.somethingWentWrong,
+        APP_STRINGS.auth.loginFailed,
+        APP_STRINGS.auth.somethingWentWrong,
       );
-      return false;
+      return null;
     }
   };
 

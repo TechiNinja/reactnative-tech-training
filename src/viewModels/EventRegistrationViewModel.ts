@@ -25,10 +25,7 @@ export const useEventRegistrationViewModel = (
   const [gender, setGender] = useState<GenderType | ''>('');
   const [selectedFormats, setSelectedFormats] = useState<FormatType[]>([]);
 
-  const availableFormats: FormatType[] =
-    event?.format === '2v2'
-      ? [FormatType.Singles, FormatType.Doubles]
-      : [FormatType.Singles];
+  const availableFormats: FormatType[] = event?.format ?? [];
 
   const totalSlotsPerCategory = event?.totalTeams ?? 0;
 

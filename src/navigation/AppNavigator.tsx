@@ -13,7 +13,6 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 import EventRegistrationScreen from '../views/EventRegistration/EventRegistrationScreen';
 import EventDetailsScreen from '../views/EventDetailsScreen/EventDetailsScreen';
 import CategoryDetailsScreen from '../views/CategoryDetailsScreen/CategoryDetailsScreen';
-import { RoleType } from '../constants/Roles';
 
 export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
@@ -31,7 +30,7 @@ export type RootStackParamList = {
   };
   EventDetails: {
     eventId: string;
-    role: RoleType;
+    role: UserRoleType;
   };
   CategoryDetails: {
     eventId: string;
