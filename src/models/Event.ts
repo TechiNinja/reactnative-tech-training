@@ -88,6 +88,7 @@ export interface Event {
 
   status: EventStatus;
   format: FormatType[];
+  formats: [FormatType.Singles | FormatType.Doubles];
 
   registeredTeams: number;
   totalTeams: number;
@@ -109,3 +110,4 @@ export interface Event {
 
   abandonedCategories?: string[];
 }
+

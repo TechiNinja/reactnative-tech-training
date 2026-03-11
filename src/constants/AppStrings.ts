@@ -56,6 +56,13 @@ export const APP_STRINGS = {
     searchTeams: 'Search Teams...',
     searchFixtures: 'Search Fixtures...',
     searchUsers: 'Search users by name or email...',
+    logisticRequirements : 'Logistic Requirements',
+    venue : 'Venue',
+    date : 'YYYY-MM-DD',
+    loadingSports : 'Loading sports...',
+    selectSports : 'Select sport',
+    sportsName : 'Sports Name',
+    eventName : 'Event Name',
   },
   userScreen: {
     allUsers: 'All Users',
@@ -86,6 +93,8 @@ export const APP_STRINGS = {
     addUser: 'Add User',
     settings: 'Settings',
     liveMatches: 'Live Matches',
+    raiseEventRequest : 'Request',
+    bell : 'Notifications'
   },
   organizerScreens: {
     greeting: 'Hello, Organizer! 👋',
@@ -206,5 +215,24 @@ export const APP_STRINGS = {
     inactive: 'Inactive',
     registrationFailed: 'Registration failed',
     failedUserLoad: 'Failed to load users',
+  },
+  RequestScreen : {
+    raiseRequest: 'Raise Request',
+    editRequest : 'Edit Request',
+    noRequestFound : 'No request found',
+    updateRequest : 'Update Request',
+    logisticRequirements : 'Logistic Requirements',
+    venue : 'Requested Venue',
+    endDate : 'End Date',
+    startDate : 'Start Date',
+    format : 'Format',
+    gender : 'Gender',
+    createEvent : "Create Event",
+    update : 'Updated',
+    created : 'Created',
+    withdraw : 'Withdraw',
+    operationsReviewerName : 'OperationsReviewerName',
+    remarks : 'Remarks:',
+    logistics : 'Logistics:'
   },
 };
