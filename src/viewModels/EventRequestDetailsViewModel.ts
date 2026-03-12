@@ -4,7 +4,7 @@ import { Alert } from 'react-native';
 import { useState } from 'react';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { EventRequestResponse, RequestStatus } from '../models/EventRequest';
-import { eventRequestService } from '../services/eventRequestService';
+import { useEventRequestStore } from '../store/EventRequestStore';
 
 type RouteType = {
   key: string;
@@ -15,10 +15,12 @@ type RouteType = {
 type OpsStatus = 'Approved' | 'Rejected';
 
 export const useEventRequestDetailsViewModel = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteType>();
 
   const request: EventRequestResponse | undefined = route.params?.request;
+  const { withdrawRequest, decideRequest } = useEventRequestStore();
 
   const canUpdate = request?.status === RequestStatus.PENDING;
   const canCreateEvent = request?.status === RequestStatus.APPROVED;
@@ -41,7 +43,9 @@ export const useEventRequestDetailsViewModel = () => {
 
     try {
       setApprovingOrRejecting(true);
-      await eventRequestService.decide(request.id, opsStatus, { remarks: trimmed });
+
+      await decideRequest(request.id, opsStatus, { remarks: trimmed });
+
       Alert.alert('Success', `Request ${opsStatus} successfully`);
       navigation.goBack();
     } catch (error: any) {
@@ -80,7 +84,7 @@ export const useEventRequestDetailsViewModel = () => {
 
     try {
       setApprovingOrRejecting(true);
-      await eventRequestService.withdraw(request.id);
+      await withdrawRequest(request.id);
       Alert.alert('Success', 'Request withdrawn successfully');
       navigation.goBack();
     } catch (error: any) {

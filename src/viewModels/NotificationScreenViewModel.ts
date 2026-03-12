@@ -1,12 +1,11 @@
   import { useEffect, useState, useCallback } from 'react';
-  import Config from 'react-native-config';
   import { getToken, getUser } from '../utils/authStorage';
   import {
     setOpsLastSeenCount,
     setAdminLastSeenCount,
   } from '../utils/notificationBadgeStorage';
+import { API_BASE_URL } from '../config/api';
 
-  const { BASE_URL } = Config;
 
   export type NotificationAudience = 'Ops' | 'Admin';
 
@@ -46,7 +45,7 @@
 
         const token = await getToken();
 
-        const base = (BASE_URL ?? '').replace(/\/$/, '');
+        const base = (API_BASE_URL ?? '').replace(/\/$/, '');
         const path = `/Notifications?audience=${audience}`;
         const url = `${base}${path}`;
 

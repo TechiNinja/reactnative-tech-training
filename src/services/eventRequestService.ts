@@ -25,7 +25,9 @@ export const eventRequestService = {
   },
 
   search(filter: EventRequestFilter = {}): Promise<EventRequestResponse[]> {
-    return authFetch<EventRequestResponse[]>(`/event-requests${toQueryString(filter)}`);
+    return authFetch<EventRequestResponse[]>(
+      `/event-requests${toQueryString(filter)}`,
+    );
   },
 
   getById(id: number): Promise<EventRequestResponse> {

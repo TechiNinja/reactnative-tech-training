@@ -1,11 +1,9 @@
 import * as signalR from "@microsoft/signalr";
-import Config from "react-native-config";
-
-const { BASE_URLL } = Config;
+import { API_BASE_URLL } from "../config/api";
 
 export const createNotificationConnection = () => {
   return new signalR.HubConnectionBuilder()
-    .withUrl(`${BASE_URLL}/hubs/notifications`, {
+    .withUrl(`${API_BASE_URLL}/hubs/notifications`, {
       transport: signalR.HttpTransportType.LongPolling,
     })
     .withAutomaticReconnect()

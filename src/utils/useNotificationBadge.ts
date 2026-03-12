@@ -9,8 +9,7 @@ import {
   getAdminLastSeenCount,
   setAdminLastSeenCount,
 } from "../utils/notificationBadgeStorage";
-
-const { BASE_URL } = Config;
+import { API_BASE_URL } from "../config/api";
 
 export type NotificationAudience = "Ops" | "Admin";
 
@@ -56,41 +55,53 @@ export const useNotificationBadge = (audience: NotificationAudience) => {
   );
 
   const loadInitialCount = useCallback(async () => {
+  try {
+    const token = await getToken();
+    const user = await getUser();
+    const userId = user?.id;
+
+    const res = await fetch(`${API_BASE_URL}/Notifications?audience=${audience}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+    const text = await res.text();
+
+    console.log("API_BASE_URL:", API_BASE_URL);
+    console.log("status:", res.status);
+    console.log("text:", text);
+
+    if (!res.ok) return;
+
+    let json: any = [];
     try {
-      const token = await getToken();
-      const user = await getUser();
-      const userId = user?.id;
-
-      const res = await fetch(`${BASE_URL}/Notifications?audience=${audience}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-
-      const text = await res.text();
-      if (!res.ok) return;
-
-      const json = text ? JSON.parse(text) : [];
-      const data = extractArray(json);
-
-      const filteredData =
-        audience === "Admin"
-          ? data.filter((n) => n.userId === userId)
-          : data;
-
-      const currentTotal = filteredData.length;
-      const lastSeen = await getLastSeen();
-      const unread = Math.max(0, currentTotal - lastSeen);
-
-      setTotalCount(currentTotal);
-      setCount(unread);
-    } catch (err) {
-      console.log("Failed to load notification count:", err);
+      json = text ? JSON.parse(text) : [];
+    } catch (error) {
+      console.log("Notification JSON parse error:", error);
+      json = [];
     }
-  }, [audience, getLastSeen]);
+
+    const data = extractArray(json);
+
+    const filteredData =
+      audience === "Admin"
+        ? data.filter((n) => n.userId === userId)
+        : data;
+
+    const currentTotal = filteredData.length;
+    const lastSeen = await getLastSeen();
+    const unread = Math.max(0, currentTotal - lastSeen);
+
+    setTotalCount(currentTotal);
+    setCount(unread);
+  } catch (err) {
+    console.log("Failed to load notification count:", err);
+  }
+}, [audience, getLastSeen]);
 
   useEffect(() => {
     let conn: any = null;
@@ -107,10 +118,20 @@ export const useNotificationBadge = (audience: NotificationAudience) => {
         await conn.start();
 
         if (audience === "Ops") {
-          await conn.invoke("JoinOpsGroup");
-        } else {
-          await conn.invoke("JoinAdminGroup");
-        }
+  await conn.invoke("JoinOpsGroup");
+} else {
+  const user = await getUser();
+  const adminId = user?.id;
+
+  console.log("JoinAdminGroup user =>", user);
+  console.log("JoinAdminGroup adminId =>", adminId);
+
+  if (!adminId) {
+    throw new Error("Admin id not found");
+  }
+
+  await conn.invoke("JoinAdminGroup", adminId);
+}
       } catch (err) {
         console.log("SignalR start error:", err);
       }

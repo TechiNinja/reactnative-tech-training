@@ -12,6 +12,7 @@ import {
 } from '../models/EventRequest';
 import { validationMessages } from '../constants/validationMessages';
 import { eventRequestService } from '../services/eventRequestService';
+import { useEventRequestStore } from '../store/EventRequestStore';
 
 type Mode = 'create' | 'edit';
 
@@ -34,10 +35,13 @@ const toYmd = (d: Date) => {
 
 export const useEventRequestFormViewModel = ({ mode, request, navigation }: Params) => {
   const isEdit = mode === 'edit' && !!request;
+  const { createRequest, updateRequest } = useEventRequestStore();
 
   const [eventName, setEventName] = useState(isEdit ? request!.eventName : '');
-  const [sportId, setSportId] = useState(isEdit ? request!.sportId : 0);
-  const [gender, setGender] = useState<GenderType>(isEdit ? request!.gender : GenderType.Male);
+  const [sportId, setSportId] = useState<number>(isEdit ? request!.sportId : 0);
+  const [gender, setGender] = useState<GenderType>(
+    isEdit ? request!.gender : GenderType.Male,
+  );
   const [format, setFormat] = useState<MatchFormat>(
     isEdit ? request!.format : MatchFormat.Singles,
   );
@@ -66,8 +70,10 @@ export const useEventRequestFormViewModel = ({ mode, request, navigation }: Para
         setSportsLoading(true);
         const data = await eventRequestService.getSports();
         setSports(data);
-      } catch (error: any) {
-        Alert.alert(validationMessages.ERROR, error?.message || validationMessages.SOMETHING_WRONG);
+      } catch (err) {
+        if(err instanceof Error){
+          Alert.alert(validationMessages.ERROR, err?.message || validationMessages.SOMETHING_WRONG);
+        }
       } finally {
         setSportsLoading(false);
       }
@@ -81,15 +87,19 @@ export const useEventRequestFormViewModel = ({ mode, request, navigation }: Para
     return sports.find((s) => s.id === sportId)?.name ?? '';
   }, [isEdit, request?.sportsName, sports, sportId]);
 
-  const genderOptions = useMemo(
-    () => Object.values(GenderType).map((value) => ({ value, disabled: false })),
-    [],
-  );
+  const genderOptions = useMemo(() => {
+    return Object.values(GenderType).map((value) => ({
+      value,
+      disabled: false,
+    }));
+  }, []);
 
-  const formatOptions = useMemo(
-    () => Object.values(MatchFormat).map((value) => ({ value, disabled: false })),
-    [],
-  );
+  const formatOptions = useMemo(() => {
+    return Object.values(MatchFormat).map((value) => ({
+      value,
+      disabled: false,
+    }));
+  }, []);
 
   const validate = () => {
     const nextErrors: Errors = {};
@@ -99,6 +109,7 @@ export const useEventRequestFormViewModel = ({ mode, request, navigation }: Para
     if (!requestedVenue.trim()) nextErrors.requestedVenue = validationMessages.VENUE_REQUIRED;
     if (!startDate) nextErrors.startDate = validationMessages.STARTDATE_REQUIRED;
     if (!endDate) nextErrors.endDate = validationMessages.ENDDATE_REQUIRED;
+
     if (startDate && endDate && startDate > endDate) {
       nextErrors.endDate = validationMessages.DATE_COMPARE;
     }
@@ -124,7 +135,7 @@ export const useEventRequestFormViewModel = ({ mode, request, navigation }: Para
           endDate,
         };
 
-        await eventRequestService.update(request!.id, payload);
+        await updateRequest(request!.id, payload);
       } else {
         const payload: CreateEventRequest = {
           eventName: eventName.trim(),
@@ -137,12 +148,15 @@ export const useEventRequestFormViewModel = ({ mode, request, navigation }: Para
           endDate,
         };
 
-        await eventRequestService.create(payload);
+        await createRequest(payload);
       }
 
       navigation.navigate('AdminTabs', { screen: 'Request' });
     } catch (error: any) {
-      Alert.alert(validationMessages.ERROR, error?.message || validationMessages.SOMETHING_WRONG);
+      Alert.alert(
+        validationMessages.ERROR,
+        error?.message || validationMessages.SOMETHING_WRONG,
+      );
     } finally {
       setSubmitting(false);
     }

@@ -11,11 +11,7 @@ export const useOperationHomeViewModel = (
 ) => {
   const { logout } = useAuthStore();
   const { count, reset } = useNotificationBadge('Ops');
-
-
-  const [loading, setLoading] = useState(false);
-
-
+  
   const onLogoutPress = async () => {
     await logout();
     navigation.reset({
@@ -34,7 +30,6 @@ export const useOperationHomeViewModel = (
   };
 
   return {
-    loading,
     notificationCount: count,
     onLogoutPress,
     onOpenRequests,

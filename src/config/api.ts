@@ -1,4 +1,5 @@
 export const API_BASE_URL = 'http://localhost:5181/api';
+export const API_BASE_URLL = 'http://localhost:5181';
 
 export const API_ENDPOINTS = {
   AUTH: {
