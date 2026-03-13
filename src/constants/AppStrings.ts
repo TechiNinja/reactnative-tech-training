@@ -1,3 +1,5 @@
+import NotificationScreen from "../views/NotificationScreen/NotificationScreen";
+
 export const APP_STRINGS = {
   app: {
     name: 'SportsCarnival',
@@ -83,6 +85,8 @@ export const APP_STRINGS = {
       'Select your role to customize your experience. You can change this later in the settings.',
   },
   adminScreens: {
+    pendingRequest : 'Pending Request',
+    totalRequest: 'Total Request',
     greeting: 'Hello, Admin! 👋',
     totalEvents: 'Total Events',
     activeUsers: 'Active Users',
@@ -225,14 +229,26 @@ export const APP_STRINGS = {
     venue : 'Requested Venue',
     endDate : 'End Date',
     startDate : 'Start Date',
-    format : 'Format',
-    gender : 'Gender',
+    format : 'Format :',
+    gender : 'Gender :',
     createEvent : "Create Event",
-    update : 'Updated',
-    created : 'Created',
+    update : 'Updated :',
+    created : 'Created :',
     withdraw : 'Withdraw',
-    operationsReviewerName : 'OperationsReviewerName',
-    remarks : 'Remarks:',
-    logistics : 'Logistics:'
+    operationsReviewerName : 'OperationsReviewerName :',
+    remarks : 'Remarks :',
+    logistics : 'Logistics :'
   },
+  OperationScreen : {
+    Operation : "Operation",
+  },
+  NotificationScreen : {
+    Notification : "Notification",
+    noNotification : "No Notification yet",
+    request : "Request#",
+    loadingNotification : "Loading Notification..."
+  },
+  EventRequestScreen : {
+    Request :  "Request",
+  }
 };

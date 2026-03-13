@@ -43,7 +43,7 @@ const EventRequestListScreen = ({ role }: EventRequestListScreenProps) => {
                 : styles.heading
             }
           >
-            Requests
+            {APP_STRINGS.EventRequestScreen.Request}
           </Text>
 
           {(role === 'admin') && (
@@ -98,6 +98,7 @@ const EventRequestListScreen = ({ role }: EventRequestListScreenProps) => {
         ) : (
           <FlatList
             data={viewModel.filteredRequests}
+            
             keyExtractor={(item) => String(item.id)}
             renderItem={({ item }) => (
               <EventRequestCard

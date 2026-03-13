@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, Calendar, Users } from 'lucide-react-native';
+import { Home, Calendar, Users, Clipboard, ClipboardList } from 'lucide-react-native';
 import { colors } from '../theme/colors';
 
 import AdminHomeScreen from '../views/Admin/AdminHomeScreen';
@@ -66,7 +66,7 @@ const AdminTabs = () => {
 
           if (route.name === 'Request') {
             return (
-              <Users
+              <ClipboardList
                 size={22}
                 color={focused ? colors.primary : colors.textSecondary}
               />

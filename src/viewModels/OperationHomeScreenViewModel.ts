@@ -3,7 +3,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuthStore } from '../store/AuthStore';
 import { useNotificationBadge } from '../utils/useNotificationBadge';
-import { AnalyticsService } from '../services/AnalyticsService';
+import { AnalyticsService, OperationAnalytics} from '../services/analyticsService';
 
 
 export const useOperationHomeViewModel = (
@@ -11,6 +11,15 @@ export const useOperationHomeViewModel = (
 ) => {
   const { logout } = useAuthStore();
   const { count, reset } = useNotificationBadge('Ops');
+
+  const [analytics, setAnalytics] = useState<OperationAnalytics | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    AnalyticsService.getOperationAnalytics()
+      .then(setAnalytics)
+      .finally(() => setLoading(false));
+  }, []);
   
   const onLogoutPress = async () => {
     await logout();
@@ -30,6 +39,8 @@ export const useOperationHomeViewModel = (
   };
 
   return {
+    loading,
+    analytics,
     notificationCount: count,
     onLogoutPress,
     onOpenRequests,

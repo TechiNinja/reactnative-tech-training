@@ -34,4 +34,8 @@ export const validationMessages = {
   VENUE_REQUIRED : 'Venue is required',
   SPORT_REQUIRED : 'Sport is required',
   EVENTNAME_REQUIRED : 'Event name is required',
+  withdrawSuccess : 'Success ,Request withdrawn successfully',
+  withdraw : 'Withdraw Request',
+  withdrawSure : 'Are you sure you want to withdraw',
+  remarkRequired : 'Error,Remarks are required',
 };

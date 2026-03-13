@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, Users } from 'lucide-react-native';
+import { ClipboardList, Home, Users } from 'lucide-react-native';
 import { colors } from '../theme/colors';
 
 import EventRequestListScreen from '../views/EventRequestListScreen/EventRequestListScreen';
@@ -44,7 +44,7 @@ const OperationTabs = () => {
 
           if (route.name === 'Request') {
             return (
-              <Users
+              <ClipboardList
                 size={22}
                 color={focused ? colors.primary : colors.textSecondary}
               />

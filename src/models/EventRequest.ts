@@ -73,4 +73,5 @@ export type EventRequestFilter = {
 export type Sport = {
   id: number;
   name: string;
+  allowedFormats : MatchFormat[]
 };

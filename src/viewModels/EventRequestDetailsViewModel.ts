@@ -1,10 +1,12 @@
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert } from 'react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { EventRequestResponse, RequestStatus } from '../models/EventRequest';
 import { useEventRequestStore } from '../store/EventRequestStore';
+import { validationMessages } from '../constants/validationMessages';
 
 type RouteType = {
   key: string;
@@ -22,47 +24,53 @@ export const useEventRequestDetailsViewModel = () => {
   const request: EventRequestResponse | undefined = route.params?.request;
   const { withdrawRequest, decideRequest } = useEventRequestStore();
 
-  const canUpdate = request?.status === RequestStatus.PENDING;
-  const canCreateEvent = request?.status === RequestStatus.APPROVED;
-  const canApproved = request?.status === RequestStatus.PENDING;
-  const canRejected = request?.status === RequestStatus.PENDING;
-  const canWithdraw = request?.status === RequestStatus.PENDING;
-
   const [approvingOrRejecting, setApprovingOrRejecting] = useState(false);
 
-  const handleBack = () => navigation.goBack();
+  const isPending = request?.status === RequestStatus.PENDING;
+  const isApproved = request?.status === RequestStatus.APPROVED;
 
-  const decideOps = async (opsStatus: OpsStatus, remarks: string) => {
-    if (!request) return;
+  const canUpdate = isPending;
+  const canApprove = isPending;
+  const canReject = isPending;
+  const canWithdraw = isPending;
+  const canCreateEvent = isApproved;
 
-    const trimmed = remarks.trim();
-    if (!trimmed) {
-      Alert.alert('Error', 'Remarks are required');
+  const handleBack = () => {
+    navigation.goBack();
+  };
+
+  const handleDecision = async (status: OpsStatus, remarks: string) => {
+    if (!request || !isPending) return;
+
+    const trimmedRemarks = remarks.trim();
+
+    if (!trimmedRemarks) {
+      Alert.alert(validationMessages.remarkRequired);
       return;
     }
 
     try {
       setApprovingOrRejecting(true);
 
-      await decideRequest(request.id, opsStatus, { remarks: trimmed });
+      await decideRequest(request.id, status, { remarks: trimmedRemarks });
 
-      Alert.alert('Success', `Request ${opsStatus} successfully`);
+      Alert.alert('Success', `Request ${status} successfully`);
       navigation.goBack();
     } catch (error: any) {
-      Alert.alert('Error', error?.message || 'Something went wrong');
+      Alert.alert('Error', error?.message || validationMessages.SOMETHING_WRONG);
     } finally {
       setApprovingOrRejecting(false);
     }
   };
 
   const handleApproved = (remarks: string) => {
-    if (!request || !canApproved) return;
-    decideOps('Approved', remarks);
+    if (!canApprove) return;
+    handleDecision('Approved', remarks);
   };
 
   const handleRejected = (remarks: string) => {
-    if (!request || !canRejected) return;
-    decideOps('Rejected', remarks);
+    if (!canReject) return;
+    handleDecision('Rejected', remarks);
   };
 
   const handleUpdate = () => {
@@ -76,37 +84,70 @@ export const useEventRequestDetailsViewModel = () => {
 
   const handleCreateEvent = () => {
     if (!request || !canCreateEvent) return;
-    navigation.navigate('EventForm', { mode: 'create' });
+
+    navigation.navigate('EventForm', {
+      mode: 'create',
+    });
   };
 
-  const handleWithdraw = async () => {
-    if (!request || !canWithdraw) return;
+ const handleWithdraw = () => {
+  if (!request || !canWithdraw) return;
 
-    try {
-      setApprovingOrRejecting(true);
-      await withdrawRequest(request.id);
-      Alert.alert('Success', 'Request withdrawn successfully');
-      navigation.goBack();
-    } catch (error: any) {
-      Alert.alert('Error', error?.message || 'Something went wrong');
-    } finally {
-      setApprovingOrRejecting(false);
-    }
-  };
+  Alert.alert(
+    validationMessages.withdraw,
+    validationMessages.withdrawSure,
+    [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'OK',
+        onPress: async () => {
+          try {
+            setApprovingOrRejecting(true);
+
+            await withdrawRequest(request.id);
+
+            Alert.alert(validationMessages.withdrawSuccess);
+            navigation.goBack();
+          } catch (error: any) {
+            Alert.alert('Error', error?.message || validationMessages.SOMETHING_WRONG);
+          } finally {
+            setApprovingOrRejecting(false);
+          }
+        },
+      },
+    ],
+  );
+};
+
+  const formatDate = (date: string) => {
+  const d = new Date(date);
+
+  const day = d.getDate();
+  const month = d.getMonth() + 1;
+  const year = d.getFullYear();
+  const hours = d.getHours();
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+
+  return `${day}-${month}-${year} ${hours}:${minutes}`;
+};
 
   return {
     request,
-    canApproved,
-    canRejected,
-    handleBack,
-    handleApproved,
-    handleRejected,
-    handleCreateEvent,
-    handleUpdate,
-    canUpdate,
-    canCreateEvent,
-    approvingOrRejecting,
-    handleWithdraw,
-    canWithdraw,
+  canApprove,
+  canReject,
+  handleBack,
+  handleApproved,
+  handleRejected,
+  handleCreateEvent,
+  handleUpdate,
+  canUpdate,
+  canCreateEvent,
+  approvingOrRejecting,
+  handleWithdraw,
+  canWithdraw,
+  formatDate,
   };
 };

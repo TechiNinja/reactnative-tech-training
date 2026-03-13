@@ -43,7 +43,7 @@ export const useEventRequestFormViewModel = ({ mode, request, navigation }: Para
     isEdit ? request!.gender : GenderType.Male,
   );
   const [format, setFormat] = useState<MatchFormat>(
-    isEdit ? request!.format : MatchFormat.Singles,
+    isEdit ? request!.format : undefined as unknown as MatchFormat,
   );
   const [requestedVenue, setRequestedVenue] = useState(
     isEdit ? request!.requestedVenue : '',
@@ -71,8 +71,8 @@ export const useEventRequestFormViewModel = ({ mode, request, navigation }: Para
         const data = await eventRequestService.getSports();
         setSports(data);
       } catch (err) {
-        if(err instanceof Error){
-          Alert.alert(validationMessages.ERROR, err?.message || validationMessages.SOMETHING_WRONG);
+        if (err instanceof Error) {
+          Alert.alert(validationMessages.ERROR, err.message || validationMessages.SOMETHING_WRONG);
         }
       } finally {
         setSportsLoading(false);
@@ -95,11 +95,29 @@ export const useEventRequestFormViewModel = ({ mode, request, navigation }: Para
   }, []);
 
   const formatOptions = useMemo(() => {
-    return Object.values(MatchFormat).map((value) => ({
-      value,
-      disabled: false,
-    }));
-  }, []);
+    if (isEdit) return Object.values(MatchFormat).map((value) => ({ value, disabled: false }));
+
+    const selectedSport = sports.find((s) => s.id === sportId);
+    if (!selectedSport || !selectedSport.allowedFormats.length) return [];
+
+    return selectedSport.allowedFormats.map((value) => ({ value, disabled: false }));
+  }, [sportId, sports, isEdit]);
+
+  useEffect(() => {
+    if (isEdit) return;
+
+    const selectedSport = sports.find((s) => s.id === sportId);
+    if (!selectedSport) return;
+
+    if (!selectedSport.allowedFormats.includes(format)) {
+      const newFormat = selectedSport.allowedFormats[0];
+      if (newFormat) {
+        setFormat(newFormat);
+      } else {
+        setFormat(undefined as unknown as MatchFormat);
+      }
+    }
+  }, [sportId, sports]);
 
   const validate = () => {
     const nextErrors: Errors = {};
@@ -135,7 +153,7 @@ export const useEventRequestFormViewModel = ({ mode, request, navigation }: Para
           endDate,
         };
 
-        await updateRequest(request!.id, payload);
+        await updateRequest(request.id, payload);
       } else {
         const payload: CreateEventRequest = {
           eventName: eventName.trim(),

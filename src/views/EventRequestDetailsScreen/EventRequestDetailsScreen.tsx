@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Text, View, ScrollView, Pressable, Modal, TextInput } from 'react-native';
+import {
+  Text,
+  View,
+  ScrollView,
+  Pressable,
+  Modal,
+  TextInput,
+} from 'react-native';
 import { ArrowLeft, Calendar, MapPin } from 'lucide-react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppButton from '../../components/AppButton/AppButton';
@@ -18,8 +25,8 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
 
   const {
     request,
-    canApproved,
-    canRejected,
+    canApprove,
+    canReject,
     handleBack,
     handleApproved,
     handleRejected,
@@ -29,13 +36,15 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
     canUpdate,
     canCreateEvent,
     approvingOrRejecting,
-    canWithdraw
-  
+    canWithdraw,
+    formatDate,
   } = useEventRequestDetailsViewModel();
 
   const [remarksModalVisible, setRemarksModalVisible] = useState(false);
   const [remarks, setRemarks] = useState('');
-  const [decision, setDecision] = useState<'Approved' | 'Rejected' | null>(null);
+  const [decision, setDecision] = useState<'Approved' | 'Rejected' | null>(
+    null,
+  );
 
   const openRemarksModal = (type: 'Approved' | 'Rejected') => {
     setDecision(type);
@@ -44,7 +53,7 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
   };
 
   const closeRemarksModal = () => {
-    if (approvingOrRejecting) return; 
+    if (approvingOrRejecting) return;
     setRemarksModalVisible(false);
     setDecision(null);
     setRemarks('');
@@ -132,17 +141,19 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
             )}
 
             <Text style={styles.description}>
-                {APP_STRINGS.RequestScreen.operationsReviewerName}{' '}
-                {request.operationsReviewerName}
-              </Text>            
+              {APP_STRINGS.RequestScreen.operationsReviewerName}{' '}
+              {request.operationsReviewerName}
+            </Text>
 
             <Text style={styles.description}>
-              {APP_STRINGS.RequestScreen.created} {request.createdDate}
+              {APP_STRINGS.RequestScreen.created}{' '}
+              {formatDate(request.createdDate)}
             </Text>
 
             {request.updatedDate && (
               <Text style={styles.description}>
-                {APP_STRINGS.RequestScreen.update} {request.updatedDate}
+                {APP_STRINGS.RequestScreen.update}{' '}
+                {formatDate(request.updatedDate)}
               </Text>
             )}
           </View>
@@ -150,50 +161,49 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
           <View style={styles.bottomPadding} />
         </ScrollView>
 
-      {(role === 'admin' && ( 
-        <View style={styles.footer}>
-          <View style={styles.buttonRow}>
+        {role === 'admin' && (
+          <View style={styles.footer}>
+            <View style={styles.buttonRow}>
+              {request.status === RequestStatus.PENDING && (
+                <>
+                  <View style={styles.buttonFlex}>
+                    <AppButton
+                      title={APP_STRINGS.RequestScreen.update}
+                      disabled={!canUpdate}
+                      onPress={handleUpdate}
+                    />
+                  </View>
 
-        {request.status === RequestStatus.PENDING && ( 
-          <>
-            <View style={styles.buttonFlex}>
-              <AppButton
-                title={APP_STRINGS.RequestScreen.update}
-                disabled={!canUpdate}
-                onPress={handleUpdate}
-              />
-            </View>
-          
-            <View style={styles.buttonFlex}>
-              <AppButton
-                title={APP_STRINGS.RequestScreen.withdraw}
-                disabled={!canWithdraw}
-                onPress={handleWithdraw}
-              />
-            </View>
-            </>
-          )}
+                  <View style={styles.buttonFlex}>
+                    <AppButton
+                      title={APP_STRINGS.RequestScreen.withdraw}
+                      disabled={!canWithdraw}
+                      onPress={handleWithdraw}
+                    />
+                  </View>
+                </>
+              )}
 
-      {request.status === RequestStatus.APPROVED && (
-        <View style={styles.buttonFlex}>
-          <AppButton
-            title={APP_STRINGS.RequestScreen.createEvent}
-            disabled={!canCreateEvent}
-            onPress={handleCreateEvent}
-          />
-        </View>
-      )}
+              {request.status === RequestStatus.APPROVED && (
+                <View style={styles.buttonFlex}>
+                  <AppButton
+                    title={APP_STRINGS.RequestScreen.createEvent}
+                    disabled={!canCreateEvent}
+                    onPress={handleCreateEvent}
+                  />
+                </View>
+              )}
+            </View>
           </View>
-        </View>
-      ))}
+        )}
 
-        {(role === 'operations' && request.status === RequestStatus.PENDING) && (
+        {role === 'operations' && request.status === RequestStatus.PENDING && (
           <View style={styles.footer}>
             <View style={styles.buttonRow}>
               <View style={styles.buttonFlex}>
                 <AppButton
                   title="Approved"
-                  disabled={!canApproved}
+                  disabled={!canApprove}
                   onPress={() => openRemarksModal('Approved')}
                 />
               </View>
@@ -201,7 +211,7 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
               <View style={styles.buttonFlex}>
                 <AppButton
                   title="Rejected"
-                  disabled={!canRejected}
+                  disabled={!canReject}
                   onPress={() => openRemarksModal('Rejected')}
                 />
               </View>
@@ -209,7 +219,6 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
           </View>
         )}
 
-        
         <Modal
           visible={remarksModalVisible}
           transparent

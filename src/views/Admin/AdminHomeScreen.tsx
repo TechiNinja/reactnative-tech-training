@@ -150,12 +150,6 @@ const AdminHomeScreen = () => {
               />
             </View>
 
-            <View style={styles.actionCardWrapper}>
-              <ActionCard
-                icon={<Settings size={20} color={colors.textSecondary} />}
-                title={APP_STRINGS.adminScreens.settings}
-              />
-            </View>
           </View>
         </View>
 

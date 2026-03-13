@@ -180,4 +180,39 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.usersIconBackground + '20',
     color: colors.usersIconBackground,
   },
+  modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  justifyContent: 'center',
+  padding: 16,
+},
+
+modalCard: {
+  backgroundColor: colors.cardBackgroud,
+  borderRadius: 12,
+  padding: 16,
+},
+
+modalTitle: {
+  color: colors.textPrimary,
+  fontSize: 16,
+  fontWeight: '600',
+},
+
+remarksInput: {
+  marginTop: 12,
+  minHeight: 90,
+  borderWidth: 1,
+  borderColor: colors.border,
+  borderRadius: 10,
+  padding: 12,
+  color: colors.textPrimary,
+  textAlignVertical: 'top',
+},
+
+modalButtonRow: {
+  flexDirection: 'row',
+  gap: 12,
+  marginTop: 14,
+},
 });

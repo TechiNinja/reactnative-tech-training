@@ -6,6 +6,7 @@ import AnalyticsCard from '../../components/AnalyticsCard/AnalyticsCard';
 import {
   Bell,
   Calendar,
+  ClipboardList,
   Clock,
   LogOut,
   MapPin,
@@ -22,12 +23,15 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useOperationHomeViewModel } from '../../viewModels/OperationHomeScreenViewModel';
 import { MOCK_MATCHES } from '../../constants/mockMatches';
+import { ActivityIndicator } from 'react-native';
 
 const OperationHomeScreen = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const {
+    loading,
+    analytics,
     notificationCount,
     onLogoutPress,
     onOpenRequests,
@@ -38,41 +42,51 @@ const OperationHomeScreen = () => {
     <ScreenWrapper scrollable={true}>
       <View style={styles.container}>
         <View style={styles.headerRow}>
-          <Text style={styles.greeting}>Operation</Text>
+          <Text style={styles.greeting}>
+            {APP_STRINGS.OperationScreen.Operation}
+          </Text>
 
           <TouchableOpacity onPress={onLogoutPress}>
             <LogOut size={22} color={colors.error} />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.analyticsGrid}>
-          {/* <View style={styles.row}>
-            <AnalyticsCard
-              icon={<Calendar size={24} color={colors.primary} />}
-              title="Total Requests"
-              data={totalRequests}
-            />
-            <AnalyticsCard
-              icon={<Users size={24} color={colors.usersIconBackground} />}
-              title="Pending Requests"
-              data={pendingRequests}
-            />
-          </View> */}
-
-          {/* <View style={styles.row}>
-            <AnalyticsCard
-              icon={<Trophy size={24} color={colors.participantBackgroud} />}
-              title="Total Events"
-              data={'--'}
-            />
-            <AnalyticsCard
-              icon={<TrendingUp size={24} color={colors.matchesIconBackgound} />}
-              title="Today Events"
-              data={'--'}
-            />
-          </View> */}
-        </View>
-
+        {loading ? (
+          <ActivityIndicator color={colors.primary} />
+        ) : (
+          analytics && (
+            <View style={styles.analyticsGrid}>
+              <View style={styles.row}>
+                <AnalyticsCard
+                  icon={<Calendar size={24} color={colors.primary} />}
+                  title={APP_STRINGS.adminScreens.totalRequest}
+                  data={analytics.totalRequests}
+                />
+                <AnalyticsCard
+                  icon={<Users size={24} color={colors.usersIconBackground} />}
+                  title={APP_STRINGS.adminScreens.pendingRequest}
+                  data={analytics.pendingRequests}
+                />
+              </View>
+              <View style={styles.row}>
+                <AnalyticsCard
+                  icon={
+                    <Trophy size={24} color={colors.participantBackgroud} />
+                  }
+                  title={APP_STRINGS.adminScreens.totalEvents}
+                  data={analytics.totalEvents}
+                />
+                <AnalyticsCard
+                  icon={
+                    <TrendingUp size={24} color={colors.matchesIconBackgound} />
+                  }
+                  title={APP_STRINGS.adminScreens.matchesToday}
+                  data={analytics.matchesToday}
+                />
+              </View>
+            </View>
+          )
+        )}
         <View>
           <Text style={styles.heading}>
             {APP_STRINGS.adminScreens.quickActions}
@@ -81,7 +95,12 @@ const OperationHomeScreen = () => {
           <View style={styles.actionCardContainer}>
             <View style={styles.actionCardWrapper}>
               <ActionCard
-                icon={<Bell size={20} color={colors.participantBackgroud} />}
+                icon={
+                  <ClipboardList
+                    size={20}
+                    color={colors.participantBackgroud}
+                  />
+                }
                 title="Requests"
                 onPress={onOpenRequests}
               />
@@ -94,25 +113,10 @@ const OperationHomeScreen = () => {
                     <Bell size={20} color={colors.primary} />
                     {notificationCount > 0 ? (
                       <View
-                        style={{
-                          position: 'absolute',
-                          top: -8,
-                          right: -10,
-                          minWidth: 18,
-                          height: 18,
-                          borderRadius: 9,
-                          backgroundColor: 'red',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          paddingHorizontal: 4,
-                        }}
+                        style={styles.badgeStyle}
                       >
                         <Text
-                          style={{
-                            color: 'white',
-                            fontSize: 10,
-                            fontWeight: '700',
-                          }}
+                          style={styles.badgeCount}
                         >
                           {notificationCount > 99 ? '99+' : notificationCount}
                         </Text>
@@ -122,13 +126,6 @@ const OperationHomeScreen = () => {
                 }
                 title={APP_STRINGS.adminScreens.bell}
                 onPress={onOpenNotifications}
-              />
-            </View>
-
-            <View style={styles.actionCardWrapper}>
-              <ActionCard
-                icon={<Settings size={20} color={colors.primary} />}
-                title={APP_STRINGS.adminScreens.settings}
               />
             </View>
           </View>
