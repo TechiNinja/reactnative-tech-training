@@ -6,6 +6,7 @@ export enum EventStatus {
   CANCELLED = 'CANCELLED',
 }
 
+
 export enum CategoryStatus {
   ACTIVE = 'ACTIVE',
   ABANDONED = 'ABANDONED',
@@ -87,7 +88,7 @@ export interface Event {
   venue: string;
 
   status: EventStatus;
-  format: '1v1' | '2v2';
+  formats: [FormatType.Singles | FormatType.Doubles];
 
   registeredTeams: number;
   totalTeams: number;
@@ -109,3 +110,4 @@ export interface Event {
 
   abandonedCategories?: string[];
 }
+

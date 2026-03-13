@@ -28,7 +28,7 @@ const AdminHomeScreen = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const { onLogoutPress, onAddEvent, onAddUser } =
+  const { onLogoutPress, onAddEvent, onAddUser, onRaiseRequest } =
     useAdminHomeViewModel(navigation);
 
   return (
@@ -81,11 +81,12 @@ const AdminHomeScreen = () => {
           <View style={styles.actionCardContainer}>
             <View style={styles.actionCardWrapper}>
               <ActionCard
-                icon={<Plus size={20} color={colors.primary} />}
-                title={APP_STRINGS.adminScreens.addEvent}
-                onPress={onAddEvent}
+                icon={<Plus size={20} color={colors.participantBackgroud} />}
+                title={APP_STRINGS.adminScreens.raiseEventRequest}
+                onPress={onRaiseRequest}
               />
             </View>
+
             <View style={styles.actionCardWrapper}>
               <ActionCard
                 icon={<UserPlus size={20} color={colors.usersIconBackground} />}
@@ -93,9 +94,10 @@ const AdminHomeScreen = () => {
                 onPress={onAddUser}
               />
             </View>
+
             <View style={styles.actionCardWrapper}>
               <ActionCard
-                icon={<Settings size={20} color={colors.textSecondary} />}
+                icon={<Settings size={20} color={colors.primary} />}
                 title={APP_STRINGS.adminScreens.settings}
               />
             </View>

@@ -6,7 +6,7 @@ import {
   StoredUser,
 } from '../utils/authStorage';
 import { Alert } from 'react-native';
-import { API_ENDPOINTS } from '../config/api';
+import { API_ENDPOINTS, API_BASE_URL } from '../config/api';
 import { UserRoleType } from '../models/User';
 import { APP_STRINGS } from '../constants/AppStrings';
 
@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     password: string,
   ) => {
     try {
-      const res = await fetch(API_ENDPOINTS.AUTH.REGISTER, {
+      const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.REGISTER}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fullName, email, password }),
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (email: string, password: string) => {
     try {
-      const res = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
+      const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.LOGIN}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

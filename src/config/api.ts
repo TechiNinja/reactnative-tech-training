@@ -6,8 +6,8 @@ export const API_BASE_URL = `http://${HOST}:5000/api`;
 
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
+    LOGIN: '/Auth/login',
+    REGISTER: '/Auth/register',
   },
   USERS: '/users',
   ROLES: '/roles',

@@ -1,18 +1,18 @@
 import { Text, TouchableOpacity, View } from 'react-native';
-import { EventResponse } from '../../models/EventResponse';
-import { styles } from './EventCardStyles';
+import { styles } from '../EventCard/EventCardStyles'; 
 import { colors } from '../../theme/colors';
 import { Calendar, MapPin } from 'lucide-react-native';
-import { RoleType } from '../../constants/Roles';
 import { useState } from 'react';
+import { EventRequestResponse } from '../../models/EventRequest';
+import { RoleType } from '../../constants/Roles';
 
-type EventCardProps = {
-  event: EventResponse;
+type EventRequestCardProps = {
+  request: EventRequestResponse;
   role: RoleType;
   onPress: () => void;
 };
 
-const EventCard = ({ event, onPress }: EventCardProps) => {
+const EventRequestCard = ({ request, onPress }: EventRequestCardProps) => {
   const [pressed, setPressed] = useState(false);
 
   return (
@@ -24,22 +24,29 @@ const EventCard = ({ event, onPress }: EventCardProps) => {
     >
       <View style={styles.container}>
         <View style={styles.status}>
-          <Text style={styles.sportText}>{event.sportName}</Text>
-          <Text style={[styles.statusText, styles[`status_${event.status.toUpperCase()}` as keyof typeof styles]]}>
-            {event.status}
-          </Text>
+         
+          <Text style={styles.sportText}>{request.sportsName}</Text>
+
+          <Text style={styles.statusText}>{request.status}</Text>
         </View>
+
         <View style={styles.left}>
           <View style={styles.info}>
-            <Text style={styles.title}>{event.name}</Text>
+        
+            <Text style={styles.title}>{request.eventName}</Text>
+
             <View style={styles.details}>
               <Calendar color={colors.textSecondary} />
-              <Text style={styles.detailsText}>{String(event.startDate)}</Text>
+              <Text style={styles.detailsText}>
+                {request.startDate} - {request.endDate}
+              </Text>
             </View>
+
             <View style={styles.details}>
               <MapPin color={colors.textSecondary} />
-              <Text style={styles.detailsText}>{event.eventVenue}</Text>
+              <Text style={styles.detailsText}>{request.requestedVenue}</Text>
             </View>
+
           </View>
         </View>
       </View>
@@ -47,4 +54,4 @@ const EventCard = ({ event, onPress }: EventCardProps) => {
   );
 };
 
-export default EventCard;
+export default EventRequestCard;

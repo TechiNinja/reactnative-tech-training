@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import { RoleType } from '../../constants/Roles';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import EventCard from '../../components/EventCard/EventCard';
@@ -11,15 +11,15 @@ import { RootStackParamList } from '../../navigation/AppNavigator';
 import AppButton from '../../components/AppButton/AppButton';
 import { APP_STRINGS } from '../../constants/AppStrings';
 import { useEventsListViewModel } from '../../viewModels/EventListScreenViewModel';
+import { colors } from '../../theme/colors';
+import { EventResponse } from '../../models/EventResponse';
 
 type EventListScreenProps = {
   role: RoleType;
 };
 
 const EventsListScreen = ({ role }: EventListScreenProps) => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const viewModel = useEventsListViewModel(navigation, role);
 
   return (
@@ -28,14 +28,11 @@ const EventsListScreen = ({ role }: EventListScreenProps) => {
         <View style={styles.headerContainer}>
           <Text
             style={
-              role === 'participant'
-                ? styles.headingParticipant
-                : styles.heading
+              role === 'participant' ? styles.headingParticipant : styles.heading
             }
           >
             {APP_STRINGS.eventScreen.allEvents}
           </Text>
-
           {(role === 'admin' || role === 'organizer') && (
             <AppButton
               title={APP_STRINGS.eventScreen.createEvent}
@@ -49,15 +46,21 @@ const EventsListScreen = ({ role }: EventListScreenProps) => {
           onChange={viewModel.setActiveTab}
         />
 
-        {viewModel.filteredEvents.length === 0 ? (
+        {viewModel.loading ? (
+          <ActivityIndicator
+            size="large"
+            color={colors.primary}
+            style={{ marginTop: 40 }}
+          />
+        ) : viewModel.filteredEvents.length === 0 ? (
           <Text style={styles.noEventStyle}>
             {APP_STRINGS.eventScreen.noEventFound}
           </Text>
         ) : (
           <FlatList
             data={viewModel.filteredEvents}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
+            keyExtractor={(item: EventResponse) => String(item.id)}
+            renderItem={({ item }: { item: EventResponse }) => (
               <EventCard
                 event={item}
                 role={role}

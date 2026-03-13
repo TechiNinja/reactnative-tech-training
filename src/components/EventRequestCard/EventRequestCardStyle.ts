@@ -117,10 +117,6 @@ export const styles = StyleSheet.create({
   },
 
   statusText: {
-    backgroundColor : colors.status,
-    borderRadius : 12,
-    padding : 2,
-    paddingHorizontal : 5,
     fontSize: fontsSize.small,
     fontWeight: 'bold',
   },

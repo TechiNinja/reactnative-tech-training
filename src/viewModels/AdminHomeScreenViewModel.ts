@@ -9,7 +9,6 @@ export const useAdminHomeViewModel = (
 
   const onLogoutPress = async () => {
     await logout();
-
     navigation.reset({
       index: 0,
       routes: [{ name: 'Auth', params: { screen: 'Login' } }],
@@ -24,9 +23,14 @@ export const useAdminHomeViewModel = (
     navigation.navigate('UserForm', { mode: 'create' });
   };
 
+  const onRaiseRequest = () => {
+    navigation.navigate('EventRequestForm', { mode: 'create' });
+  };
+
   return {
     onLogoutPress,
     onAddEvent,
     onAddUser,
+    onRaiseRequest,
   };
 };

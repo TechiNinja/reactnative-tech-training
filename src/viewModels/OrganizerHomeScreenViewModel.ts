@@ -10,7 +10,6 @@ export const useOrganizerHomeViewModel = (
 
   const onLogout = async () => {
     await logout();
-
     navigation.reset({
       index: 0,
       routes: [{ name: 'Auth', params: { screen: 'Login' } }],

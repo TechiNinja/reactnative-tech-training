@@ -26,7 +26,7 @@ export const useEventRegistrationViewModel = (
   const [selectedFormats, setSelectedFormats] = useState<FormatType[]>([]);
 
   const availableFormats: FormatType[] =
-    event?.format === '2v2'
+    event?.formats?.includes(FormatType.Doubles)
       ? [FormatType.Singles, FormatType.Doubles]
       : [FormatType.Singles];
 

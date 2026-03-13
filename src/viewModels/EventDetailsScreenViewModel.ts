@@ -1,12 +1,11 @@
-import { useMemo } from 'react';
-import { Alert } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { EventStatus, FormatType, GenderType } from '../models/Event';
-import { useEventStore } from '../store/EventStore';
+import { FormatType, GenderType } from '../models/Event';
 import { useAuthStore } from '../store/AuthStore';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { authFetch } from '../utils/authFetch';
+import { EventResponse, EventCategoryResponse } from '../models/EventResponse';
 
 type EventDetailsRouteProp = RouteProp<RootStackParamList, 'EventDetails'>;
 
@@ -20,193 +19,171 @@ type Category = {
   teamCount: number;
   slotsFull: boolean;
   isAbandoned: boolean;
+  eventCategoryId: number;
+};
+
+const mapGender = (gender: string): GenderType => {
+  if (gender === 'Female') return GenderType.Female;
+  if (gender === 'Mixed') return GenderType.Mixed;
+  return GenderType.Male;
+};
+
+const mapFormat = (format: string): FormatType => {
+  if (format === 'Doubles') return FormatType.Doubles;
+  return FormatType.Singles;
+};
+
+const mapCategory = (
+  cat: EventCategoryResponse,
+  maxParticipants: number,
+): Category => {
+  const gender = mapGender(cat.gender);
+  const format = mapFormat(cat.format);
+  const genderLabel =
+    gender === GenderType.Female
+      ? "Women's"
+      : gender === GenderType.Mixed
+      ? 'Mixed'
+      : "Men's";
+  const isAbandoned = cat.status === 'Abandoned';
+
+  return {
+    id: String(cat.id),
+    title: `${genderLabel} ${format}`,
+    gender,
+    format,
+    participantCount: 0,
+    totalParticipants: maxParticipants,
+    teamCount: 0,
+    slotsFull: false,
+    isAbandoned,
+    eventCategoryId: cat.id,
+  };
 };
 
 export const useEventDetailsViewModel = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<EventDetailsRouteProp>();
-  const { eventId } = route.params;
-
-  const { events, deleteEvent } = useEventStore();
+  const { eventId, role } = route.params;
   const { user } = useAuthStore();
 
-  const role = user?.role;
+  const [event, setEvent] = useState<EventResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showAssignOrganizer, setShowAssignOrganizer] = useState(false);
 
-  const event = useMemo(
-    () => events.find((event) => event.id === eventId) ?? null,
-    [events, eventId],
+  const fetchEvent = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await authFetch<EventResponse[]>(`/events?id=${eventId}`);
+      if (data && data.length > 0) {
+        setEvent(data[0]);
+      } else {
+        setError('Event not found');
+      }
+    } catch (e: any) {
+      setError(e?.message ?? 'Failed to load event');
+    } finally {
+      setLoading(false);
+    }
+  }, [eventId]);
+
+  useEffect(() => { 
+    fetchEvent();
+  }, [fetchEvent]);
+
+  const categories: Category[] = (event?.categories ?? []).map((cat) =>
+    mapCategory(cat, event?.maxParticipantsCount ?? 0),
   );
 
-  const totalParticipantsPerCategory = event?.totalTeams ?? 0;
-  const isChess = event?.sport.toLowerCase() === 'chess';
-
-  const categories: Category[] = useMemo(() => {
-    if (!event) return [];
-
-    const abandonedCategories = event.abandonedCategories ?? [];
-
-    const cats: Category[] = [];
-    const genders: GenderType[] = [GenderType.Male, GenderType.Female];
-    const formats: FormatType[] =
-      event.format === '1v1'
-        ? [FormatType.Singles]
-        : event.format === '2v2'
-        ? [FormatType.Doubles]
-        : [FormatType.Singles, FormatType.Doubles];
-
-    if (isChess && formats.includes(FormatType.Singles)) {
-      const allSinglesParticipants = event.registrations.filter((player) =>
-        player.formats?.includes(FormatType.Singles),
-      );
-
-      const mixedTeams = event.teams.filter(
-        (team) =>
-          team.format === FormatType.Singles &&
-          team.gender === GenderType.Mixed,
-      );
-
-      const slotsFull =
-        allSinglesParticipants.length >= totalParticipantsPerCategory * 2;
-
-      const isAbandoned = abandonedCategories.includes('Mixed-Singles');
-
-      cats.push({
-        id: 'Mixed-Singles',
-        title: 'Mixed Singles',
-        gender: GenderType.Mixed,
-        format: FormatType.Singles,
-        participantCount: allSinglesParticipants.length,
-        totalParticipants: totalParticipantsPerCategory * 2,
-        teamCount: mixedTeams.length,
-        slotsFull,
-        isAbandoned,
-      });
-    } else {
-      genders.forEach((gender) => {
-        formats.forEach((format) => {
-          const participants = event.registrations.filter(
-            (player) =>
-              player.gender === gender && player.formats?.includes(format),
-          );
-
-          const teams = event.teams.filter(
-            (team) => team.gender === gender && team.format === format,
-          );
-
-          const slotsFull = participants.length >= totalParticipantsPerCategory;
-
-          const isAbandoned = abandonedCategories.includes(
-            `${gender}-${format}`,
-          );
-
-          const genderLabel = gender === GenderType.Male ? "Men's" : "Women's";
-
-          cats.push({
-            id: `${gender}-${format}`,
-            title: `${genderLabel} ${format}`,
-            gender,
-            format,
-            participantCount: participants.length,
-            totalParticipants: totalParticipantsPerCategory,
-            teamCount: teams.length,
-            slotsFull,
-            isAbandoned,
-          });
-        });
-      });
-    }
-
-    return cats;
-  }, [event, totalParticipantsPerCategory, isChess]);
-
-  const isAdminOrOrganizer = role === 'admin' || role === 'organizer';
-  const isOwner = event?.createdBy === user?.email;
-
   const hasEventStarted =
-    event?.status === EventStatus.LIVE ||
-    event?.status === EventStatus.COMPLETED;
+    event?.status === 'Live' || event?.status === 'Completed';
 
   const canEditOrDelete =
-    (role === 'admin' || (role === 'organizer' && isOwner)) && !hasEventStarted;
+    (role === 'admin' || role === 'organizer') &&
+    !hasEventStarted &&
+    event?.status !== 'Cancelled';
 
-  const areAllSlotsFull =
-    categories.length > 0 && categories.every((cat) => cat.slotsFull);
+  const canAssignOrganizer =
+    role === 'admin' &&
+    !hasEventStarted &&
+    event?.status !== 'Cancelled';
 
-  const canRegister =
-    role === 'participant' &&
-    event?.status === EventStatus.OPEN &&
-    !areAllSlotsFull;
+  const canPublish =
+    role === 'admin' &&
+    event?.status === 'Upcoming';
+
+  const canRegister = role === 'participant' && event?.status === 'Open';
 
   const getRegisterButtonText = () => {
-    if (areAllSlotsFull) return APP_STRINGS.eventScreen.slotsFull;
-    if (event?.status !== EventStatus.OPEN)
-      return APP_STRINGS.eventScreen.registrationClosed;
-    return APP_STRINGS.eventScreen.register;
+    if (event?.status !== 'Open') return 'Registration Closed';
+    return 'Register';
   };
 
   const handleCategoryPress = (category: Category) => {
     if (!event || !role) return;
-
     navigation.navigate('CategoryDetails', {
-      eventId: event.id,
+      eventId: String(event.id),
       gender: category.gender,
       format: category.format,
       role,
+      eventCategoryId: category.eventCategoryId,
     });
   };
 
   const handleEditEvent = () => {
     if (!event) return;
-
-    navigation.navigate('EventForm', {
-      mode: 'edit',
-      event,
-    });
+    navigation.navigate('EventForm', { mode: 'edit', event });
   };
 
-  const handleDeleteEvent = () => {
-    if (!event) return;
-
-    Alert.alert(
-      APP_STRINGS.eventScreen.deleteEvent,
-      APP_STRINGS.eventScreen.deleteEventConfirmation,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: APP_STRINGS.eventScreen.delete,
-          style: 'destructive',
-          onPress: () => {
-            deleteEvent(event.id);
-            navigation.goBack();
-          },
-        },
-      ],
-    );
-  };
-
-  const handleBack = () => {
-    navigation.goBack();
-  };
+  const handleBack = () => navigation.goBack();
 
   const handleRegister = () => {
     if (!event) return;
+    navigation.navigate('EventRegister', { eventId: String(event.id) });
+  };
 
-    navigation.navigate('EventRegister', { eventId: event.id });
+  const handleOpenAssignOrganizer = () => setShowAssignOrganizer(true);
+  const handleCloseAssignOrganizer = () => setShowAssignOrganizer(false);
+  const handleAssignOrganizerSuccess = () => {
+    setShowAssignOrganizer(false);
+    fetchEvent();
+  };
+
+  const handlePublish = async () => {
+    if (!event) return;
+    try {
+      await authFetch(`/events/${event.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ action: 'publish' }),
+      });
+      fetchEvent();
+    } catch (e: any) {
+      console.error('Publish failed:', e?.message);
+    }
   };
 
   return {
     event,
+    loading,
+    error,
     role,
     categories,
-    isAdminOrOrganizer,
     canEditOrDelete,
+    canAssignOrganizer,
+    canPublish,
     canRegister,
+    showAssignOrganizer,
     getRegisterButtonText,
     handleCategoryPress,
     handleEditEvent,
-    handleDeleteEvent,
     handleBack,
     handleRegister,
+    handleOpenAssignOrganizer,
+    handleCloseAssignOrganizer,
+    handleAssignOrganizerSuccess,
+    handlePublish,
   };
 };

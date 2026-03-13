@@ -4,10 +4,11 @@ import {
   GenderType,
   FormatType,
   Fixture,
+  Registration,
+  Team,
   MatchStatus,
 } from '../models/Event';
 import { MOCK_EVENTS } from '../constants/mockEvents';
-import { EVENT_FORMAT_MAP } from '../constants/eventFormatMap';
 
 type EventContextType = {
   events: Event[];
@@ -22,6 +23,7 @@ type EventContextType = {
     formats: FormatType[],
   ) => void;
 
+  createTeams: (eventId: string) => void;
   createFixtures: (eventId: string) => void;
   updateFixtureScore: (
     eventId: string,
@@ -96,6 +98,42 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({
             },
           ],
           registeredTeams: event.registeredTeams + 1,
+        };
+      }),
+    );
+  };
+
+  const createTeams = (eventId: string) => {
+    setEvents((prev) =>
+      prev.map((event) => {
+        if (event.id !== eventId) return event;
+
+        const teams: Team[] = [];
+        let teamIndex = 1;
+        const teamFormat = event.formats[0];
+
+        const buildTeams = (players: Registration[]) => {
+          for (let index = 0; index + 1 < players.length; index += 2) {
+            if (teams.length >= event.totalTeams) break;
+
+            teams.push({
+              id: teamIndex.toString(),
+              name: `Team ${teamIndex}`,
+              players: players.slice(index, index + 2),
+              gender: players[index].gender,
+              format: teamFormat,
+            });
+
+            teamIndex++;
+          }
+        };
+
+        buildTeams(event.registrations);
+
+        return {
+          ...event,
+          teams,
+          teamsCreated: true,
         };
       }),
     );
@@ -244,7 +282,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({
 
         let fixtures: Fixture[] = [];
 
-        const eventFormat = EVENT_FORMAT_MAP[event.format];
+        const eventFormat = event.formats[0];
 
         if (eventFormat === FormatType.Singles) {
           const males = event.registrations
@@ -308,6 +346,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({
         updateEvent,
         deleteEvent,
         registerParticipant,
+        createTeams,
         createFixtures,
         updateFixtureScore,
         updateFixtureStatus,

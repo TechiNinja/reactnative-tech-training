@@ -1,33 +1,44 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { Event, EventStatusTab } from '../models/Event';
-import { useEventStore } from '../store/EventStore';
+import { EventStatusTab } from '../models/Event';
 import { RoleType } from '../constants/Roles';
+import { authFetch } from '../utils/authFetch';
+import { EventResponse } from '../models/EventResponse';
 
 export const useEventsListViewModel = (
   navigation: NativeStackNavigationProp<RootStackParamList>,
   role: RoleType,
 ) => {
-  const { events } = useEventStore();
-
-  const [activeTab, setActiveTab] = useState<EventStatusTab>(
-    EventStatusTab.ALL,
-  );
-
+  const [events, setEvents] = useState<EventResponse[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<EventStatusTab>(EventStatusTab.ALL);
   const tabBarHeight = useBottomTabBarHeight();
 
-  const filteredEvents = useMemo(() => {
-    if (activeTab === EventStatusTab.ALL) return events;
-    return events.filter(
-      (event) => event.status === (activeTab as unknown as Event['status']),
-    );
-  }, [activeTab, events]);
+  const fetchEvents = useCallback(async () => {
+    try {
+      setLoading(true);
+      const status = activeTab === EventStatusTab.ALL ? undefined : activeTab;
+      const url = status ? `/events?status=${status}` : '/events';
+      const data = await authFetch<EventResponse[]>(url);
+      setEvents(data ?? []);
+    } catch {
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab]);
 
-  const onEventPress = (event: Event) => {
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+
+  const filteredEvents = useMemo(() => events, [events]);
+
+  const onEventPress = (event: EventResponse) => {
     navigation.navigate('EventDetails', {
-      eventId: event.id,
+      eventId: String(event.id),
       role,
     });
   };
@@ -40,6 +51,7 @@ export const useEventsListViewModel = (
     activeTab,
     setActiveTab,
     filteredEvents,
+    loading,
     tabBarHeight,
     onEventPress,
     onCreateEvent,
