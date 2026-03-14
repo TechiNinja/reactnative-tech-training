@@ -88,7 +88,7 @@ export interface Event {
   venue: string;
 
   status: EventStatus;
-  formats: [FormatType.Singles | FormatType.Doubles];
+  format: FormatType[];
 
   registeredTeams: number;
   totalTeams: number;

@@ -1,5 +1,3 @@
-export type RoleType = 'admin' | 'organizer' | 'participant';
-
 export const roles = [
   {
     key: 'admin',

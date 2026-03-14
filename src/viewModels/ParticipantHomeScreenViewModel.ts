@@ -6,9 +6,11 @@ import {
   getMyTeams,
   ApiScheduleRaw,
 } from '../services/participantService';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Alert } from 'react-native';
+import { APP_STRINGS } from '../constants/AppStrings';
 
 type ApiTeam = {
   teamId: number;
@@ -27,9 +29,9 @@ type ApiSchedule = {
   scoreB: number;
 };
 
-export const useParticipantHomeViewModel = (
-  navigation: NativeStackNavigationProp<RootStackParamList>,
-) => {
+export const useParticipantHomeViewModel = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, logout } = useAuthStore();
 
   const [myTeams, setMyTeams] = useState<ApiTeam[]>([]);
@@ -41,15 +43,17 @@ export const useParticipantHomeViewModel = (
   useEffect(() => {
     if (!user?.id) return;
 
-    const resolveName = (id: string) => {
-      const participant = myTeams.find((team) => team.teamId.toString() === id);
-      return participant ? participant.teamName : `Player ${id}`;
-    };
-
     const loadData = async () => {
       try {
         const teams = await getMyTeams(user.id);
         setMyTeams(teams);
+
+        const resolveName = (id: string) => {
+          const participant = teams.find(
+            (team) => team.teamId.toString() === id,
+          );
+          return participant ? participant.teamName : `Player ${id}`;
+        };
 
         const events = await getMyEvents(user.id);
         setMyEventsCount(events.length);
@@ -82,7 +86,7 @@ export const useParticipantHomeViewModel = (
         setMatchesPlayedCount(played);
         setWinsCount(wins);
       } catch {
-        Alert.alert('Error', 'Failed to load participant data');
+        Alert.alert('Error', APP_STRINGS.participantScreens.failedToLoadData);
       }
     };
 

@@ -1,20 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { EventStatusTab } from '../models/Event';
-import { RoleType } from '../constants/Roles';
-import { authFetch } from '../utils/authFetch';
+import { UserRoleType } from '../models/User';
 import { EventResponse } from '../models/EventResponse';
+import { authFetch } from '../utils/authFetch';
 
-export const useEventsListViewModel = (
-  navigation: NativeStackNavigationProp<RootStackParamList>,
-  role: RoleType,
-) => {
+export const useEventsListViewModel = (role: UserRoleType) => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const tabBarHeight = useBottomTabBarHeight();
+
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<EventStatusTab>(EventStatusTab.ALL);
-  const tabBarHeight = useBottomTabBarHeight();
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -34,7 +34,10 @@ export const useEventsListViewModel = (
     fetchEvents();
   }, [fetchEvents]);
 
-  const filteredEvents = useMemo(() => events, [events]);
+  const filteredEvents = useMemo(() => {
+    if (activeTab === EventStatusTab.ALL) return events;
+    return events.filter((e) => e.status === activeTab);
+  }, [events, activeTab]);
 
   const onEventPress = (event: EventResponse) => {
     navigation.navigate('EventDetails', {

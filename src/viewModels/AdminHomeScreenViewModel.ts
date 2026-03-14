@@ -1,11 +1,21 @@
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/AuthStore';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { AnalyticsService, AdminAnalytics } from '../services/analyticsService';
 
-export const useAdminHomeViewModel = (
-  navigation: NativeStackNavigationProp<RootStackParamList>,
-) => {
+export const useAdminHomeViewModel = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { logout } = useAuthStore();
+  const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    AnalyticsService.getAdminAnalytics()
+      .then(setAnalytics)
+      .finally(() => setLoading(false));
+  }, []);
 
   const onLogoutPress = async () => {
     await logout();
@@ -32,5 +42,7 @@ export const useAdminHomeViewModel = (
     onAddEvent,
     onAddUser,
     onRaiseRequest,
+    analytics,
+    loading,
   };
 };

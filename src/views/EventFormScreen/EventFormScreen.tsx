@@ -14,15 +14,14 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 type EventFormScreenProps = NativeStackScreenProps<RootStackParamList, 'EventForm'>;
 
-const EventFormScreen = ({ route, navigation }: EventFormScreenProps) => {
+const EventFormScreen = ({ route }: EventFormScreenProps) => {
   const { mode, eventRequest, event } = route.params;
 
-  const viewModel = useEventFormViewModel({ mode, eventRequest, event, navigation });
+  const viewModel = useEventFormViewModel({ mode, eventRequest, event });
 
   return (
     <ScreenWrapper scrollable withBottomSafeArea>
       <View style={styles.container}>
-
         <View style={styles.headerRow}>
           <Pressable style={styles.iconContainer} onPress={viewModel.onBack}>
             <ArrowLeft size={25} color={colors.textPrimary} />
@@ -191,7 +190,6 @@ const EventFormScreen = ({ route, navigation }: EventFormScreenProps) => {
             disabled={viewModel.submitting}
           />
         )}
-
       </View>
     </ScreenWrapper>
   );

@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { isValidEmail, isValidPassword } from '../utils/validation';
 import { validationMessages } from '../constants/validationMessages';
 import { useAuthStore } from '../store/AuthStore';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
-export const useLoginViewModel = (
-  navigation: NativeStackNavigationProp<RootStackParamList>,
-) => {
-  const { login, user } = useAuthStore();
+export const useLoginViewModel = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { login } = useAuthStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -48,16 +49,14 @@ export const useLoginViewModel = (
 
     if (!isEmailValid || !isPasswordValid) return;
 
-    const success = await login(email, password);
+    const loggedInUser = await login(email, password);
 
-    if (!success) {
+    if (!loggedInUser) {
       setPasswordError(validationMessages.INVALID_CREDENTIALS);
       return;
     }
 
-    if (!user) return;
-
-    switch (user.role) {
+    switch (loggedInUser.role) {
       case 'admin':
         navigation.reset({
           index: 0,

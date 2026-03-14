@@ -79,3 +79,5 @@ ios/Pods
 android/build
 android/.gradle
 dist
+
+.vscode/

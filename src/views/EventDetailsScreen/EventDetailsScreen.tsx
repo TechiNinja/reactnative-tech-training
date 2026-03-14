@@ -26,6 +26,7 @@ import { styles } from './EventDetailsScreenStyles';
 import { APP_STRINGS } from '../../constants/AppStrings';
 import { useEventDetailsViewModel } from '../../viewModels/EventDetailsScreenViewModel';
 import { useAssignOrganizerViewModel } from '../../viewModels/AssignOrganizerViewModel';
+import { FormatType } from '../../models/Event';
 
 const EventDetailsScreen = () => {
   const {
@@ -123,7 +124,8 @@ const EventDetailsScreen = () => {
             <View style={styles.infoRow}>
               <Trophy size={18} color={colors.textSecondary} />
               <Text style={styles.infoText}>
-                {APP_STRINGS.eventScreen.maxParticipants}: {event.maxParticipantsCount}
+                Formats:{' '}
+                {[...new Set(event.categories?.map((c) => c.format) ?? [])].join(', ')}
               </Text>
             </View>
 
@@ -152,7 +154,6 @@ const EventDetailsScreen = () => {
             <Text style={styles.sectionTitle}>
               {APP_STRINGS.eventScreen.categories}
             </Text>
-
             {categories.length > 0 ? (
               categories.map((category) => (
                 <CategoryCard
@@ -187,7 +188,6 @@ const EventDetailsScreen = () => {
               onPress={handleRegister}
             />
           )}
-
           {(canEditOrDelete || canPublish) && (
             <View style={styles.adminActionRow}>
               {canEditOrDelete && (
@@ -257,19 +257,14 @@ const EventDetailsScreen = () => {
                     return (
                       <TouchableOpacity
                         key={org.id}
-                        style={[
-                          styles.organizerItem,
-                          isSelected && styles.organizerItemSelected,
-                        ]}
+                        style={[styles.organizerItem, isSelected && styles.organizerItemSelected]}
                         onPress={() => setSelectedOrganizerId(org.id)}
                       >
                         <View style={styles.organizerInfo}>
                           <Text style={styles.organizerName}>{org.fullName}</Text>
                           <Text style={styles.organizerEmail}>{org.email}</Text>
                         </View>
-                        {isSelected && (
-                          <Check size={20} color={colors.primary} />
-                        )}
+                        {isSelected && <Check size={20} color={colors.primary} />}
                       </TouchableOpacity>
                     );
                   })}

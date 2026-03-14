@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import { APP_STRINGS } from '../../constants/AppStrings';
 import AnalyticsCard from '../../components/AnalyticsCard/AnalyticsCard';
@@ -17,16 +17,10 @@ import ActionCard from '../../components/ActionsCard/ActionCard';
 import LiveMatchesCard from '../../components/MatchesCard/LiveMatchesCard';
 import { styles } from './OrganizerHomeScreenStyles';
 import UpcomingMatchesCard from '../../components/MatchesCard/UpcomingMatchesCard';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useOrganizerHomeViewModel } from '../../viewModels/OrganizerHomeScreenViewModel';
 
 const OrganizerHomeScreen = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-  const viewModel = useOrganizerHomeViewModel(navigation);
+  const viewModel = useOrganizerHomeViewModel();
 
   return (
     <ScreenWrapper scrollable={true}>
@@ -41,34 +35,45 @@ const OrganizerHomeScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.analyticsGrid}>
-          <View style={styles.row}>
-            <AnalyticsCard
-              icon={<Calendar size={24} color={colors.primary} />}
-              title={APP_STRINGS.organizerScreens.myEvents}
-              data={5}
-            />
-            <AnalyticsCard
-              icon={
-                <ClipboardList size={24} color={colors.matchesIconBackgound} />
-              }
-              title={APP_STRINGS.organizerScreens.pendingApprovals}
-              data={12}
-            />
-          </View>
-          <View style={styles.row}>
-            <AnalyticsCard
-              icon={<Users size={24} color={colors.usersIconBackground} />}
-              title={APP_STRINGS.organizerScreens.teamsRegistered}
-              data={32}
-            />
-            <AnalyticsCard
-              icon={<Trophy size={24} color={colors.participantBackgroud} />}
-              title={APP_STRINGS.organizerScreens.liveMatches}
-              data={2}
-            />
-          </View>
-        </View>
+        {viewModel.loading ? (
+          <ActivityIndicator color={colors.primary} />
+        ) : (
+          viewModel.analytics && (
+            <View style={styles.analyticsGrid}>
+              <View style={styles.row}>
+                <AnalyticsCard
+                  icon={<Calendar size={24} color={colors.primary} />}
+                  title={APP_STRINGS.organizerScreens.myEvents}
+                  data={viewModel.analytics.myEvents}
+                />
+                <AnalyticsCard
+                  icon={
+                    <ClipboardList
+                      size={24}
+                      color={colors.matchesIconBackgound}
+                    />
+                  }
+                  title={APP_STRINGS.organizerScreens.totalRegistrations}
+                  data={viewModel.analytics.totalRegistrations}
+                />
+              </View>
+              <View style={styles.row}>
+                <AnalyticsCard
+                  icon={<Users size={24} color={colors.usersIconBackground} />}
+                  title={APP_STRINGS.organizerScreens.teamsRegistered}
+                  data={viewModel.analytics.teamsRegistered}
+                />
+                <AnalyticsCard
+                  icon={
+                    <Trophy size={24} color={colors.participantBackgroud} />
+                  }
+                  title={APP_STRINGS.organizerScreens.liveMatches}
+                  data={viewModel.analytics.liveMatches}
+                />
+              </View>
+            </View>
+          )
+        )}
 
         <View>
           <Text style={styles.heading}>

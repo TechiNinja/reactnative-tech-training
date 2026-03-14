@@ -1,30 +1,34 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { OrganizerService } from '../services/organizerService';
+import {
+  ApiTeamResponse,
+  OrganizerService,
+} from '../services/organizerService';
 import { useEventStore } from '../store/EventStore';
 import { useAuthStore } from '../store/AuthStore';
 import { APP_STRINGS } from '../constants/AppStrings';
 import {
   EventStatus,
-  Fixture,
   FixtureTabType,
   FormatType,
   GenderType,
   MatchStatus,
   Team,
 } from '../models/Event';
+import { generateTeams } from '../utils/teamUtils';
+import { generateBracket, nextPowerOfTwo } from '../utils/fixtureUtils';
+
+const PARTICIPANTS_TAB = 'PARTICIPANTS';
+const TEAMS_TAB = 'TEAMS';
+const FIXTURES_TAB = 'FIXTURES';
 
 type CategoryDetailsRouteProp = RouteProp<
   RootStackParamList,
   'CategoryDetails'
 >;
-
-const nextPowerOfTwo = (n: number) => Math.pow(2, Math.ceil(Math.log2(n)));
-const generateFixtureId = () =>
-  `fix-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 export const useCategoryDetailsViewModel = () => {
   const navigation =
@@ -44,15 +48,13 @@ export const useCategoryDetailsViewModel = () => {
 
   const event = events.find((event) => event.id === eventId) ?? null;
 
-  const mainTabs = (() => {
+  const mainTabs = useMemo(() => {
     const tabs: string[] = [];
-    if (role !== 'participant') {
-      tabs.push('PARTICIPANTS');
-    }
-    if (format === FormatType.Doubles) tabs.push('TEAMS');
-    tabs.push('FIXTURES');
+    if (role !== 'participant') tabs.push(PARTICIPANTS_TAB);
+    if (format === FormatType.Doubles) tabs.push(TEAMS_TAB);
+    tabs.push(FIXTURES_TAB);
     return tabs;
-  })();
+  }, [role, format]);
 
   const [activeMainTab, setActiveMainTab] = useState(mainTabs[0]);
   const [activeFixtureTab, setActiveFixtureTab] = useState<FixtureTabType>(
@@ -68,7 +70,7 @@ export const useCategoryDetailsViewModel = () => {
 
   const isMixedCategory = gender === GenderType.Mixed;
 
-  const participants = (() => {
+  const participants = useMemo(() => {
     if (!event) return [];
     if (isMixedCategory) {
       return event.registrations.filter((player) =>
@@ -78,23 +80,23 @@ export const useCategoryDetailsViewModel = () => {
     return event.registrations.filter(
       (player) => player.gender === gender && player.formats?.includes(format),
     );
-  })();
+  }, [event, isMixedCategory, format, gender]);
 
-  const teams = (() => {
+  const teams = useMemo(() => {
     if (!event) return [];
     return event.teams.filter(
       (team) => team.gender === gender && team.format === format,
     );
-  })();
+  }, [event, gender, format]);
 
-  const filteredTeams = (() => {
+  const filteredTeams = useMemo(() => {
     if (!searchQuery.trim()) return teams;
     return teams.filter((team) =>
       team.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
-  })();
+  }, [teams, searchQuery]);
 
-  const fixtures = (() => {
+  const fixtures = useMemo(() => {
     if (!event) return [];
     if (isMixedCategory) {
       return event.fixtures.filter(
@@ -105,9 +107,9 @@ export const useCategoryDetailsViewModel = () => {
     return event.fixtures.filter(
       (fixture) => fixture.gender === gender && fixture.format === format,
     );
-  })();
+  }, [event, isMixedCategory, format, gender]);
 
-  const filteredFixtures = (() => {
+  const filteredFixtures = useMemo(() => {
     let result = fixtures;
     if (activeFixtureTab !== FixtureTabType.ALL) {
       result = result.filter(
@@ -124,7 +126,7 @@ export const useCategoryDetailsViewModel = () => {
       );
     }
     return result;
-  })();
+  }, [fixtures, activeFixtureTab, searchQuery]);
 
   const getRoundName = (round: number, totalCount: number) => {
     const totalRounds = Math.log2(nextPowerOfTwo(totalCount));
@@ -148,122 +150,21 @@ export const useCategoryDetailsViewModel = () => {
       ? participants.length >= 2
       : teams.length >= 2;
 
-  const generateBracket = (
-    names: string[],
-    bracketGender: GenderType,
-    bracketFormat: FormatType,
-  ): Fixture[] => {
-    const generatedFixtures: Fixture[] = [];
-    const teamList = [...names].sort(() => Math.random() - 0.5);
-    const targetSize = nextPowerOfTwo(teamList.length);
-    const totalRounds = Math.ceil(Math.log2(targetSize));
-
-    let bracketPosition = 0;
-    const round1MatchCount = targetSize / 2;
-
-    for (let index = 0; index < round1MatchCount; index++) {
-      const teamAIndex = index * 2;
-      const teamBIndex = index * 2 + 1;
-
-      const teamA = teamAIndex < teamList.length ? teamList[teamAIndex] : 'BYE';
-      const teamB = teamBIndex < teamList.length ? teamList[teamBIndex] : 'BYE';
-
-      if (teamA === 'BYE' && teamB === 'BYE') {
-        bracketPosition++;
-        continue;
-      }
-
-      generatedFixtures.push({
-        id: generateFixtureId(),
-        teamA,
-        teamB,
-        scoreA: 0,
-        scoreB: 0,
-        round: 1,
-        totalRounds,
-        time: new Date().toISOString(),
-        status:
-          teamA === 'BYE' || teamB === 'BYE'
-            ? MatchStatus.COMPLETED
-            : MatchStatus.UPCOMING,
-        winner: teamA === 'BYE' ? teamB : teamB === 'BYE' ? teamA : undefined,
-        gender: bracketGender,
-        format: bracketFormat,
-        bracketPosition: bracketPosition++,
-      });
-    }
-
-    for (let round = 2; round <= totalRounds; round++) {
-      const matchesInRound = targetSize / Math.pow(2, round);
-      for (let index = 0; index < matchesInRound; index++) {
-        const prevRoundPos1 = index * 2;
-        const prevRoundPos2 = index * 2 + 1;
-
-        const prevMatch1 = generatedFixtures.find(
-          (fixture) =>
-            fixture.round === round - 1 &&
-            fixture.bracketPosition === prevRoundPos1,
-        );
-        const prevMatch2 = generatedFixtures.find(
-          (fixture) =>
-            fixture.round === round - 1 &&
-            fixture.bracketPosition === prevRoundPos2,
-        );
-
-        let teamA = 'TBD';
-        let teamB = 'TBD';
-
-        if (prevMatch1?.status === MatchStatus.COMPLETED && prevMatch1.winner) {
-          teamA = prevMatch1.winner;
-        }
-        if (prevMatch2?.status === MatchStatus.COMPLETED && prevMatch2.winner) {
-          teamB = prevMatch2.winner;
-        }
-
-        generatedFixtures.push({
-          id: generateFixtureId(),
-          teamA,
-          teamB,
-          scoreA: 0,
-          scoreB: 0,
-          round,
-          totalRounds,
-          time: new Date().toISOString(),
-          status: MatchStatus.UPCOMING,
-          gender: bracketGender,
-          format: bracketFormat,
-          bracketPosition: index,
-        });
-      }
-    }
-
-    return generatedFixtures;
-  };
-
   const createTeamsInternal = () => {
     if (!event) return;
 
-    const newTeams: Team[] = [];
-    let teamIndex = event.teams.length + 1;
-
-    for (let index = 0; index + 1 < participants.length; index += 2) {
-      const pair = participants.slice(index, index + 2);
-      newTeams.push({
-        id: `team-${Date.now()}-${teamIndex}`,
-        name: `Team ${teamIndex}`,
-        players: pair,
-        gender,
-        format,
-      });
-      teamIndex++;
-    }
+    const newTeams = generateTeams(
+      participants,
+      gender,
+      format,
+      event.teams.length,
+    );
 
     const otherTeams = event.teams.filter(
       (team) => !(team.gender === gender && team.format === format),
     );
 
-    const hasOddParticipants = participants.length % 2 !== 0;
-    if (hasOddParticipants) {
+    if (participants.length % 2 !== 0) {
       Alert.alert(
         APP_STRINGS.eventScreen.note,
         APP_STRINGS.eventScreen.oddRegistrationsAlert,
@@ -275,12 +176,6 @@ export const useCategoryDetailsViewModel = () => {
       teams: [...otherTeams, ...newTeams],
       teamsCreated: true,
     });
-  };
-
-  type ApiTeamResponse = {
-    id: number;
-    name: string;
-    members: string[];
   };
 
   const handleCreateTeams = async () => {
@@ -342,9 +237,9 @@ export const useCategoryDetailsViewModel = () => {
           totalParticipantsAllowed - participants.length
         } slots remaining). Continue?`,
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: APP_STRINGS.buttons.cancel, style: 'cancel' },
           {
-            text: 'Continue',
+            text: APP_STRINGS.buttons.continue,
             onPress: createTeamsInternal,
           },
         ],

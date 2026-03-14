@@ -13,7 +13,6 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 import EventRegistrationScreen from '../views/EventRegistration/EventRegistrationScreen';
 import EventDetailsScreen from '../views/EventDetailsScreen/EventDetailsScreen';
 import CategoryDetailsScreen from '../views/CategoryDetailsScreen/CategoryDetailsScreen';
-import { RoleType } from '../constants/Roles';
 import { EventRequestResponse } from '../models/EventRequest';
 import EventRequestDetailsScreen from '../views/EventRequestDetailsScreen/EventRequestDetailsScreen';
 import { EventResponse } from '../models/EventResponse';
@@ -39,11 +38,11 @@ export type RootStackParamList = {
   };
   EventDetails: {
     eventId: string;
-    role: RoleType;
+    role: UserRoleType;
   };
   EventRequestDetails: {
     request: EventRequestResponse;
-    role: RoleType;
+    role: UserRoleType;
   };
   CategoryDetails: {
     eventId: string;

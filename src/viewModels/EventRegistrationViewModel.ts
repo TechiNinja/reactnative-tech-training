@@ -17,7 +17,7 @@ export const useEventRegistrationViewModel = (
   const { user } = useAuthStore();
 
   const event = useMemo(
-    () => events.find((event) => event.id === eventId),
+    () => events.find((e) => e.id === eventId),
     [events, eventId],
   );
 
@@ -25,17 +25,11 @@ export const useEventRegistrationViewModel = (
   const [gender, setGender] = useState<GenderType | ''>('');
   const [selectedFormats, setSelectedFormats] = useState<FormatType[]>([]);
 
-  const availableFormats: FormatType[] =
-    event?.formats?.includes(FormatType.Doubles)
-      ? [FormatType.Singles, FormatType.Doubles]
-      : [FormatType.Singles];
+  const availableFormats: FormatType[] = event?.format ?? [];
 
   const totalSlotsPerCategory = event?.totalTeams ?? 0;
 
-  const isCategoryFull = (
-    checkGender: GenderType,
-    format: FormatType,
-  ): boolean => {
+  const isCategoryFull = (checkGender: GenderType, format: FormatType): boolean => {
     if (!event) return false;
     const count = event.registrations.filter(
       (reg) => reg.gender === checkGender && reg.formats?.includes(format),
@@ -43,10 +37,7 @@ export const useEventRegistrationViewModel = (
     return count >= totalSlotsPerCategory;
   };
 
-  const getCategoryCount = (
-    checkGender: GenderType,
-    format: FormatType,
-  ): number => {
+  const getCategoryCount = (checkGender: GenderType, format: FormatType): number => {
     if (!event) return 0;
     return event.registrations.filter(
       (reg) => reg.gender === checkGender && reg.formats?.includes(format),
@@ -64,11 +55,8 @@ export const useEventRegistrationViewModel = (
         return;
       }
     }
-
     setSelectedFormats((prev) =>
-      prev.includes(format)
-        ? prev.filter((fmt) => fmt !== format)
-        : [...prev, format],
+      prev.includes(format) ? prev.filter((fmt) => fmt !== format) : [...prev, format],
     );
   };
 
@@ -79,9 +67,7 @@ export const useEventRegistrationViewModel = (
     );
   };
 
-  const onBack = () => {
-    navigation.goBack();
-  };
+  const onBack = () => navigation.goBack();
 
   const onRegister = () => {
     if (!playerName || !gender || selectedFormats.length === 0) return;
@@ -94,9 +80,7 @@ export const useEventRegistrationViewModel = (
       const genderLabel = gender === GenderType.Male ? "Men's" : "Women's";
       Alert.alert(
         APP_STRINGS.eventScreen.registrationFailed,
-        `${genderLabel} ${fullCategories.join(
-          ', ',
-        )} category is now full. Please choose another category.`,
+        `${genderLabel} ${fullCategories.join(', ')} category is now full. Please choose another category.`,
       );
       setSelectedFormats((prev) =>
         prev.filter((format) => !fullCategories.includes(format)),
@@ -123,8 +107,7 @@ export const useEventRegistrationViewModel = (
     navigation.goBack();
   };
 
-  const isFormValid =
-    playerName.length > 0 && gender !== '' && selectedFormats.length > 0;
+  const isFormValid = playerName.length > 0 && gender !== '' && selectedFormats.length > 0;
 
   return {
     playerName,

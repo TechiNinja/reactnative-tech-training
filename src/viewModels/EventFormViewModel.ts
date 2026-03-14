@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import { validationMessages } from '../constants/validationMessages';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { EventRequestResponse } from '../models/EventRequest';
@@ -13,7 +14,6 @@ type EventFormParams = {
   mode: Mode;
   eventRequest?: EventRequestResponse;
   event?: EventResponse;
-  navigation: NativeStackNavigationProp<RootStackParamList>;
 };
 
 type EventFormErrors = {
@@ -39,27 +39,23 @@ type PatchEventPayload = {
   registrationDeadline?: string;
 };
 
-export const useEventFormViewModel = ({
-  mode,
-  eventRequest,
-  event,
-  navigation,
-}: EventFormParams) => {
+export const useEventFormViewModel = ({ mode, eventRequest, event }: EventFormParams) => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   const isEdit = mode === 'edit' && !!event;
 
   const [submitting, setSubmitting] = useState(false);
   const [isDeadlinePickerVisible, setDeadlinePickerVisible] = useState(false);
 
-  const name_prefill = isEdit ? event!.name : eventRequest?.eventName ?? '';
-  const sport        = isEdit ? event!.sportName : eventRequest?.sportsName ?? '';
-  const venue        = isEdit ? event!.eventVenue : eventRequest?.requestedVenue ?? '';
-  const startDate    = isEdit ? String(event!.startDate) : eventRequest?.startDate ?? '';
-  const endDate      = isEdit ? String(event!.endDate) : eventRequest?.endDate ?? '';
-  const gender       = isEdit ? event!.categories?.[0]?.gender ?? '' : eventRequest?.gender ?? '';
-  const format       = isEdit ? event!.categories?.[0]?.format ?? '' : eventRequest?.format ?? '';
+  const sport     = isEdit ? event!.sportName : eventRequest?.sportsName ?? '';
+  const venue     = isEdit ? event!.eventVenue : eventRequest?.requestedVenue ?? '';
+  const startDate = isEdit ? String(event!.startDate) : eventRequest?.startDate ?? '';
+  const endDate   = isEdit ? String(event!.endDate) : eventRequest?.endDate ?? '';
+  const gender    = isEdit ? event!.categories?.[0]?.gender ?? '' : eventRequest?.gender ?? '';
+  const format    = isEdit ? event!.categories?.[0]?.format ?? '' : eventRequest?.format ?? '';
 
-  const [name, setName]                               = useState(name_prefill);
-  const [description, setDescription]                 = useState(isEdit ? event!.description : '');
+  const [name, setName] = useState(isEdit ? event!.name : eventRequest?.eventName ?? '');
+  const [description, setDescription] = useState(isEdit ? event!.description : '');
   const [maxParticipantsCount, setMaxParticipantsCount] = useState(
     isEdit ? String(event!.maxParticipantsCount) : '',
   );
@@ -90,7 +86,7 @@ export const useEventFormViewModel = ({
       newErrors.registrationDeadline = 'Registration deadline is required';
 
     const deadline = new Date(registrationDeadline);
-    const start    = new Date(startDate);
+    const start = new Date(startDate);
     if (registrationDeadline && deadline >= start)
       newErrors.registrationDeadline = 'Deadline must be before the start date';
 
@@ -106,16 +102,16 @@ export const useEventFormViewModel = ({
 
       if (isEdit) {
         const payload: PatchEventPayload = {
-          action:               'update',
-          name:                 name.trim(),
-          description:          description.trim(),
+          action: 'update',
+          name: name.trim(),
+          description: description.trim(),
           maxParticipantsCount: Number(maxParticipantsCount),
           registrationDeadline,
         };
 
         await authFetch(`/events/${event!.id}`, {
           method: 'PATCH',
-          body:   JSON.stringify(payload),
+          body: JSON.stringify(payload),
         });
 
         Alert.alert('Success', 'Event updated successfully!');
@@ -123,16 +119,16 @@ export const useEventFormViewModel = ({
         if (!eventRequest) return;
 
         const payload: CreateEventPayload = {
-          eventRequestId:      eventRequest.id,
-          name:                name.trim(),
+          eventRequestId: eventRequest.id,
+          name: name.trim(),
           registrationDeadline,
-          description:         description.trim(),
+          description: description.trim(),
           maxParticipantsCount: Number(maxParticipantsCount),
         };
 
         await authFetch('/events', {
           method: 'POST',
-          body:   JSON.stringify(payload),
+          body: JSON.stringify(payload),
         });
 
         Alert.alert('Success', 'Event created successfully!');
@@ -160,7 +156,7 @@ export const useEventFormViewModel = ({
               setSubmitting(true);
               await authFetch(`/events/${event!.id}`, {
                 method: 'PATCH',
-                body:   JSON.stringify({ action: 'cancel' }),
+                body: JSON.stringify({ action: 'cancel' }),
               });
               Alert.alert('Success', 'Event has been cancelled.');
               navigation.navigate('AdminTabs', { screen: 'Events' });

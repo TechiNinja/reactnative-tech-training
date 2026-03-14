@@ -1,27 +1,25 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { RoleType } from '../constants/Roles';
+import { UserRoleType } from '../models/User';
 import { EventRequestResponse, RequestStatus } from '../models/EventRequest';
-import { authFetch } from '../utils/authFetch'; // ✅ replaced local api with authFetch
+import { authFetch } from '../utils/authFetch';
 
-export const useEventRequestListViewModel = (
-  navigation: NativeStackNavigationProp<RootStackParamList>,
-  role: RoleType,
-) => {
+export const useEventRequestListViewModel = (role: UserRoleType) => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const tabBarHeight = useBottomTabBarHeight();
+
   const [activeTab, setActiveTab] = useState<RequestStatus>(RequestStatus.PENDING);
   const [requests, setRequests] = useState<EventRequestResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const tabBarHeight = useBottomTabBarHeight();
 
   const fetchRequests = async (status: RequestStatus) => {
     try {
       setLoading(true);
-      const data = await authFetch<EventRequestResponse[]>( // ✅ authFetch with token
-        `/EventRequests?status=${status}`,
-      );
+      const data = await authFetch<EventRequestResponse[]>(`/EventRequests?status=${status}`);
       setRequests(data);
     } catch (e) {
       setRequests([]);

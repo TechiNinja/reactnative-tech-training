@@ -33,18 +33,11 @@ const mapFormat = (format: string): FormatType => {
   return FormatType.Singles;
 };
 
-const mapCategory = (
-  cat: EventCategoryResponse,
-  maxParticipants: number,
-): Category => {
+const mapCategory = (cat: EventCategoryResponse, maxParticipants: number): Category => {
   const gender = mapGender(cat.gender);
   const format = mapFormat(cat.format);
   const genderLabel =
-    gender === GenderType.Female
-      ? "Women's"
-      : gender === GenderType.Mixed
-      ? 'Mixed'
-      : "Men's";
+    gender === GenderType.Female ? "Women's" : gender === GenderType.Mixed ? 'Mixed' : "Men's";
   const isAbandoned = cat.status === 'Abandoned';
 
   return {
@@ -62,8 +55,7 @@ const mapCategory = (
 };
 
 export const useEventDetailsViewModel = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<EventDetailsRouteProp>();
   const { eventId, role } = route.params;
   const { user } = useAuthStore();
@@ -90,7 +82,7 @@ export const useEventDetailsViewModel = () => {
     }
   }, [eventId]);
 
-  useEffect(() => { 
+  useEffect(() => {
     fetchEvent();
   }, [fetchEvent]);
 
@@ -98,22 +90,14 @@ export const useEventDetailsViewModel = () => {
     mapCategory(cat, event?.maxParticipantsCount ?? 0),
   );
 
-  const hasEventStarted =
-    event?.status === 'Live' || event?.status === 'Completed';
+  const hasEventStarted = event?.status === 'Live' || event?.status === 'Completed';
 
   const canEditOrDelete =
-    (role === 'admin' || role === 'organizer') &&
-    !hasEventStarted &&
-    event?.status !== 'Cancelled';
+    (role === 'admin' || role === 'organizer') && !hasEventStarted && event?.status !== 'Cancelled';
 
-  const canAssignOrganizer =
-    role === 'admin' &&
-    !hasEventStarted &&
-    event?.status !== 'Cancelled';
+  const canAssignOrganizer = role === 'admin' && !hasEventStarted && event?.status !== 'Cancelled';
 
-  const canPublish =
-    role === 'admin' &&
-    event?.status === 'Upcoming';
+  const canPublish = role === 'admin' && event?.status === 'Upcoming';
 
   const canRegister = role === 'participant' && event?.status === 'Open';
 
