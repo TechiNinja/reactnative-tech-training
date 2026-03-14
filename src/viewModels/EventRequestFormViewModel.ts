@@ -11,7 +11,7 @@ import {
 } from '../models/EventRequest';
 import { Alert } from 'react-native';
 import { validationMessages } from '../constants/validationMessages';
-import { authFetch } from '../utils/authFetch'; // ✅ replaced local api with authFetch
+import { authFetch } from '../utils/authFetch'; 
 
 type Mode = 'create' | 'edit';
 

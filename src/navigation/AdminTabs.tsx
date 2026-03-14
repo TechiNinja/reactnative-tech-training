@@ -37,36 +37,16 @@ const AdminTabs = () => {
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarIcon: ({ focused }) => {
           if (route.name === 'Home') {
-            return (
-              <Home
-                size={22}
-                color={focused ? colors.primary : colors.textSecondary}
-              />
-            );
+            return <Home size={22} color={focused ? colors.primary : colors.textSecondary} />;
           }
           if (route.name === 'Events') {
-            return (
-              <Calendar
-                size={22}
-                color={focused ? colors.primary : colors.textSecondary}
-              />
-            );
+            return <Calendar size={22} color={focused ? colors.primary : colors.textSecondary} />;
           }
           if (route.name === 'Request') {
-            return (
-              <ClipboardList
-                size={22}
-                color={focused ? colors.primary : colors.textSecondary}
-              />
-            );
+            return <ClipboardList size={22} color={focused ? colors.primary : colors.textSecondary} />;
           }
           if (route.name === 'Users') {
-            return (
-              <Users
-                size={22}
-                color={focused ? colors.primary : colors.textSecondary}
-              />
-            );
+            return <Users size={22} color={focused ? colors.primary : colors.textSecondary} />;
           }
           return null;
         },
