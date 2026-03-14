@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Alert } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import {
@@ -9,9 +10,9 @@ import {
   MatchFormat,
   Sport,
 } from '../models/EventRequest';
-import { Alert } from 'react-native';
 import { validationMessages } from '../constants/validationMessages';
-import { authFetch } from '../utils/authFetch'; 
+import { eventRequestService } from '../services/eventRequestService';
+import { useEventRequestStore } from '../store/EventRequestStore';
 
 type Mode = 'create' | 'edit';
 
@@ -21,12 +22,13 @@ type Params = {
   navigation: NativeStackNavigationProp<RootStackParamList>;
 };
 
-type Errors = Partial<
-  Record<
-    'eventName' | 'sportId' | 'requestedVenue' | 'startDate' | 'endDate',
-    string
-  >
->;
+type Errors = {
+  eventName?: string;
+  sportId?: string;
+  requestedVenue?: string;
+  startDate?: string;
+  endDate?: string;
+};
 
 const toYmd = (d: Date) => {
   const year = d.getFullYear();
@@ -35,12 +37,9 @@ const toYmd = (d: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-export const useEventRequestFormViewModel = ({
-  mode,
-  request,
-  navigation,
-}: Params) => {
+export const useEventRequestFormViewModel = ({ mode, request, navigation }: Params) => {
   const isEdit = mode === 'edit' && !!request;
+  const { createRequest, updateRequest } = useEventRequestStore();
 
   const [eventName, setEventName] = useState(isEdit ? request!.eventName : '');
   const [sportId, setSportId] = useState<number>(isEdit ? request!.sportId : 0);
@@ -48,7 +47,7 @@ export const useEventRequestFormViewModel = ({
     isEdit ? request!.gender : GenderType.Male,
   );
   const [format, setFormat] = useState<MatchFormat>(
-    isEdit ? request!.format : MatchFormat.Singles,
+    isEdit ? request!.format : undefined as unknown as MatchFormat,
   );
   const [requestedVenue, setRequestedVenue] = useState(
     isEdit ? request!.requestedVenue : '',
@@ -67,21 +66,24 @@ export const useEventRequestFormViewModel = ({
   const [isStartPickerVisible, setStartPickerVisible] = useState(false);
   const [isEndPickerVisible, setEndPickerVisible] = useState(false);
 
-  // Fetch sports (create mode only)
   useEffect(() => {
     if (isEdit) return;
 
-    (async () => {
+    const loadSports = async () => {
       try {
         setSportsLoading(true);
-        const data = await authFetch<Sport[]>('/Sports'); // ✅ authFetch
+        const data = await eventRequestService.getSports();
         setSports(data);
-      } catch (e: any) {
-        Alert.alert(validationMessages.ERROR, e?.message);
+      } catch (err) {
+        if (err instanceof Error) {
+          Alert.alert(validationMessages.ERROR, err.message || validationMessages.SOMETHING_WRONG);
+        }
       } finally {
         setSportsLoading(false);
       }
-    })();
+    };
+
+    loadSports();
   }, [isEdit]);
 
   const selectedSportName = useMemo(() => {
@@ -90,48 +92,49 @@ export const useEventRequestFormViewModel = ({
   }, [isEdit, request?.sportsName, sports, sportId]);
 
   const genderOptions = useMemo(() => {
-    return Object.values(GenderType).map((g) => ({
-      value: g,
-      disabled: false,
-    }));
+    return Object.values(GenderType).map((value) => ({ value, disabled: false }));
   }, []);
 
   const formatOptions = useMemo(() => {
-    return Object.values(MatchFormat).map((f) => ({
-      value: f,
-      disabled: false,
-    }));
-  }, []);
+    if (isEdit) return Object.values(MatchFormat).map((value) => ({ value, disabled: false }));
+
+    const selectedSport = sports.find((s) => s.id === sportId);
+    if (!selectedSport || !selectedSport.allowedFormats.length) return [];
+
+    return selectedSport.allowedFormats.map((value) => ({ value, disabled: false }));
+  }, [sportId, sports, isEdit]);
+
+  useEffect(() => {
+    if (isEdit) return;
+
+    const selectedSport = sports.find((s) => s.id === sportId);
+    if (!selectedSport) return;
+
+    if (!selectedSport.allowedFormats.includes(format)) {
+      const newFormat = selectedSport.allowedFormats[0];
+      if (newFormat) {
+        setFormat(newFormat);
+      } else {
+        setFormat(undefined as unknown as MatchFormat);
+      }
+    }
+  }, [sportId, sports]);
 
   const validate = () => {
-    const e: Errors = {};
+    const nextErrors: Errors = {};
 
-    if (!eventName.trim()) {
-      e.eventName = validationMessages.EVENTNAME_REQUIRED;
-    }
-
-    if (!isEdit && (!sportId || sportId <= 0)) {
-      e.sportId = validationMessages.SPORT_REQUIRED;
-    }
-
-    if (!requestedVenue.trim()) {
-      e.requestedVenue = validationMessages.VENUE_REQUIRED;
-    }
-
-    if (!startDate) {
-      e.startDate = validationMessages.STARTDATE_REQUIRED;
-    }
-
-    if (!endDate) {
-      e.endDate = validationMessages.ENDDATE_REQUIRED;
-    }
+    if (!eventName.trim()) nextErrors.eventName = validationMessages.EVENTNAME_REQUIRED;
+    if (!isEdit && sportId <= 0) nextErrors.sportId = validationMessages.SPORT_REQUIRED;
+    if (!requestedVenue.trim()) nextErrors.requestedVenue = validationMessages.VENUE_REQUIRED;
+    if (!startDate) nextErrors.startDate = validationMessages.STARTDATE_REQUIRED;
+    if (!endDate) nextErrors.endDate = validationMessages.ENDDATE_REQUIRED;
 
     if (startDate && endDate && startDate > endDate) {
-      e.endDate = validationMessages.DATE_COMPARE;
+      nextErrors.endDate = validationMessages.DATE_COMPARE;
     }
 
-    setErrors(e);
-    return Object.keys(e).length === 0;
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const onSubmit = async () => {
@@ -141,7 +144,7 @@ export const useEventRequestFormViewModel = ({
       setSubmitting(true);
 
       if (isEdit) {
-        const dto: EditEventRequest = {
+        const payload: EditEventRequest = {
           eventName: eventName.trim(),
           requestedVenue: requestedVenue.trim(),
           logisticsRequirements: logisticsRequirements.trim(),
@@ -151,39 +154,28 @@ export const useEventRequestFormViewModel = ({
           endDate,
         };
 
-        const updated = await authFetch<EventRequestResponse>( // ✅ authFetch
-          `/EventRequests/${request!.id}`,
-          {
-            method: 'PUT',
-            body: JSON.stringify(dto),
-          },
-        );
+        await updateRequest(request!.id, payload);
+      } else {
+        const payload: CreateEventRequest = {
+          eventName: eventName.trim(),
+          sportId,
+          requestedVenue: requestedVenue.trim(),
+          logisticsRequirements: logisticsRequirements.trim(),
+          format,
+          gender,
+          startDate,
+          endDate,
+        };
 
-        navigation.navigate('AdminTabs', { screen: 'Request' });
-        return updated;
+        await createRequest(payload);
       }
 
-      const dto: CreateEventRequest = {
-        eventName: eventName.trim(),
-        sportId,
-        requestedVenue: requestedVenue.trim(),
-        logisticsRequirements: logisticsRequirements.trim(),
-        format,
-        gender,
-        startDate,
-        endDate,
-      };
-
-      const created = await authFetch<EventRequestResponse>('/EventRequests', { // ✅ authFetch
-        method: 'POST',
-        body: JSON.stringify(dto),
-      });
-
       navigation.navigate('AdminTabs', { screen: 'Request' });
-      return created;
-    } catch (e: any) {
-      const message = e?.message || validationMessages.SOMETHING_WRONG;
-      Alert.alert(validationMessages.ERROR, message);
+    } catch (error: any) {
+      Alert.alert(
+        validationMessages.ERROR,
+        error?.message || validationMessages.SOMETHING_WRONG,
+      );
     } finally {
       setSubmitting(false);
     }
@@ -198,7 +190,6 @@ export const useEventRequestFormViewModel = ({
   return {
     isEdit,
     submitting,
-
     eventName,
     sportId,
     selectedSportName,
@@ -208,27 +199,22 @@ export const useEventRequestFormViewModel = ({
     logisticsRequirements,
     startDate,
     endDate,
-
     sports,
     sportsLoading,
-
     setEventName,
     setSportId,
     setGender,
     setFormat,
     setRequestedVenue,
     setLogisticsRequirements,
-
     genderOptions,
     formatOptions,
-
     isStartPickerVisible,
     isEndPickerVisible,
     showStartPicker: () => setStartPickerVisible(true),
     hideStartPicker: () => setStartPickerVisible(false),
     showEndPicker: () => setEndPickerVisible(true),
     hideEndPicker: () => setEndPickerVisible(false),
-
     onConfirmStartDate: (d: Date) => {
       setStartDate(toYmd(d));
       setStartPickerVisible(false);
@@ -237,7 +223,6 @@ export const useEventRequestFormViewModel = ({
       setEndDate(toYmd(d));
       setEndPickerVisible(false);
     },
-
     safeDateFromYmd,
     errors,
     onSubmit,

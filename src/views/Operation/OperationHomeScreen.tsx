@@ -1,46 +1,51 @@
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import { APP_STRINGS } from '../../constants/AppStrings';
-import { styles } from './AdminHomeScreenStyles';
+import { styles } from './OperationHomeScreenStyle';
 import AnalyticsCard from '../../components/AnalyticsCard/AnalyticsCard';
 import {
   Bell,
   Calendar,
+  ClipboardList,
   Clock,
   LogOut,
   MapPin,
-  Plus,
   Settings,
   TrendingUp,
   Trophy,
-  UserPlus,
   Users,
 } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
 import ActionCard from '../../components/ActionsCard/ActionCard';
 import LiveMatchesCard from '../../components/MatchesCard/LiveMatchesCard';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+import { useOperationHomeViewModel } from '../../viewModels/OperationHomeScreenViewModel';
 import { MOCK_MATCHES } from '../../constants/mockMatches';
-import { useAdminHomeViewModel } from '../../viewModels/AdminHomeScreenViewModel';
-import { useNotificationBadge } from '../../utils/useNotificationBadge';
+import { ActivityIndicator } from 'react-native';
 
-const AdminHomeScreen = () => {
-  const { onLogoutPress, onAddEvent, onAddUser, onRaiseRequest, analytics, loading, onGetNotificaton } =
-    useAdminHomeViewModel();
+const OperationHomeScreen = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const { count, reset } = useNotificationBadge('Admin');
-
-  const handleOpenNotifications = async () => {
-    await reset();
-    onGetNotificaton();
-  };
+  const {
+    loading,
+    analytics,
+    notificationCount,
+    onLogoutPress,
+    onOpenRequests,
+    onOpenNotifications,
+  } = useOperationHomeViewModel(navigation);
 
   return (
     <ScreenWrapper scrollable={true}>
       <View style={styles.container}>
         <View style={styles.headerRow}>
           <Text style={styles.greeting}>
-            {APP_STRINGS.adminScreens.greeting}
+            {APP_STRINGS.OperationScreen.Operation}
           </Text>
+
           <TouchableOpacity onPress={onLogoutPress}>
             <LogOut size={22} color={colors.error} />
           </TouchableOpacity>
@@ -54,23 +59,27 @@ const AdminHomeScreen = () => {
               <View style={styles.row}>
                 <AnalyticsCard
                   icon={<Calendar size={24} color={colors.primary} />}
-                  title={APP_STRINGS.adminScreens.totalEvents}
-                  data={analytics.totalEvents}
+                  title={APP_STRINGS.adminScreens.totalRequest}
+                  data={analytics.totalRequests}
                 />
                 <AnalyticsCard
                   icon={<Users size={24} color={colors.usersIconBackground} />}
-                  title={APP_STRINGS.adminScreens.activeUsers}
-                  data={analytics.activeUsers}
+                  title={APP_STRINGS.adminScreens.pendingRequest}
+                  data={analytics.pendingRequests}
                 />
               </View>
               <View style={styles.row}>
                 <AnalyticsCard
-                  icon={<Trophy size={24} color={colors.participantBackgroud} />}
-                  title={APP_STRINGS.adminScreens.team}
-                  data={analytics.teams}
+                  icon={
+                    <Trophy size={24} color={colors.participantBackgroud} />
+                  }
+                  title={APP_STRINGS.adminScreens.totalEvents}
+                  data={analytics.totalEvents}
                 />
                 <AnalyticsCard
-                  icon={<TrendingUp size={24} color={colors.matchesIconBackgound} />}
+                  icon={
+                    <TrendingUp size={24} color={colors.matchesIconBackgound} />
+                  }
                   title={APP_STRINGS.adminScreens.matchesToday}
                   data={analytics.matchesToday}
                 />
@@ -78,61 +87,45 @@ const AdminHomeScreen = () => {
             </View>
           )
         )}
-
         <View>
           <Text style={styles.heading}>
             {APP_STRINGS.adminScreens.quickActions}
           </Text>
+
           <View style={styles.actionCardContainer}>
             <View style={styles.actionCardWrapper}>
               <ActionCard
-                icon={<Plus size={20} color={colors.participantBackgroud} />}
-                title={APP_STRINGS.adminScreens.raiseEventRequest}
-                onPress={onRaiseRequest}
+                icon={
+                  <ClipboardList
+                    size={20}
+                    color={colors.participantBackgroud}
+                  />
+                }
+                title="Requests"
+                onPress={onOpenRequests}
               />
             </View>
-            <View style={styles.actionCardWrapper}>
-              <ActionCard
-                icon={<UserPlus size={20} color={colors.usersIconBackground} />}
-                title={APP_STRINGS.adminScreens.addUser}
-                onPress={onAddUser}
-              />
-            </View>
-            <View style={styles.actionCardWrapper}>
-              <ActionCard
-                icon={<Settings size={20} color={colors.primary} />}
-                title={APP_STRINGS.adminScreens.settings}
-              />
-            </View>
+
             <View style={styles.actionCardWrapper}>
               <ActionCard
                 icon={
                   <View style={{ position: 'relative' }}>
                     <Bell size={20} color={colors.primary} />
-                    {count > 0 ? (
+                    {notificationCount > 0 ? (
                       <View
-                        style={{
-                          position: 'absolute',
-                          top: -8,
-                          right: -10,
-                          minWidth: 18,
-                          height: 18,
-                          borderRadius: 9,
-                          backgroundColor: 'red',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          paddingHorizontal: 4,
-                        }}
+                        style={styles.badgeStyle}
                       >
-                        <Text style={{ color: 'white', fontSize: 10, fontWeight: '700' }}>
-                          {count > 99 ? '99+' : count}
+                        <Text
+                          style={styles.badgeCount}
+                        >
+                          {notificationCount > 99 ? '99+' : notificationCount}
                         </Text>
                       </View>
                     ) : null}
                   </View>
                 }
                 title={APP_STRINGS.adminScreens.bell}
-                onPress={handleOpenNotifications}
+                onPress={onOpenNotifications}
               />
             </View>
           </View>
@@ -142,6 +135,7 @@ const AdminHomeScreen = () => {
           <Text style={styles.heading}>
             {APP_STRINGS.eventScreen.todaysMatches}
           </Text>
+
           {MOCK_MATCHES.map((match) => (
             <LiveMatchesCard
               key={match.id}
@@ -156,12 +150,18 @@ const AdminHomeScreen = () => {
               statusIcon={<Clock color={colors.textSecondary} />}
               firstTeamLogo={
                 <View>
-                  <Text>{match.firstTeam[0]}{match.firstTeam[1].toUpperCase()}</Text>
+                  <Text>
+                    {match.firstTeam[0]}
+                    {match.firstTeam[1]?.toUpperCase()}
+                  </Text>
                 </View>
               }
               secondTeamLogo={
                 <View>
-                  <Text>{match.secondTeam[0]}{match.secondTeam[1].toUpperCase()}</Text>
+                  <Text>
+                    {match.secondTeam[0]}
+                    {match.secondTeam[1]?.toUpperCase()}
+                  </Text>
                 </View>
               }
             />
@@ -172,4 +172,4 @@ const AdminHomeScreen = () => {
   );
 };
 
-export default AdminHomeScreen;
+export default OperationHomeScreen;

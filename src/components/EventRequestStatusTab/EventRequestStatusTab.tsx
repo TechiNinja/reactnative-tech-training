@@ -6,7 +6,7 @@ const TABS: RequestStatus[] = [
   RequestStatus.PENDING,
   RequestStatus.APPROVED,
   RequestStatus.REJECTED,
-  RequestStatus.WITHDRAW,
+  RequestStatus.WITHDRAWN,
 ];
 
 type RequestStatusTabProps = {

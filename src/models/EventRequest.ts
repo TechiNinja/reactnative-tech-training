@@ -2,20 +2,20 @@ export enum RequestStatus {
   PENDING = 'Pending',
   APPROVED = 'Approved',
   REJECTED = 'Rejected',
-  WITHDRAW = 'Withdrawn',
+  WITHDRAWN = 'Withdrawn',
 }
 
 export enum GenderType {
   Male = 'Male',
   Female = 'Female',
   Mixed = 'Mixed',
-  Both = 'Both'
+  Both = 'Both',
 }
 
 export enum MatchFormat {
   Singles = 'Singles',
   Doubles = 'Doubles',
-  Both = 'Both'
+  Both = 'Both',
 }
 
 export type EventRequestResponse = {
@@ -23,23 +23,18 @@ export type EventRequestResponse = {
   eventName: string;
   sportId: number;
   sportsName: string;
-
   gender: GenderType;
   format: MatchFormat;
-
   requestedVenue: string;
   logisticsRequirements: string;
-
-  startDate: string; 
+  startDate: string;
   endDate: string;
-
   status: RequestStatus;
   remarks: string;
-
   adminId: number;
-  adminName : string;
-
-operationsReviewerName? : string;
+  adminName: string;
+  operationsReviewerName?: string;
+  operationsReviewerId?: number;
   createdDate: string;
   updatedDate?: string;
 };
@@ -65,4 +60,18 @@ export type EditEventRequest = {
   endDate: string;
 };
 
-export type Sport = { id: number; name: string };
+export type DecideEventRequest = {
+  remarks: string;
+};
+
+export type EventRequestFilter = {
+  id?: number;
+  status?: RequestStatus;
+  adminId?: number;
+};
+
+export type Sport = {
+  id: number;
+  name: string;
+  allowedFormats: MatchFormat[];
+};

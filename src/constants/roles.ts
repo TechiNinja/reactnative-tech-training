@@ -38,4 +38,17 @@ export const roles = [
       'Track your performance',
     ],
   },
+  {
+    key: 'OpsTeam',
+    title: 'Operation',
+    icon: 'OrigamiIcon',
+    description: 'Organize events & compete',
+    color: 'operation',
+    features: [
+      'Browse & join events',
+      'Create or join teams',
+      'View schedule & results',
+      'Track your performance',
+    ],
+  },
 ];

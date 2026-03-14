@@ -16,10 +16,14 @@ import CategoryDetailsScreen from '../views/CategoryDetailsScreen/CategoryDetail
 import { EventRequestResponse } from '../models/EventRequest';
 import EventRequestDetailsScreen from '../views/EventRequestDetailsScreen/EventRequestDetailsScreen';
 import { EventResponse } from '../models/EventResponse';
+import OperationTabs, { OperationTabParamList } from './OperationTab';
+import NotificationScreen from '../views/NotificationScreen/NotificationScreen';
 
 export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   AdminTabs: NavigatorScreenParams<AdminTabParamList>;
+  OperationTabs: NavigatorScreenParams<OperationTabParamList>;
+  Notification: { audience: 'Ops' | 'Admin' };
   OrganizerTabs: undefined;
   ParticipantTabs: undefined;
   EventForm: {
@@ -62,6 +66,7 @@ const AppNavigator = () => {
       <Stack.Screen name="AdminTabs" component={AdminTabs} />
       <Stack.Screen name="OrganizerTabs" component={OrganizerTabs} />
       <Stack.Screen name="ParticipantTabs" component={ParticipantTabs} />
+      <Stack.Screen name="OperationTabs" component={OperationTabs} />
       <Stack.Screen name="EventForm" component={EventFormScreen} />
       <Stack.Screen name="UserForm" component={UserFormScreen} />
       <Stack.Screen name="EventRequestForm" component={EventRequestFormScreen} />
@@ -69,6 +74,7 @@ const AppNavigator = () => {
       <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
       <Stack.Screen name="EventRequestDetails" component={EventRequestDetailsScreen} />
       <Stack.Screen name="CategoryDetails" component={CategoryDetailsScreen} />
+      <Stack.Screen name="Notification" component={NotificationScreen} />
     </Stack.Navigator>
   );
 };

@@ -4,15 +4,18 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { EventProvider } from './src/store/EventStore';
 import { UserProvider } from './src/store/UserStore';
 import { AuthProvider } from './src/store/AuthStore';
+import { EventRequestProvider } from './src/store/EventRequestStore';
 
 function App() {
   return (
     <AuthProvider>
       <EventProvider>
         <UserProvider>
-          <NavigationContainer>
-            <AppNavigator />
-          </NavigationContainer>
+          <EventRequestProvider>
+            <NavigationContainer>
+              <AppNavigator />
+            </NavigationContainer>
+          </EventRequestProvider>
         </UserProvider>
       </EventProvider>
     </AuthProvider>

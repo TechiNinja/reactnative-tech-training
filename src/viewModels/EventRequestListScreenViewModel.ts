@@ -3,37 +3,24 @@ import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { RequestStatus, EventRequestResponse } from '../models/EventRequest';
+import { useEventRequestStore } from '../store/EventRequestStore';
 import { UserRoleType } from '../models/User';
-import { EventRequestResponse, RequestStatus } from '../models/EventRequest';
-import { authFetch } from '../utils/authFetch';
 
 export const useEventRequestListViewModel = (role: UserRoleType) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const tabBarHeight = useBottomTabBarHeight();
 
   const [activeTab, setActiveTab] = useState<RequestStatus>(RequestStatus.PENDING);
-  const [requests, setRequests] = useState<EventRequestResponse[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { requests, loading, fetchRequests } = useEventRequestStore();
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchRequests = async (status: RequestStatus) => {
-    try {
-      setLoading(true);
-      const data = await authFetch<EventRequestResponse[]>(`/EventRequests?status=${status}`);
-      setRequests(data);
-    } catch (e) {
-      setRequests([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchRequests(activeTab);
-  }, [activeTab]);
+    fetchRequests();
+  }, [fetchRequests]);
 
   const filteredRequests = useMemo(() => {
-    return requests.filter((r) => r.status === activeTab);
+    return requests.filter((request) => request.status === activeTab);
   }, [requests, activeTab]);
 
   const onRequestPress = (request: EventRequestResponse) => {
@@ -45,7 +32,16 @@ export const useEventRequestListViewModel = (role: UserRoleType) => {
   };
 
   const onRefresh = async () => {
-    await fetchRequests(activeTab);
+    try {
+      setRefreshing(true);
+      await fetchRequests();
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const notification = () => {
+    navigation.navigate('Notification', { audience: 'Ops' });
   };
 
   return {
@@ -53,10 +49,11 @@ export const useEventRequestListViewModel = (role: UserRoleType) => {
     setActiveTab,
     filteredRequests,
     tabBarHeight,
-    onRequestPress,
-    onRaiseRequest,
     loading,
     refreshing,
     onRefresh,
+    onRequestPress,
+    onRaiseRequest,
+    notification,
   };
 };

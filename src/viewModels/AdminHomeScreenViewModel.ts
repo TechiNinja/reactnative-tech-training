@@ -37,6 +37,10 @@ export const useAdminHomeViewModel = () => {
     navigation.navigate('EventRequestForm', { mode: 'create' });
   };
 
+  const onGetNotificaton = () => {
+    navigation.navigate('Notification', { audience: 'Admin' });
+  };
+
   return {
     onLogoutPress,
     onAddEvent,
@@ -44,5 +48,6 @@ export const useAdminHomeViewModel = () => {
     onRaiseRequest,
     analytics,
     loading,
+    onGetNotificaton
   };
 };
