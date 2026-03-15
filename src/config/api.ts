@@ -9,7 +9,6 @@ export const API_ENDPOINTS = {
   USERS: '/Users',
   ROLES: '/Roles',
   SPORT: '/Sport',
-  NOTIFICATIONS: '/Notifications',
   EVENT_REQUESTS: {
     BASE: '/event-requests',
     BY_ID: (id: number) => `/event-requests/${id}`,
@@ -30,4 +29,9 @@ export const API_ENDPOINTS = {
       `/participantregistrations/${eventCategoryId}`,
   },
   ANALYTICS: '/analytics',
+
+  NOTIFICATIONS: {
+    BASE: '/Notifications',
+    MARK_READ: '/Notifications/mark-read',
+  },
 };

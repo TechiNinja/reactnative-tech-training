@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { RequestStatus, EventRequestResponse } from '../models/EventRequest';
 import { useEventRequestStore } from '../store/EventRequestStore';
 import { UserRoleType } from '../models/User';
+import { useNotificationBadge } from '../utils/useNotificationBadge';
 
 export const useEventRequestListViewModel = (
   navigation: NativeStackNavigationProp<RootStackParamList>,
@@ -13,9 +15,10 @@ export const useEventRequestListViewModel = (
   const [activeTab, setActiveTab] = useState<RequestStatus>(
     RequestStatus.PENDING,
   );
-
-  const { requests, loading, fetchRequests } = useEventRequestStore();
   const [refreshing, setRefreshing] = useState(false);
+
+  const { requests, fetchRequests } = useEventRequestStore();
+  const { count: notificationCount } = useNotificationBadge('Ops');
 
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -23,9 +26,10 @@ export const useEventRequestListViewModel = (
     fetchRequests();
   }, [fetchRequests]);
 
-  const filteredRequests = useMemo(() => {
-    return requests.filter((request) => request.status === activeTab);
-  }, [requests, activeTab]);
+  const filteredRequests = useMemo(
+    () => requests.filter(request => request.status === activeTab),
+    [requests, activeTab],
+  );
 
   const onRequestPress = (request: EventRequestResponse) => {
     navigation.navigate('EventRequestDetails', { request, role });
@@ -35,17 +39,17 @@ export const useEventRequestListViewModel = (
     navigation.navigate('EventRequestForm', { mode: 'create' });
   };
 
+  const onOpenNotifications = () => {
+    navigation.navigate('Notification', { audience: 'Ops' });
+  };
+
   const onRefresh = async () => {
+    setRefreshing(true);
     try {
-      setRefreshing(true);
       await fetchRequests();
     } finally {
       setRefreshing(false);
     }
-  };
-
-  const notification = () => {
-    navigation.navigate('Notification', { audience: 'Ops' });
   };
 
   return {
@@ -53,11 +57,12 @@ export const useEventRequestListViewModel = (
     setActiveTab,
     filteredRequests,
     tabBarHeight,
-    loading,
     refreshing,
+    notificationCount,
+    showNotificationBadge: notificationCount > 0,
     onRefresh,
     onRequestPress,
     onRaiseRequest,
-    notification,
+    onOpenNotifications,
   };
 };

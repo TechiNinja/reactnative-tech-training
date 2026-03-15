@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Pressable,
   Text,
@@ -6,13 +7,13 @@ import {
   RefreshControl,
   ScrollView,
 } from 'react-native';
-import React from 'react';
-import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import { ArrowLeft } from 'lucide-react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import { styles } from './NotificationScreenStyle';
 import { colors } from '../../theme/colors';
 import { useNotificationViewModel } from '../../viewModels/NotificationScreenViewModel';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { APP_STRINGS } from '../../constants/AppStrings';
 
@@ -23,6 +24,11 @@ const NotificationScreen = ({ navigation, route }: Props) => {
 
   const { handleBack, refresh, loading, notifications, error } =
     useNotificationViewModel(navigation, audience);
+
+  const showInitialLoader = loading && notifications.length === 0;
+  const showError = !loading && !!error;
+  const showEmptyState = !loading && !error && notifications.length === 0;
+  const showNotifications = notifications.length > 0;
 
   return (
     <ScreenWrapper scrollable={false}>
@@ -35,6 +41,7 @@ const NotificationScreen = ({ navigation, route }: Props) => {
           <Text style={styles.headerTitle}>
             {APP_STRINGS.NotificationScreen.Notification}
           </Text>
+
           <View style={styles.headerRight} />
         </View>
 
@@ -44,118 +51,77 @@ const NotificationScreen = ({ navigation, route }: Props) => {
             <RefreshControl refreshing={loading} onRefresh={refresh} />
           }
         >
-          {loading && notifications.length === 0 ? (
-            <View style={{ paddingVertical: 20, alignItems: 'center' }}>
+          {showInitialLoader && (
+            <View style={styles.loaderContainer}>
               <ActivityIndicator />
-              <Text style={{ marginTop: 10, color: colors.textSecondary }}>
+              <Text style={styles.loaderText}>
                 {APP_STRINGS.NotificationScreen.loadingNotification}
               </Text>
             </View>
-          ) : null}
+          )}
 
-          {!loading && !!error ? (
-            <View style={{ paddingVertical: 16, paddingHorizontal: 16 }}>
-              <Text style={{ color: 'tomato', marginBottom: 10 }}>{error}</Text>
+          {showError && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
 
-              <Pressable
-                onPress={refresh}
-                style={{
-                  paddingVertical: 12,
-                  borderRadius: 10,
-                  alignItems: 'center',
-                  borderWidth: 1,
-                  borderColor: colors.border,
-                }}
-              >
-                <Text style={{ color: colors.textPrimary, fontWeight: '600' }}>
-                  Retry
+              <Pressable onPress={refresh} style={styles.retryButton}>
+                <Text style={styles.retryButtonText}>
+                  {APP_STRINGS.NotificationScreen.retry}
                 </Text>
               </Pressable>
             </View>
-          ) : null}
+          )}
 
-          {!loading && !error && notifications.length === 0 ? (
-            <View style={{ paddingVertical: 24, alignItems: 'center' }}>
-              <Text style={{ color: colors.textSecondary }}>
+          {showEmptyState && (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>
                 {APP_STRINGS.NotificationScreen.noNotification}
               </Text>
             </View>
-          ) : null}
+          )}
 
-          <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
-            {notifications.map(n => {
-              const isNew = !n.isRead;
+          {showNotifications && (
+            <View style={styles.notificationListContainer}>
+              {notifications.map(notification => {
+                const isUnread = !notification.isRead;
 
-              return (
-                <View
-                  key={n.id}
-                  style={{
-                    padding: 14,
-                    borderRadius: 12,
-                    marginTop: 12,
-                    borderWidth: 1.5,
-                    borderColor: isNew ? 'red' : colors.border,
-                  }}
-                >
+                return (
                   <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      gap: 10,
-                    }}
+                    key={notification.id}
+                    style={[
+                      styles.notificationCard,
+                      isUnread && styles.unreadNotificationCard,
+                    ]}
                   >
-                    <Text
-                      style={{
-                        color: colors.textPrimary,
-                        fontWeight: '600',
-                        flex: 1,
-                      }}
-                    >
-                      {n.message}
-                    </Text>
+                    <View style={styles.notificationTopRow}>
+                      <Text style={styles.notificationMessage}>
+                        {notification.message}
+                      </Text>
 
-                    {isNew ? (
-                      <View
-                        style={{
-                          backgroundColor: colors.primary,
-                          paddingHorizontal: 10,
-                          paddingVertical: 4,
-                          borderRadius: 999,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            color: 'white',
-                            fontSize: 11,
-                            fontWeight: '700',
-                          }}
-                        >
-                          NEW
-                        </Text>
-                      </View>
-                    ) : null}
+                      {isUnread && (
+                        <View style={styles.newBadge}>
+                          <Text style={styles.newBadgeText}>
+                            {APP_STRINGS.NotificationScreen.new}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+
+                    <View style={styles.notificationBottomRow}>
+                      <Text style={styles.notificationMetaText}>
+                        {APP_STRINGS.NotificationScreen.request}{' '}
+                        {notification.eventRequestId}
+                      </Text>
+
+                      <Text style={styles.notificationMetaText}>
+                        {notification.createdAt}
+                      </Text>
+                    </View>
                   </View>
-
-                  <View
-                    style={{
-                      marginTop: 8,
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
-                      {APP_STRINGS.NotificationScreen.request} {n.eventRequestId}
-                    </Text>
-
-                    <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
-                      {formatDateTime(n.createdAt)}
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
+                );
+              })}
+            </View>
+          )}
         </ScrollView>
       </View>
     </ScreenWrapper>
@@ -163,12 +129,3 @@ const NotificationScreen = ({ navigation, route }: Props) => {
 };
 
 export default NotificationScreen;
-
-const formatDateTime = (iso: string) => {
-  try {
-    const d = new Date(iso);
-    return d.toLocaleString();
-  } catch {
-    return iso;
-  }
-};

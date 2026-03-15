@@ -237,7 +237,14 @@ export const APP_STRINGS = {
     withdraw : 'Withdraw',
     operationsReviewerName : 'OperationsReviewerName :',
     remarks : 'Remarks :',
-    logistics : 'Logistics :'
+    logistics : 'Logistics :',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    enterRemarks: 'Enter Remarks',
+    writeRemarks: 'Write remarks...',
+    cancel: 'Cancel',
+    submit: 'Submit',
+    request: 'Request',
   },
   OperationScreen : {
     Operation : "Operation",
@@ -246,7 +253,9 @@ export const APP_STRINGS = {
     Notification : "Notification",
     noNotification : "No Notification yet",
     request : "Request#",
-    loadingNotification : "Loading Notification..."
+    loadingNotification : "Loading Notification...",
+    retry : 'Retry',
+    new : 'New'
   },
   EventRequestScreen : {
     Request :  "Request",

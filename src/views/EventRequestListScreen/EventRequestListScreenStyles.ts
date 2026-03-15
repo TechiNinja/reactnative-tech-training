@@ -33,11 +33,38 @@ export const styles = StyleSheet.create({
     marginVertical: 20,
     textAlign: 'center',
   },
-   button: {
-    borderWidth : 0.5,
-    borderRadius : 30,
-    borderColor : colors.primary,
+  button: {
+    borderWidth: 0.5,
+    borderRadius: 30,
+    borderColor: colors.primary,
     marginVertical: 20,
     padding: 10,
+  },
+  notificationIconContainer: {
+    width: 28,
+    height: 28,
+  },
+
+  badgeContainer: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'red',
+  },
+
+  badgeText: {
+    color: 'white',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+
+  listContentContainer: {
+    flexGrow: 1,
   },
 });

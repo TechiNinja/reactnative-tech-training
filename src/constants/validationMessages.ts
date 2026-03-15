@@ -38,4 +38,8 @@ export const validationMessages = {
   withdraw : 'Withdraw Request',
   withdrawSure : 'Are you sure you want to withdraw',
   remarkRequired : 'Error,Remarks are required',
+  success: 'Success',
+  error: 'Error',
+  ok: 'OK',
+  successfully: 'successfully',
 };

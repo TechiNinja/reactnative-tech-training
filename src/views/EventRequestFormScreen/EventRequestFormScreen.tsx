@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
+import { ArrowLeft, Check } from 'lucide-react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppInput from '../../components/AppInput/AppInput';
 import AppButton from '../../components/AppButton/AppButton';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { ArrowLeft, Check } from 'lucide-react-native';
+
 import { colors } from '../../theme/colors';
-import { styles } from './EventRequestFormScreenStyles';
 import { useEventRequestFormViewModel } from '../../viewModels/EventRequestFormViewModel';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { APP_STRINGS } from '../../constants/AppStrings';
+import { styles } from './EventRequestFormScreenStyles';
+
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EventRequestForm'>;
 
@@ -19,22 +22,15 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
 
   const vm = useEventRequestFormViewModel({ mode, request, navigation });
 
-  const [showSportList, setShowSportList] = useState(false);
-
   return (
     <ScreenWrapper scrollable withBottomSafeArea>
       <View style={styles.container}>
-
         <View style={styles.headerRow}>
           <Pressable style={styles.iconContainer} onPress={vm.onBack}>
             <ArrowLeft size={25} color={colors.textPrimary} />
           </Pressable>
 
-          <Text style={styles.heading}>
-            {vm.isEdit
-              ? APP_STRINGS.RequestScreen.editRequest
-              : APP_STRINGS.RequestScreen.raiseRequest}
-          </Text>
+          <Text style={styles.heading}>{vm.screenTitle}</Text>
         </View>
 
         <Text style={styles.inputLabels}>
@@ -60,14 +56,10 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
           />
         ) : (
           <>
-            <Pressable onPress={() => setShowSportList((p) => !p)}>
+            <Pressable onPress={vm.toggleSportList}>
               <View pointerEvents="none">
                 <AppInput
-                  placeholder={
-                    vm.sportsLoading
-                      ? APP_STRINGS.placeHolders.loadingSports
-                      : APP_STRINGS.placeHolders.selectSports
-                  }
+                  placeholder={vm.sportPlaceholder}
                   value={vm.selectedSportName}
                   editable={false}
                   onChangeText={() => {}}
@@ -76,34 +68,35 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
               </View>
             </Pressable>
 
-            {showSportList && (
-              <View style={{ marginTop: 8 }}>
-                {vm.sports.map((s) => (
-                  <Pressable
-                    key={s.id}
-                    onPress={() => {
-                      vm.setSportId(s.id);
-                      setShowSportList(false);
-                    }}
-                    style={[
-                      styles.formatOption,
-                      vm.sportId === s.id && styles.formatOptionActive,
-                    ]}
-                  >
-                    <Text
+            {vm.showSportList && (
+              <View style={styles.sportListContainer}>
+                {vm.sports.map((sport) => {
+                  const isSelected = vm.sportId === sport.id;
+
+                  return (
+                    <Pressable
+                      key={sport.id}
+                      onPress={() => vm.onSelectSport(sport.id)}
                       style={[
-                        styles.formatOptionText,
-                        vm.sportId === s.id &&
-                          styles.formatOptionTextActive,
+                        styles.formatOption,
+                        isSelected && styles.formatOptionActive,
                       ]}
                     >
-                      {s.name}
-                    </Text>
-                    {vm.sportId === s.id && (
-                      <Check size={14} color={colors.primaryText} />
-                    )}
-                  </Pressable>
-                ))}
+                      <Text
+                        style={[
+                          styles.formatOptionText,
+                          isSelected && styles.formatOptionTextActive,
+                        ]}
+                      >
+                        {sport.name}
+                      </Text>
+
+                      {isSelected && (
+                        <Check size={14} color={colors.primaryText} />
+                      )}
+                    </Pressable>
+                  );
+                })}
               </View>
             )}
           </>
@@ -114,36 +107,29 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
             {APP_STRINGS.RequestScreen.gender}
           </Text>
           <View style={styles.formatOptions}>
-            {vm.genderOptions.map((o) => {
-              const isSelected = vm.gender === o.value;
-
-              return (
-                <Pressable
-                  key={o.value}
-                  onPress={() => {
-                    if (!o.disabled) vm.setGender(o.value);
-                  }}
+            {vm.genderOptions.map((option) => (
+              <Pressable
+                key={option.value}
+                onPress={() => vm.setGender(option.value)}
+                style={[
+                  styles.formatOption,
+                  vm.gender === option.value && styles.formatOptionActive,
+                ]}
+              >
+                <Text
                   style={[
-                    styles.formatOption,
-                    isSelected && styles.formatOptionActive,
-                    o.disabled && { opacity: 0.4 },
+                    styles.formatOptionText,
+                    vm.gender === option.value && styles.formatOptionTextActive,
                   ]}
-                  disabled={o.disabled}
                 >
-                  <Text
-                    style={[
-                      styles.formatOptionText,
-                      isSelected && styles.formatOptionTextActive,
-                    ]}
-                  >
-                    {o.value}
-                  </Text>
-                  {isSelected && (
-                    <Check size={14} color={colors.primaryText} />
-                  )}
-                </Pressable>
-              );
-            })}
+                  {option.value}
+                </Text>
+
+                {vm.gender === option.value && (
+                  <Check size={14} color={colors.primaryText} />
+                )}
+              </Pressable>
+            ))}
           </View>
         </View>
 
@@ -152,36 +138,29 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
             {APP_STRINGS.RequestScreen.format}
           </Text>
           <View style={styles.formatOptions}>
-            {vm.formatOptions.map((o) => {
-              const isSelected = vm.format === o.value;
-
-              return (
-                <Pressable
-                  key={o.value}
-                  onPress={() => {
-                    if (!o.disabled) vm.setFormat(o.value);
-                  }}
+            {vm.formatOptions.map((option) => (
+              <Pressable
+                key={option.value}
+                onPress={() => vm.setFormat(option.value)}
+                style={[
+                  styles.formatOption,
+                  vm.format === option.value && styles.formatOptionActive,
+                ]}
+              >
+                <Text
                   style={[
-                    styles.formatOption,
-                    isSelected && styles.formatOptionActive,
-                    o.disabled && { opacity: 0.4 },
+                    styles.formatOptionText,
+                    vm.format === option.value && styles.formatOptionTextActive,
                   ]}
-                  disabled={o.disabled}
                 >
-                  <Text
-                    style={[
-                      styles.formatOptionText,
-                      isSelected && styles.formatOptionTextActive,
-                    ]}
-                  >
-                    {o.value}
-                  </Text>
-                  {isSelected && (
-                    <Check size={14} color={colors.primaryText} />
-                  )}
-                </Pressable>
-              );
-            })}
+                  {option.value}
+                </Text>
+
+                {vm.format === option.value && (
+                  <Check size={14} color={colors.primaryText} />
+                )}
+              </Pressable>
+            ))}
           </View>
         </View>
 
@@ -263,11 +242,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
         </View>
 
         <AppButton
-          title={
-            vm.isEdit
-              ? APP_STRINGS.RequestScreen.updateRequest
-              : APP_STRINGS.RequestScreen.raiseRequest
-          }
+          title={vm.submitButtonTitle}
           onPress={vm.onSubmit}
           disabled={vm.submitting}
         />

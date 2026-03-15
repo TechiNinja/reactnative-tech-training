@@ -115,4 +115,8 @@ export const styles = StyleSheet.create({
     fontSize: fontsSize.regular,
     fontWeight: '600',
   },
+
+  sportListContainer: {
+    marginTop: 8,
+  },
 });

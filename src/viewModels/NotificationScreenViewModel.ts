@@ -1,28 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getToken, getUser } from '../utils/authStorage';
-import { API_BASE_URL } from '../config/api';
-
-export type NotificationAudience = 'Ops' | 'Admin';
-
-export type NotificationItem = {
-  id: number;
-  userId?: number | null;
-  audience?: number | string;
-  eventRequestId: number;
-  message: string;
-  type: number | string;
-  createdAt: string;
-  isRead: boolean;
-};
-
-function extractArray(payload: any): NotificationItem[] {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.data)) return payload.data;
-  if (Array.isArray(payload?.items)) return payload.items;
-  if (Array.isArray(payload?.result)) return payload.result;
-  if (Array.isArray(payload?.data?.items)) return payload.data.items;
-  return [];
-}
+import { getUser } from '../utils/authStorage';
+import {
+  notificationService,
+  NotificationAudience,
+  NotificationItem,
+} from '../services/notificationService';
 
 export const useNotificationViewModel = (
   navigation: any,
@@ -37,81 +19,58 @@ export const useNotificationViewModel = (
       setLoading(true);
       setError('');
 
-      const token = await getToken();
-      const url = `${API_BASE_URL}/Notifications?audience=${audience}`;
+      const data = await notificationService.getAll(audience);
 
-      const res = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-
-      const text = await res.text();
-
-      if (res.status === 401) {
-        setError('Unauthorized. Please login again.');
-        setNotifications([]);
-        return;
-      }
-
-      if (!res.ok) {
-        setError(text || `Request failed (${res.status})`);
-        setNotifications([]);
-        return;
-      }
-
-      let json: any = null;
-      try {
-        json = text ? JSON.parse(text) : null;
-      } catch (e: any) {
-        setError(e?.message || 'Invalid notification response.');
-        setNotifications([]);
-        return;
-      }
-
-      const data = extractArray(json);
-
-      let filteredData = data;
+      let filteredNotifications = data;
 
       if (audience === 'Admin') {
         const user = await getUser();
-        const userId = user?.id;
-        filteredData = data.filter(n => Number(n.userId) === Number(userId));
+        filteredNotifications = data.filter(
+          item => Number(item.userId) === Number(user?.id),
+        );
       }
 
-      const sorted = [...filteredData].sort(
+      const sortedNotifications = [...filteredNotifications].sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
 
-      setNotifications(sorted);
-    } catch (e: any) {
+      console.log(
+  'notifications =>',
+  sortedNotifications.map(item => ({
+    id: item.id,
+    message: item.message,
+    isRead: item.isRead,
+    createdAt: item.createdAt,
+  })),
+);
+
+console.log(
+  'unread from api =>',
+  sortedNotifications.filter(item => !item.isRead).length,
+);
+
+      setNotifications(sortedNotifications);
+    } catch (error: any) {
       setError(
-        e?.message || 'Something went wrong while fetching notifications.',
+        error?.message || 'Something went wrong while fetching notifications.',
       );
       setNotifications([]);
     } finally {
       setLoading(false);
     }
+
+    
+
   }, [audience]);
+
+  
 
   const markAllAsRead = useCallback(async () => {
     try {
-      const token = await getToken();
-
-      await fetch(`${API_BASE_URL}/Notifications/mark-read?audience=${audience}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-    } catch (e) {
-      console.log('Failed to mark notifications as read:', e);
+      await notificationService.markAllAsRead(audience);
+    } catch (error) {
+      console.log('Failed to mark notifications as read:', error);
     }
   }, [audience]);
 
@@ -128,7 +87,7 @@ export const useNotificationViewModel = (
     navigation.goBack();
   }, [markAllAsRead, navigation]);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter(item => !item.isRead).length;
 
   return {
     handleBack,

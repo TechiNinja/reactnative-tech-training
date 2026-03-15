@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Text,
   View,
@@ -8,15 +8,17 @@ import {
   TextInput,
 } from 'react-native';
 import { ArrowLeft, Calendar, MapPin } from 'lucide-react-native';
+
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppButton from '../../components/AppButton/AppButton';
+
 import { colors } from '../../theme/colors';
-import { styles } from '../EventDetailsScreen/EventDetailsScreenStyles';
 import { useEventRequestDetailsViewModel } from '../../viewModels/EventRequestDetailsViewModel';
 import { APP_STRINGS } from '../../constants/AppStrings';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { RequestStatus } from '../../models/EventRequest';
+import { styles } from './EventRequestDetailsScreenStyle';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EventRequestDetails'>;
 
@@ -27,48 +29,25 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
     request,
     canApprove,
     canReject,
+    canUpdate,
+    canCreateEvent,
+    canWithdraw,
+    approvingOrRejecting,
+    remarks,
+    remarksModalVisible,
+    isSubmitDisabled,
     handleBack,
     handleApproved,
     handleRejected,
     handleCreateEvent,
     handleWithdraw,
     handleUpdate,
-    canUpdate,
-    canCreateEvent,
-    approvingOrRejecting,
-    canWithdraw,
     formatDate,
+    setRemarks,
+    openRemarksModal,
+    closeRemarksModal,
+    submitDecision,
   } = useEventRequestDetailsViewModel();
-
-  const [remarksModalVisible, setRemarksModalVisible] = useState(false);
-  const [remarks, setRemarks] = useState('');
-  const [decision, setDecision] = useState<'Approved' | 'Rejected' | null>(
-    null,
-  );
-
-  const openRemarksModal = (type: 'Approved' | 'Rejected') => {
-    setDecision(type);
-    setRemarks('');
-    setRemarksModalVisible(true);
-  };
-
-  const closeRemarksModal = () => {
-    if (approvingOrRejecting) return;
-    setRemarksModalVisible(false);
-    setDecision(null);
-    setRemarks('');
-  };
-
-  const submitDecision = () => {
-    const text = remarks.trim();
-    if (!text || !decision) return;
-
-    if (decision === 'Approved') {
-      handleApproved(text);
-    } else {
-      handleRejected(text);
-    }
-  };
 
   if (!request) {
     return (
@@ -109,8 +88,7 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
             <View style={styles.infoRow}>
               <Calendar size={18} color={colors.textSecondary} />
               <Text style={styles.infoText}>
-                {APP_STRINGS.RequestScreen.endDate}
-                {request.endDate}
+                {APP_STRINGS.RequestScreen.endDate} {request.endDate}
               </Text>
             </View>
 
@@ -202,17 +180,17 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
             <View style={styles.buttonRow}>
               <View style={styles.buttonFlex}>
                 <AppButton
-                  title="Approved"
+                  title={APP_STRINGS.RequestScreen.approved}
                   disabled={!canApprove}
-                  onPress={() => openRemarksModal('Approved')}
+                  onPress={handleApproved}
                 />
               </View>
 
               <View style={styles.buttonFlex}>
                 <AppButton
-                  title="Rejected"
+                  title={APP_STRINGS.RequestScreen.rejected}
                   disabled={!canReject}
-                  onPress={() => openRemarksModal('Rejected')}
+                  onPress={handleRejected}
                 />
               </View>
             </View>
@@ -225,64 +203,36 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
           animationType="fade"
           onRequestClose={closeRemarksModal}
         >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              justifyContent: 'center',
-              padding: 16,
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: colors.cardBackgroud,
-                borderRadius: 12,
-                padding: 16,
-              }}
-            >
-              <Text
-                style={{
-                  color: colors.textPrimary,
-                  fontSize: 16,
-                  fontWeight: '600',
-                }}
-              >
-                Enter Remarks
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>
+                {APP_STRINGS.RequestScreen.enterRemarks}
               </Text>
 
               <TextInput
                 value={remarks}
                 onChangeText={setRemarks}
-                placeholder="Write remarks..."
+                placeholder={APP_STRINGS.RequestScreen.writeRemarks}
                 placeholderTextColor={colors.textSecondary}
                 multiline
                 editable={!approvingOrRejecting}
-                style={{
-                  marginTop: 12,
-                  minHeight: 90,
-                  borderWidth: 1,
-                  borderColor: colors.border,
-                  borderRadius: 10,
-                  padding: 12,
-                  color: colors.textPrimary,
-                  textAlignVertical: 'top',
-                }}
+                style={styles.remarksInput}
               />
 
-              <View style={{ flexDirection: 'row', gap: 12, marginTop: 14 }}>
-                <View style={{ flex: 1 }}>
+              <View style={styles.modalButtonRow}>
+                <View style={styles.buttonFlex}>
                   <AppButton
-                    title="Cancel"
+                    title={APP_STRINGS.RequestScreen.cancel}
                     onPress={closeRemarksModal}
                     disabled={approvingOrRejecting}
                   />
                 </View>
 
-                <View style={{ flex: 1 }}>
+                <View style={styles.buttonFlex}>
                   <AppButton
-                    title="Submit"
+                    title={APP_STRINGS.RequestScreen.submit}
                     onPress={submitDecision}
-                    disabled={!remarks.trim() || approvingOrRejecting}
+                    disabled={isSubmitDisabled}
                   />
                 </View>
               </View>
