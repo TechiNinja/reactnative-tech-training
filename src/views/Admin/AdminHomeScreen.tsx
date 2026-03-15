@@ -34,10 +34,9 @@ const AdminHomeScreen = () => {
   const { onLogoutPress, onAddEvent,onRaiseRequest, onAddUser, analytics, loading,onGetNotificaton } =
     useAdminHomeViewModel();
 
-  const { count, reset } = useNotificationBadge("Admin");
+  const { count} = useNotificationBadge("Admin");
 
   const handleOpenNotifications = async () => {
-    await reset();
     onGetNotificaton();
   };  
 

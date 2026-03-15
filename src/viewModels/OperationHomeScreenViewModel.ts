@@ -10,7 +10,7 @@ export const useOperationHomeViewModel = (
   navigation: NativeStackNavigationProp<RootStackParamList>,
 ) => {
   const { logout } = useAuthStore();
-  const { count, reset } = useNotificationBadge('Ops');
+  const { count } = useNotificationBadge('Ops');
 
   const [analytics, setAnalytics] = useState<OperationAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,6 @@ export const useOperationHomeViewModel = (
   };
 
   const onOpenNotifications = async () => {
-    await reset();
     navigation.navigate('Notification', { audience: 'Ops' });
   };
 

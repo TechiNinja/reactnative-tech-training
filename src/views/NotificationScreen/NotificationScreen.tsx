@@ -21,7 +21,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Notification'>;
 const NotificationScreen = ({ navigation, route }: Props) => {
   const audience = route.params?.audience ?? 'Ops';
 
-  const { handleBack, refresh, loading, notifications, error, unreadCount } =
+  const { handleBack, refresh, loading, notifications, error } =
     useNotificationViewModel(navigation, audience);
 
   return (
@@ -83,8 +83,8 @@ const NotificationScreen = ({ navigation, route }: Props) => {
           ) : null}
 
           <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
-            {notifications.map((n, index) => {
-              const isNew = index < unreadCount;
+            {notifications.map(n => {
+              const isNew = !n.isRead;
 
               return (
                 <View
@@ -94,7 +94,7 @@ const NotificationScreen = ({ navigation, route }: Props) => {
                     borderRadius: 12,
                     marginTop: 12,
                     borderWidth: 1.5,
-                    borderColor: isNew ? 'red' : 'blue',
+                    borderColor: isNew ? 'red' : colors.border,
                   }}
                 >
                   <View

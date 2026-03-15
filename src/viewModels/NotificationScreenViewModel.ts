@@ -1,11 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getToken, getUser } from '../utils/authStorage';
-import {
-  getOpsLastSeenCount,
-  setOpsLastSeenCount,
-  getAdminLastSeenCount,
-  setAdminLastSeenCount,
-} from '../utils/notificationBadgeStorage';
 import { API_BASE_URL } from '../config/api';
 
 export type NotificationAudience = 'Ops' | 'Admin';
@@ -18,6 +12,7 @@ export type NotificationItem = {
   message: string;
   type: number | string;
   createdAt: string;
+  isRead: boolean;
 };
 
 function extractArray(payload: any): NotificationItem[] {
@@ -36,25 +31,6 @@ export const useNotificationViewModel = (
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [error, setError] = useState('');
-  const [lastSeenCount, setLastSeenCount] = useState(0);
-
-  const markAllAsSeen = useCallback(
-    async (totalCount: number) => {
-      if (audience === 'Ops') {
-        await setOpsLastSeenCount(totalCount);
-      } else {
-        await setAdminLastSeenCount(totalCount);
-      }
-
-      setLastSeenCount(totalCount);
-    },
-    [audience],
-  );
-
-  const handleBack = useCallback(async () => {
-    await markAllAsSeen(notifications.length);
-    navigation.goBack();
-  }, [markAllAsSeen, navigation, notifications.length]);
 
   const notificationFetch = useCallback(async () => {
     try {
@@ -111,15 +87,6 @@ export const useNotificationViewModel = (
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
 
-      let seenCount = 0;
-
-      if (audience === 'Ops') {
-        seenCount = await getOpsLastSeenCount();
-      } else {
-        seenCount = await getAdminLastSeenCount();
-      }
-
-      setLastSeenCount(seenCount);
       setNotifications(sorted);
     } catch (e: any) {
       setError(
@@ -131,6 +98,23 @@ export const useNotificationViewModel = (
     }
   }, [audience]);
 
+  const markAllAsRead = useCallback(async () => {
+    try {
+      const token = await getToken();
+
+      await fetch(`${API_BASE_URL}/Notifications/mark-read?audience=${audience}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+    } catch (e) {
+      console.log('Failed to mark notifications as read:', e);
+    }
+  }, [audience]);
+
   useEffect(() => {
     notificationFetch();
   }, [notificationFetch]);
@@ -139,7 +123,12 @@ export const useNotificationViewModel = (
     await notificationFetch();
   }, [notificationFetch]);
 
-  const unreadCount = Math.max(0, notifications.length - lastSeenCount);
+  const handleBack = useCallback(async () => {
+    await markAllAsRead();
+    navigation.goBack();
+  }, [markAllAsRead, navigation]);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return {
     handleBack,
@@ -148,6 +137,5 @@ export const useNotificationViewModel = (
     notifications,
     error,
     unreadCount,
-    lastSeenCount,
   };
 };
