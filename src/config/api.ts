@@ -1,20 +1,25 @@
-import { Platform } from 'react-native';
-
-const HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-
-export const API_BASE_URL = `http://${HOST}:5000/api`;
+export const API_BASE_URL = 'http://localhost:5181/api';
+export const API_BASE_URLL = 'http://localhost:5181';
 
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
   },
-  USERS: '/users',
-  ROLES: '/roles',
+  USERS: '/Users',
+  ROLES: '/Roles',
+  SPORT: '/Sport',
+  EVENT_REQUESTS: {
+    BASE: '/event-requests',
+    BY_ID: (id: number) => `/event-requests/${id}`,
+    WITHDRAW: (id: number) => `/event-requests/${id}/withdraw`,
+    DECIDE: (id: number, status: 'Approved' | 'Rejected') =>
+      `/Operation/${id}/${status}`,
+  },
   PARTICIPANT: {
-    EVENTS: (userId: number) => `/events/${userId}`,
-    TEAM: (userId: number) => `/teams/${userId}`,
-    SCHEDULE: (userId: number) => `/schedules/${userId}`,
+    EVENTS: (userId: number) => `/Events/${userId}`,
+    TEAM: (userId: number) => `/Teams/${userId}`,
+    SCHEDULE: (userId: number) => `/Schedules/${userId}`,
     REGISTER: '/participantregistrations',
   },
   ORGANIZER: {
@@ -24,4 +29,9 @@ export const API_ENDPOINTS = {
       `/participantregistrations/${eventCategoryId}`,
   },
   ANALYTICS: '/analytics',
+
+  NOTIFICATIONS: {
+    BASE: '/Notifications',
+    MARK_READ: '/Notifications/mark-read',
+  },
 };
