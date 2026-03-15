@@ -27,10 +27,10 @@ export type RootStackParamList = {
     onSubmit?: (event: Event) => void;
   };
   EventRequestForm: {
-  mode: 'create' | 'edit';
-  request?: EventRequestResponse; // ✅ edit mode ke liye
-  onSubmit?: (request: EventRequestResponse) => void; // optional
-};
+    mode: 'create' | 'edit';
+    request?: EventRequestResponse;
+    onSubmit?: (request: EventRequestResponse) => void;
+  };
   EventRegister: {
     eventId: string;
   };
@@ -38,7 +38,7 @@ export type RootStackParamList = {
     eventId: string;
     role: RoleType;
   };
-  EventRequestDetails : {
+  EventRequestDetails: {
     request: EventRequestResponse;
     role: RoleType;
   };
@@ -62,10 +62,16 @@ const AppNavigator = () => {
       <Stack.Screen name="ParticipantTabs" component={ParticipantTabs} />
 
       <Stack.Screen name="EventForm" component={EventFormScreen} />
-      <Stack.Screen name="EventRequestForm" component={EventRequestFormScreen} />
+      <Stack.Screen
+        name="EventRequestForm"
+        component={EventRequestFormScreen}
+      />
       <Stack.Screen name="EventRegister" component={EventRegistrationScreen} />
       <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
-      <Stack.Screen name="EventRequestDetails" component={EventRequestDetailsScreen} />
+      <Stack.Screen
+        name="EventRequestDetails"
+        component={EventRequestDetailsScreen}
+      />
       <Stack.Screen name="CategoryDetails" component={CategoryDetailsScreen} />
     </Stack.Navigator>
   );

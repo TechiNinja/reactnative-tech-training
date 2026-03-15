@@ -23,23 +23,17 @@ export type EventRequestResponse = {
   eventName: string;
   sportId: number;
   sportsName: string;
-
   gender: GenderType;
   format: MatchFormat;
-
   requestedVenue: string;
   logisticsRequirements: string;
-
   startDate: string; 
   endDate: string;
-
   status: RequestStatus;
   remarks: string;
-
   adminId: number;
-  adminName : string;
-
-operationsReviewerName? : string;
+  adminName: string;
+  operationsReviewerName?: string;
   createdDate: string;
   updatedDate?: string;
 };

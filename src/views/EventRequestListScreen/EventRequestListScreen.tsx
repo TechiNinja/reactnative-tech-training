@@ -33,7 +33,7 @@ const EventRequestListScreen = ({ role }: EventRequestListScreenProps) => {
                 : styles.heading
             }
           >
-            Requests
+            {APP_STRINGS.RequestScreen.request}
           </Text>
 
           {(role === 'admin') && (
@@ -49,11 +49,11 @@ const EventRequestListScreen = ({ role }: EventRequestListScreenProps) => {
           onChange={viewModel.setActiveTab}
         />
 
-        {viewModel.filteredRequests.length === 0 ? (
+        {viewModel.requests.length === 0 ? (
           <Text style={styles.noEventStyle}>{APP_STRINGS.RequestScreen.noRequestFound}</Text>
         ) : (
           <FlatList
-            data={viewModel.filteredRequests}
+            data={viewModel.requests}
             keyExtractor={(item) => String(item.id)}
             renderItem={({ item }) => (
               <EventRequestCard
@@ -63,9 +63,7 @@ const EventRequestListScreen = ({ role }: EventRequestListScreenProps) => {
               />
             )}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingBottom: viewModel.tabBarHeight 
-            }}
+            contentContainerStyle={viewModel.getContentContainerStyle()}
             onRefresh={viewModel.onRefresh}
             refreshing={viewModel.refreshing}
           />

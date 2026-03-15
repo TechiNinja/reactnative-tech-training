@@ -171,22 +171,23 @@ export const APP_STRINGS = {
     
   },
 
-  RequestScreen : {
+  RequestScreen: {
+    request: 'Requests',
     raiseRequest: 'Raise Request',
-    editRequest : 'Edit Request',
-    noRequestFound : 'No request found',
-    updateRequest : 'Update Request',
-    logisticRequirements : 'Logistic Requirements',
-    venue : 'Requested Venue',
-    endDate : 'End Date',
+    editRequest: 'Edit Request',
+    noRequestFound: 'No request found',
+    updateRequest: 'Update Request',
+    logisticRequirements: 'Logistic Requirements',
+    venue: 'Requested Venue',
+    endDate: 'End Date',
     startDate : 'Start Date',
-    format : 'Format',
-    gender : 'Gender',
-    createEvent : "Create Event",
-    update : 'Updated',
-    created : 'Created',
-    operationsReviewerName : 'OperationsReviewerName',
-    remarks : 'Remarks:',
-    logistics : 'Logistics:'
+    format: 'Format',
+    gender: 'Gender',
+    createEvent: "Create Event",
+    update: 'Updated',
+    created: 'Created',
+    operationsReviewerName: 'OperationsReviewerName',
+    remarks: 'Remarks:',
+    logistics: 'Logistics:'
   },
 };

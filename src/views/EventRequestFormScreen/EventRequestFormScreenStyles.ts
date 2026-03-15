@@ -12,6 +12,10 @@ export const styles = StyleSheet.create({
     marginTop: 10,
   },
 
+  sportList: { 
+    marginTop: 8 ,
+  },
+
   errorText: {
     color: colors.error,
     fontSize: fontsSize.primary,

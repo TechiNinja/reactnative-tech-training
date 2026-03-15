@@ -77,7 +77,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
             </Pressable>
 
             {showSportList && (
-              <View style={{ marginTop: 8 }}>
+              <View style={styles.sportList}>
                 {vm.sports.map((s) => (
                   <Pressable
                     key={s.id}

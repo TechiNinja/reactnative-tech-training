@@ -1,14 +1,13 @@
 import { Text, TouchableOpacity, View } from 'react-native';
-import { styles } from '../EventCard/EventCardStyles'; 
 import { colors } from '../../theme/colors';
 import { Calendar, MapPin } from 'lucide-react-native';
 import { useState } from 'react';
 import { EventRequestResponse } from '../../models/EventRequest';
 import { RoleType } from '../../constants/Roles';
+import { styles } from './EventRequestCardStyle';
 
 type EventRequestCardProps = {
   request: EventRequestResponse;
-  role: RoleType;
   onPress: () => void;
 };
 

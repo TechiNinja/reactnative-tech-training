@@ -4,9 +4,9 @@ import { ArrowLeft, Calendar, MapPin } from 'lucide-react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppButton from '../../components/AppButton/AppButton';
 import { colors } from '../../theme/colors';
-import { styles } from '../EventDetailsScreen/EventDetailsScreenStyles';
 import { useEventRequestDetailsViewModel } from '../../viewModels/EventRequestDetailsViewModel';
 import { APP_STRINGS } from '../../constants/AppStrings';
+import { styles } from './EventRequestDetailsScreenStyle';
 
 const EventRequestDetailsScreen = () => {
   const {

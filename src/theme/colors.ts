@@ -5,7 +5,7 @@ export const colors = {
   textSecondary: '#9CA3AF',
 
   primary: '#F97316',
-  status : '#ab5a20',
+  status: '#ab5a20',
   primaryText: '#0B1220',
 
   border: '#1F2937',
