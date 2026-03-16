@@ -6,6 +6,15 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  center: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 40,
+  },
   header: {
     alignItems: 'center',
     borderBottomColor: colors.border,
@@ -28,36 +37,23 @@ export const styles = StyleSheet.create({
   backButton: {
     padding: 4,
   },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  centered: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-    padding: 40,
-  },
-  errorText: {
-    color: colors.error,
-    fontSize: fontsSize.medium,
+  matchCard: {
+    backgroundColor: colors.cardBackgroud,
+    borderColor: colors.border,
+    borderRadius: 14,
+    borderWidth: 1,
     marginBottom: 16,
-    textAlign: 'center',
+    padding: 16,
   },
   statusRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 10,
     marginBottom: 16,
-  },
-  roundLabel: {
-    color: colors.textSecondary,
-    fontSize: fontsSize.medium,
-    fontWeight: '500',
   },
   statusBadge: {
     borderRadius: 12,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 4,
   },
   statusLive: {
@@ -71,7 +67,7 @@ export const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: fontsSize.small,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   statusTextLive: {
     color: colors.participantBackgroud,
@@ -82,29 +78,27 @@ export const styles = StyleSheet.create({
   statusTextCompleted: {
     color: colors.textSecondary,
   },
-  liveDot: {
-    backgroundColor: colors.participantBackgroud,
-    borderRadius: 5,
-    height: 8,
-    marginRight: 6,
-    width: 8,
-  },
-  liveBadgeRow: {
+  liveIndicator: {
     alignItems: 'center',
     flexDirection: 'row',
+    gap: 6,
   },
-  scoreboardCard: {
-    backgroundColor: colors.cardBackgroud,
-    borderColor: colors.border,
-    borderRadius: 16,
-    borderWidth: 1,
-    marginBottom: 20,
-    padding: 20,
+  liveDot: {
+    backgroundColor: colors.participantBackgroud,
+    borderRadius: 4,
+    height: 8,
+    width: 8,
   },
-  scoreboardRow: {
+  liveText: {
+    color: colors.participantBackgroud,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  teamsRow: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 12,
   },
   teamBlock: {
     alignItems: 'center',
@@ -119,133 +113,91 @@ export const styles = StyleSheet.create({
     marginBottom: 8,
     width: 48,
   },
-  teamAvatarTBD: {
-    backgroundColor: colors.border,
+  teamAvatarText: {
+    color: colors.primaryText,
+    fontSize: 16,
+    fontWeight: '700',
   },
   teamName: {
     color: colors.textPrimary,
     fontSize: 14,
-    fontWeight: '600',
-    minHeight: 36,
+    fontWeight: '500',
+    marginBottom: 6,
     textAlign: 'center',
-  },
-  teamNameTBD: {
-    color: colors.textSecondary,
-    fontStyle: 'italic',
-  },
-  setsWon: {
-    color: colors.textPrimary,
-    fontSize: 40,
-    fontWeight: '800',
-    marginTop: 4,
-  },
-  setsWonWinner: {
-    color: colors.participantBackgroud,
-  },
-  vsBlock: {
-    alignItems: 'center',
-    paddingHorizontal: 8,
   },
   vsText: {
     color: colors.textSecondary,
-    fontSize: fontsSize.primary,
-    fontWeight: '700',
-  },
-  winnerBanner: {
-    alignItems: 'center',
-    backgroundColor: colors.participantBackgroud + '15',
-    borderRadius: 8,
-    flexDirection: 'row',
-    gap: 6,
-    justifyContent: 'center',
-    marginTop: 14,
-    paddingVertical: 10,
-  },
-  winnerText: {
-    color: colors.participantBackgroud,
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '600',
   },
-  infoCard: {
-    backgroundColor: colors.cardBackgroud,
-    borderColor: colors.border,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 10,
-    marginBottom: 20,
-    padding: 14,
+  setScore: {
+    color: colors.textPrimary,
+    fontSize: 28,
+    fontWeight: '700',
   },
   infoRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 10,
+    gap: 6,
+    marginTop: 6,
   },
   infoText: {
-    color: colors.textPrimary,
-    fontSize: fontsSize.medium,
-  },
-  infoMuted: {
     color: colors.textSecondary,
-    fontSize: fontsSize.small,
-    marginTop: 2,
+    fontSize: 13,
+  },
+  setsLabel: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    marginTop: 8,
+  },
+  section: {
+    backgroundColor: colors.cardBackgroud,
+    borderColor: colors.border,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 16,
+    padding: 16,
   },
   sectionTitle: {
     color: colors.textPrimary,
-    fontSize: 16,
+    fontSize: fontsSize.medium,
     fontWeight: '600',
     marginBottom: 12,
   },
   setRow: {
     alignItems: 'center',
-    backgroundColor: colors.cardBackgroud,
-    borderColor: colors.border,
-    borderRadius: 10,
-    borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 10,
-    padding: 14,
   },
-  setRowActive: {
-    borderColor: colors.primary,
-  },
-  setRowCompleted: {
-    opacity: 0.7,
-  },
-  setRowLocked: {
-    opacity: 0.45,
-  },
-  setLabel: {
+  setNumber: {
     color: colors.textSecondary,
     fontSize: fontsSize.medium,
-    fontWeight: '500',
-    width: 55,
+    width: 50,
   },
   setScores: {
     alignItems: 'center',
-    flex: 1,
     flexDirection: 'row',
-    gap: 12,
+    flex: 1,
     justifyContent: 'center',
   },
-  setScore: {
+  setScoreA: {
     color: colors.textPrimary,
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
-    minWidth: 28,
-    textAlign: 'center',
   },
-  setScoreWinner: {
-    color: colors.participantBackgroud,
+  setScoreB: {
+    color: colors.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
   },
   setDash: {
     color: colors.textSecondary,
-    fontSize: 18,
-    fontWeight: '400',
+    fontSize: 16,
+    marginHorizontal: 8,
   },
-  setStatus: {
-    alignItems: 'flex-end',
-    width: 70,
+  winScore: {
+    color: colors.participantBackgroud,
   },
   setStatusBadge: {
     borderRadius: 8,
@@ -258,60 +210,145 @@ export const styles = StyleSheet.create({
   setStatusCompleted: {
     backgroundColor: colors.textSecondary + '20',
   },
-  setStatusNotStarted: {
-    backgroundColor: colors.usersIconBackground + '20',
-  },
   setStatusText: {
-    fontSize: 11,
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  inlineEditContainer: {
+    backgroundColor: colors.inputField,
+    borderRadius: 10,
+    marginBottom: 8,
+    marginTop: 4,
+    padding: 12,
+  },
+  inlineEditTitle: {
+    color: colors.textPrimary,
+    fontSize: fontsSize.medium,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  winnerBanner: {
+    alignItems: 'center',
+    backgroundColor: colors.participantBackgroud + '15',
+    borderRadius: 10,
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    marginBottom: 16,
+    paddingVertical: 12,
+  },
+  winnerText: {
+    color: colors.participantBackgroud,
+    fontSize: 15,
     fontWeight: '600',
   },
-  setStatusTextLive: {
-    color: colors.participantBackgroud,
-  },
-  setStatusTextCompleted: {
-    color: colors.textSecondary,
-  },
-  setStatusTextNotStarted: {
-    color: colors.usersIconBackground,
-  },
-  editIcon: {
-    marginLeft: 8,
-  },
-  actionRow: {
-    gap: 12,
-    marginTop: 8,
-  },
-  primaryButton: {
+  startMatchBtn: {
     alignItems: 'center',
-    backgroundColor: colors.primary,
+    backgroundColor: colors.participantBackgroud,
     borderRadius: 10,
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    marginBottom: 12,
     paddingVertical: 14,
   },
-  primaryButtonText: {
+  startMatchBtnText: {
     color: colors.primaryText,
     fontSize: 15,
     fontWeight: '600',
   },
-  secondaryButton: {
+  scoreSection: {
+    backgroundColor: colors.cardBackgroud,
+    borderColor: colors.border,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 16,
+    padding: 16,
+  },
+  scoreInputRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  scoreInputBlock: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  scoreTeamName: {
+    color: colors.textPrimary,
+    fontSize: fontsSize.medium,
+    fontWeight: '500',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  scoreControls: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 16,
+  },
+  scoreBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.border,
+    borderRadius: 22,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  scoreValue: {
+    color: colors.textPrimary,
+    fontSize: 32,
+    fontWeight: '700',
+    minWidth: 50,
+    textAlign: 'center',
+  },
+  scoreActions: {
+    gap: 12,
+  },
+  saveScoreBtn: {
     alignItems: 'center',
     backgroundColor: colors.border,
     borderRadius: 10,
     paddingVertical: 14,
   },
-  secondaryButtonText: {
+  saveScoreBtnText: {
     color: colors.textPrimary,
     fontSize: 15,
     fontWeight: '600',
   },
-  disabledButton: {
-    opacity: 0.45,
+  completeSetBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: 10,
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    paddingVertical: 14,
+  },
+  completeSetBtnText: {
+    color: colors.primaryText,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  tieWarning: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  errorText: {
+    color: colors.error,
+    fontSize: fontsSize.medium,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   modalOverlay: {
-    backgroundColor: colors.appBackground + '20',
+    backgroundColor: colors.appBackground + '80',
     flex: 1,
     justifyContent: 'flex-end',
   },
-  modalContainer: {
+  modalSheet: {
     backgroundColor: colors.cardBackgroud,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
@@ -322,7 +359,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   modalTitle: {
     color: colors.textPrimary,
@@ -330,102 +367,38 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
   modalLabel: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    marginBottom: 6,
-    marginTop: 16,
+    color: colors.textPrimary,
+    fontSize: fontsSize.medium,
+    fontWeight: '500',
+    marginBottom: 8,
   },
-  dateTimeButton: {
+  datePickerBtn: {
     alignItems: 'center',
-    backgroundColor: colors.inputField,
+    backgroundColor: colors.cardBackgroud,
+    borderColor: colors.border,
     borderRadius: 10,
+    borderWidth: 1,
     flexDirection: 'row',
     gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    marginBottom: 16,
+    padding: 14,
   },
-  dateTimeButtonText: {
+  datePickerText: {
     color: colors.textPrimary,
     fontSize: fontsSize.medium,
   },
-  setsRow: {
+  setsInputRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 12,
+    gap: 20,
     justifyContent: 'center',
-    marginTop: 4,
+    marginBottom: 20,
   },
-  setsCountBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.border,
-    borderRadius: 20,
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  setsCount: {
+  setsValue: {
     color: colors.textPrimary,
     fontSize: 24,
     fontWeight: '700',
     minWidth: 40,
-    textAlign: 'center',
-  },
-  scheduleButton: {
-    alignItems: 'center',
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    marginTop: 24,
-    paddingVertical: 14,
-  },
-  scheduleButtonText: {
-    color: colors.primaryText,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  setEditorScoreRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-  },
-  setEditorTeamBlock: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  setEditorTeamName: {
-    color: colors.textPrimary,
-    fontSize: fontsSize.medium,
-    fontWeight: '500',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  setEditorControls: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 16,
-  },
-  setEditorBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.border,
-    borderRadius: 22,
-    height: 44,
-    justifyContent: 'center',
-    width: 44,
-  },
-  setEditorScore: {
-    color: colors.textPrimary,
-    fontSize: 32,
-    fontWeight: '700',
-    minWidth: 50,
-    textAlign: 'center',
-  },
-  setEditorActions: {
-    gap: 10,
-  },
-  tieWarning: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    marginTop: 4,
     textAlign: 'center',
   },
 });

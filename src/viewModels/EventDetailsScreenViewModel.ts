@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { FormatType, GenderType } from '../models/Event';
 import { useAuthStore } from '../store/AuthStore';
 import { authFetch } from '../utils/authFetch';
 import { EventResponse, EventCategoryResponse } from '../models/EventResponse';
+import { API_ENDPOINTS } from '../config/api';
 
 type EventDetailsRouteProp = RouteProp<RootStackParamList, 'EventDetails'>;
 
@@ -22,6 +23,21 @@ type Category = {
   eventCategoryId: number;
 };
 
+type ParticipantRegistration = {
+  id: number;
+  userId: number;
+  name: string;
+  eventCategoryId: number;
+  registeredAt: string;
+};
+
+type TeamResponse = {
+  id: number;
+  name: string;
+  members: string[];
+  eventCategoryId: number;
+};
+
 const mapGender = (gender: string): GenderType => {
   if (gender === 'Female') return GenderType.Female;
   if (gender === 'Mixed') return GenderType.Mixed;
@@ -33,22 +49,30 @@ const mapFormat = (format: string): FormatType => {
   return FormatType.Singles;
 };
 
-const mapCategory = (cat: EventCategoryResponse, maxParticipants: number): Category => {
+const mapCategory = (
+  cat: EventCategoryResponse,
+  maxParticipants: number,
+  registrations: ParticipantRegistration[],
+  teamCounts: Record<number, number>,
+): Category => {
   const gender = mapGender(cat.gender);
   const format = mapFormat(cat.format);
   const genderLabel =
     gender === GenderType.Female ? "Women's" : gender === GenderType.Mixed ? 'Mixed' : "Men's";
   const isAbandoned = cat.status === 'Abandoned';
+  const participantCount = registrations.filter((r) => r.eventCategoryId === cat.id).length;
+  const teamCount = teamCounts[cat.id] ?? 0;
+  const slotsFull = participantCount >= maxParticipants;
 
   return {
     id: String(cat.id),
     title: `${genderLabel} ${format}`,
     gender,
     format,
-    participantCount: 0,
+    participantCount,
     totalParticipants: maxParticipants,
-    teamCount: 0,
-    slotsFull: false,
+    teamCount,
+    slotsFull,
     isAbandoned,
     eventCategoryId: cat.id,
   };
@@ -61,6 +85,8 @@ export const useEventDetailsViewModel = () => {
   const { user } = useAuthStore();
 
   const [event, setEvent] = useState<EventResponse | null>(null);
+  const [registrations, setRegistrations] = useState<ParticipantRegistration[]>([]);
+  const [teamCounts, setTeamCounts] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAssignOrganizer, setShowAssignOrganizer] = useState(false);
@@ -71,7 +97,33 @@ export const useEventDetailsViewModel = () => {
       setError(null);
       const data = await authFetch<EventResponse[]>(`/events?id=${eventId}`);
       if (data && data.length > 0) {
-        setEvent(data[0]);
+        const ev = data[0];
+        setEvent(ev);
+        const cats = ev.categories ?? [];
+
+        const [allRegs, allTeams] = await Promise.all([
+          Promise.all(
+            cats.map((cat) =>
+              authFetch<ParticipantRegistration[]>(
+                API_ENDPOINTS.REGISTRATIONS.BY_CATEGORY(cat.id),
+              ).then((r) => r ?? []),
+            ),
+          ),
+          Promise.all(
+            cats
+              .filter((cat) => mapFormat(cat.format) === FormatType.Doubles)
+              .map((cat) =>
+                authFetch<TeamResponse[]>(
+                  API_ENDPOINTS.ORGANIZER.GET_TEAMS(cat.id),
+                ).then((r) => ({ catId: cat.id, count: (r ?? []).length })),
+              ),
+          ),
+        ]);
+
+        setRegistrations(allRegs.flat());
+        const counts: Record<number, number> = {};
+        allTeams.forEach(({ catId, count }) => { counts[catId] = count; });
+        setTeamCounts(counts);
       } else {
         setError('Event not found');
       }
@@ -82,12 +134,14 @@ export const useEventDetailsViewModel = () => {
     }
   }, [eventId]);
 
-  useEffect(() => {
-    fetchEvent();
-  }, [fetchEvent]);
+  useEffect(() => { fetchEvent(); }, [fetchEvent]);
+
+  useFocusEffect(
+    useCallback(() => { fetchEvent(); }, [fetchEvent]),
+  );
 
   const categories: Category[] = (event?.categories ?? []).map((cat) =>
-    mapCategory(cat, event?.maxParticipantsCount ?? 0),
+    mapCategory(cat, event?.maxParticipantsCount ?? 0, registrations, teamCounts),
   );
 
   const hasEventStarted = event?.status === 'Live' || event?.status === 'Completed';
@@ -96,8 +150,6 @@ export const useEventDetailsViewModel = () => {
     (role === 'admin' || role === 'organizer') && !hasEventStarted && event?.status !== 'Cancelled';
 
   const canAssignOrganizer = role === 'admin' && !hasEventStarted && event?.status !== 'Cancelled';
-
-  const canPublish = role === 'admin' && event?.status === 'Upcoming';
 
   const canRegister = role === 'participant' && event?.status === 'Open';
 
@@ -114,6 +166,9 @@ export const useEventDetailsViewModel = () => {
       format: category.format,
       role,
       eventCategoryId: category.eventCategoryId,
+      eventStartDate: String(event.startDate),
+      eventEndDate: String(event.endDate),
+      eventVenue: event.eventVenue,
     });
   };
 
@@ -136,19 +191,6 @@ export const useEventDetailsViewModel = () => {
     fetchEvent();
   };
 
-  const handlePublish = async () => {
-    if (!event) return;
-    try {
-      await authFetch(`/events/${event.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ action: 'publish' }),
-      });
-      fetchEvent();
-    } catch (e: any) {
-      console.error('Publish failed:', e?.message);
-    }
-  };
-
   return {
     event,
     loading,
@@ -157,7 +199,6 @@ export const useEventDetailsViewModel = () => {
     categories,
     canEditOrDelete,
     canAssignOrganizer,
-    canPublish,
     canRegister,
     showAssignOrganizer,
     getRegisterButtonText,
@@ -168,6 +209,5 @@ export const useEventDetailsViewModel = () => {
     handleOpenAssignOrganizer,
     handleCloseAssignOrganizer,
     handleAssignOrganizerSuccess,
-    handlePublish,
   };
 };

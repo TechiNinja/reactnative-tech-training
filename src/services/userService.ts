@@ -75,11 +75,12 @@ export const createUser = async (payload: CreateUserPayload): Promise<User> => {
     method: 'POST',
     body: JSON.stringify(payload),
   });
+  console.log('createUser response =>', JSON.stringify(created));
   return mapApiUserToUser(created);
 };
 
 export const updateUserApi = async (
-  userId: string,
+  userId: string, 
   payload: UpdateUserPayload,
 ): Promise<User> => {
   const updated = await authFetch<ApiUser>(`/Users/${userId}`, {

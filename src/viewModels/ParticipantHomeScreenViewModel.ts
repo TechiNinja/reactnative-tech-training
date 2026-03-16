@@ -45,20 +45,26 @@ export const useParticipantHomeViewModel = () => {
 
     const loadData = async () => {
       try {
-        const teams = await getMyTeams(user.id);
+        const teams = await getMyTeams(user.id) ?? [];
         setMyTeams(teams);
 
+        const events = await getMyEvents(user.id) ?? [];
+        setMyEventsCount(events.length);
+
+        const rawSchedule = await getMySchedule(user.id) ?? [];
+        
+        if (rawSchedule.length === 0) {
+          setTodaysMatches([]);
+          setMatchesPlayedCount(0);
+          setWinsCount(0);
+          return;  
+        }
+
         const resolveName = (id: string) => {
-          const participant = teams.find(
-            (team) => team.teamId.toString() === id,
-          );
+          const participant = teams.find((team) => team.teamId.toString() === id);
           return participant ? participant.teamName : `Player ${id}`;
         };
 
-        const events = await getMyEvents(user.id);
-        setMyEventsCount(events.length);
-
-        const rawSchedule = await getMySchedule(user.id);
         const mapped = rawSchedule.map((match: ApiScheduleRaw) => ({
           id: match.matchId,
           teamA: resolveName(match.sideA),
@@ -66,9 +72,7 @@ export const useParticipantHomeViewModel = () => {
           scoreA: match.scoreA,
           scoreB: match.scoreB,
           status:
-            match.scoreA !== null && match.scoreB !== null
-              ? 'COMPLETED'
-              : 'UPCOMING',
+            match.scoreA !== null && match.scoreB !== null ? 'COMPLETED' : 'UPCOMING',
           sport: match.eventName,
         }));
 
@@ -82,11 +86,15 @@ export const useParticipantHomeViewModel = () => {
             if (match.scoreA > match.scoreB) wins++;
           }
         });
-
         setMatchesPlayedCount(played);
         setWinsCount(wins);
+
       } catch {
-        Alert.alert('Error', APP_STRINGS.participantScreens.failedToLoadData);
+        setMyTeams([]);
+        setMyEventsCount(0);
+        setTodaysMatches([]);
+        setMatchesPlayedCount(0);
+        setWinsCount(0);
       }
     };
 

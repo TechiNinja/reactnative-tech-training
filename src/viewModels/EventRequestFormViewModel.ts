@@ -70,18 +70,18 @@ export const useEventRequestFormViewModel = ({ mode, request, navigation }: Para
     if (isEdit) return;
 
     const loadSports = async () => {
-      try {
-        setSportsLoading(true);
-        const data = await eventRequestService.getSports();
-        setSports(data);
-      } catch (err) {
-        if (err instanceof Error) {
-          Alert.alert(validationMessages.ERROR, err.message || validationMessages.SOMETHING_WRONG);
-        }
-      } finally {
-        setSportsLoading(false);
-      }
-    };
+  try {
+    setSportsLoading(true);
+    const data = await eventRequestService.getSports();
+    setSports(data ?? []);
+  } catch (err) {
+    if (err instanceof Error) {
+      Alert.alert(validationMessages.ERROR, err.message || validationMessages.SOMETHING_WRONG);
+    }
+  } finally {
+    setSportsLoading(false);
+  }
+};
 
     loadSports();
   }, [isEdit]);

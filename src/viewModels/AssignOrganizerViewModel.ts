@@ -32,7 +32,7 @@ export const useAssignOrganizerViewModel = (
       setLoading(true);
       const data = await authFetch<UserResponse[]>('/users');
       const filtered = (data ?? [])
-        .filter((u) => u.roleName === 'Organizer' && u.isActive)
+        .filter((u) => u.roleName === 'organizer' && u.isActive)
         .map((u) => ({ id: u.id, fullName: u.fullName, email: u.email }));
       setOrganizers(filtered);
     } catch {

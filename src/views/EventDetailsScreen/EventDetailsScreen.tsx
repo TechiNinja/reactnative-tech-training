@@ -37,7 +37,6 @@ const EventDetailsScreen = () => {
     categories,
     canEditOrDelete,
     canAssignOrganizer,
-    canPublish,
     canRegister,
     showAssignOrganizer,
     getRegisterButtonText,
@@ -48,7 +47,6 @@ const EventDetailsScreen = () => {
     handleOpenAssignOrganizer,
     handleCloseAssignOrganizer,
     handleAssignOrganizerSuccess,
-    handlePublish,
   } = useEventDetailsViewModel();
 
   const {
@@ -188,7 +186,7 @@ const EventDetailsScreen = () => {
               onPress={handleRegister}
             />
           )}
-          {(canEditOrDelete || canPublish) && (
+          {canEditOrDelete && (
             <View style={styles.adminActionRow}>
               {canEditOrDelete && (
                 <Pressable style={styles.adminActionBtn} onPress={handleEditEvent}>
@@ -203,17 +201,6 @@ const EventDetailsScreen = () => {
                   <UserCheck size={20} color={colors.primary} />
                   <Text style={styles.adminActionText}>
                     {APP_STRINGS.eventScreen.organizerAction}
-                  </Text>
-                </Pressable>
-              )}
-              {canPublish && (
-                <Pressable
-                  style={[styles.adminActionBtn, styles.adminActionBtnPublish]}
-                  onPress={handlePublish}
-                >
-                  <Trophy size={20} color={styles.adminActionTextPublish.color} />
-                  <Text style={[styles.adminActionText, styles.adminActionTextPublish]}>
-                    {APP_STRINGS.eventScreen.publishEvent}
                   </Text>
                 </Pressable>
               )}

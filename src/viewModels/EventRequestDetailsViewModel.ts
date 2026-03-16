@@ -1,7 +1,8 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert } from 'react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { authFetch } from '../utils/authFetch';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { EventRequestResponse, RequestStatus } from '../models/EventRequest';
 import { useEventRequestStore } from '../store/EventRequestStore';
@@ -21,6 +22,7 @@ export const useEventRequestDetailsViewModel = () => {
   const request: EventRequestResponse | undefined = route.params?.request;
   const { withdrawRequest, decideRequest } = useEventRequestStore();
   const [approvingOrRejecting, setApprovingOrRejecting] = useState(false);
+  const [isEventAlreadyCreated, setIsEventAlreadyCreated] = useState(false);
 
   const isPending = request?.status === RequestStatus.PENDING;
   const isApproved = request?.status === RequestStatus.APPROVED;
@@ -29,9 +31,17 @@ export const useEventRequestDetailsViewModel = () => {
   const canApprove = isPending;
   const canReject = isPending;
   const canWithdraw = isPending;
-  const canCreateEvent = isApproved;
+  const canCreateEvent = isApproved && !isEventAlreadyCreated;
 
   const handleBack = () => navigation.goBack();
+
+  useEffect(() => {
+    if (!request || request.status !== RequestStatus.APPROVED) return;
+
+    authFetch<{ isEventAlreadyCreated: boolean }>(`/events/request/${request.id}`)
+      .then((data) => setIsEventAlreadyCreated(data?.isEventAlreadyCreated ?? false))
+      .catch(() => setIsEventAlreadyCreated(false));
+  }, [request?.id]);
 
   const handleDecision = async (status: OpsStatus, remarks: string) => {
     if (!request || !isPending) return;

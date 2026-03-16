@@ -34,7 +34,7 @@ const EventFormScreen = ({ route }: EventFormScreenProps) => {
         </View>
 
         <Text style={styles.inputLabels}>
-          {APP_STRINGS.eventScreen.eventName}
+          {APP_STRINGS.eventScreen.eventName}<Text style={{ color: colors.error }}> *</Text>
         </Text>
         <AppInput
           placeholder={APP_STRINGS.placeHolders.eventName}
@@ -121,7 +121,7 @@ const EventFormScreen = ({ route }: EventFormScreenProps) => {
 
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabels}>
-            {APP_STRINGS.eventScreen.registrationDeadline}
+            {APP_STRINGS.eventScreen.registrationDeadline}<Text style={{ color: colors.error }}> *</Text>
           </Text>
           <Pressable onPress={viewModel.showDeadlinePicker}>
             <View pointerEvents="none">
@@ -150,7 +150,7 @@ const EventFormScreen = ({ route }: EventFormScreenProps) => {
 
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabels}>
-            {APP_STRINGS.eventScreen.totalParticipants}
+            {APP_STRINGS.eventScreen.totalParticipants}<Text style={{ color: colors.error }}> *</Text>
           </Text>
           <AppInput
             placeholder={APP_STRINGS.eventScreen.totalParticipants}
@@ -163,7 +163,7 @@ const EventFormScreen = ({ route }: EventFormScreenProps) => {
 
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabels}>
-            {APP_STRINGS.eventScreen.description}
+            {APP_STRINGS.eventScreen.description}<Text style={{ color: colors.error }}> *</Text>
           </Text>
           <AppInput
             placeholder={APP_STRINGS.eventScreen.description}

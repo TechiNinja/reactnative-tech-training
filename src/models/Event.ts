@@ -43,9 +43,9 @@ export enum FixtureTabType {
 
 export enum EventStatusTab {
   ALL = 'ALL',
-  LIVE = 'LIVE',
-  UPCOMING = 'UPCOMING',
-  OPEN = 'OPEN',
+  UPCOMING = 'Upcoming',
+  LIVE = 'Live',
+  COMPLETED = 'Completed',
 }
 
 export interface Registration {
@@ -89,7 +89,6 @@ export interface Event {
 
   status: EventStatus;
   format: FormatType[];
-  // formats: [FormatType.Singles | FormatType.Doubles];
 
   registeredTeams: number;
   totalTeams: number;

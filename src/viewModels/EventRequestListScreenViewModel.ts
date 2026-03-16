@@ -17,7 +17,7 @@ export const useEventRequestListViewModel = (role: UserRoleType) => {
 
   useEffect(() => {
     fetchRequests();
-  }, [fetchRequests]);
+  }, []);
 
   const filteredRequests = useMemo(() => {
     return requests.filter((request) => request.status === activeTab);

@@ -6,6 +6,7 @@ import OrganizerTabs from './OrganizerTabs';
 import ParticipantTabs from './ParticipantTabs';
 import EventFormScreen from '../views/EventFormScreen/EventFormScreen';
 import UserFormScreen from '../views/UserFormScreen/UserFormScreen';
+import MatchDetailsScreen from '../views/MatchDetailsScreen/MatchDetailsScreen';
 import EventRequestFormScreen from '../views/EventRequestFormScreen/EventRequestFormScreen';
 import { GenderType, FormatType } from '../models/Event';
 import { UserRoleType } from '../models/User';
@@ -44,6 +45,15 @@ export type RootStackParamList = {
     eventId: string;
     role: UserRoleType;
   };
+  MatchDetails: {
+    matchId: number;
+    role: UserRoleType;
+    eventStartDate: string;
+    eventEndDate: string;
+    eventVenue: string;
+    categoryId: number;
+    openSchedule?: boolean;
+  };
   EventRequestDetails: {
     request: EventRequestResponse;
     role: UserRoleType;
@@ -54,6 +64,9 @@ export type RootStackParamList = {
     format: FormatType;
     role: UserRoleType;
     eventCategoryId?: number;
+    eventStartDate: string;
+    eventEndDate: string;
+    eventVenue: string;
   };
 };
 
@@ -70,6 +83,7 @@ const AppNavigator = () => {
       <Stack.Screen name="EventForm" component={EventFormScreen} />
       <Stack.Screen name="UserForm" component={UserFormScreen} />
       <Stack.Screen name="EventRequestForm" component={EventRequestFormScreen} />
+      <Stack.Screen name="MatchDetails" component={MatchDetailsScreen} />
       <Stack.Screen name="EventRegister" component={EventRegistrationScreen} />
       <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
       <Stack.Screen name="EventRequestDetails" component={EventRequestDetailsScreen} />

@@ -4,9 +4,9 @@ import { EventStatusTab } from '../../models/Event';
 
 const TABS: EventStatusTab[] = [
   EventStatusTab.ALL,
-  EventStatusTab.LIVE,
   EventStatusTab.UPCOMING,
-  EventStatusTab.OPEN,
+  EventStatusTab.LIVE,
+  EventStatusTab.COMPLETED,
 ];
 
 type EventStatusTabProps = {
@@ -19,7 +19,6 @@ const EventStatusTabs = ({ activeTab, onChange }: EventStatusTabProps) => {
     <View style={styles.container}>
       {TABS.map((tab) => {
         const isActive = activeTab === tab;
-
         return (
           <Pressable
             key={tab}
