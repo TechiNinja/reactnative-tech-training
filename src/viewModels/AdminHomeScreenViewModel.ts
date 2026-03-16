@@ -27,10 +27,6 @@ export const useAdminHomeViewModel = () => {
     });
   };
 
-  const onAddEvent = () => {
-    navigation.navigate('EventForm', { mode: 'create' });
-  };
-
   const onAddUser = () => {
     navigation.navigate('UserForm', { mode: 'create' });
   };
@@ -39,17 +35,16 @@ export const useAdminHomeViewModel = () => {
     navigation.navigate('EventRequestForm', { mode: 'create' });
   };
 
-  const onGetNotificaton = () => {
+  const onGetNotification = () => {
     navigation.navigate('Notification', { audience: 'Admin' });
   };
 
   return {
     onLogoutPress,
-    onAddEvent,
     onAddUser,
     analytics,
     loading,
     onRaiseRequest,
-    onGetNotificaton
+    onGetNotification
   };
 };

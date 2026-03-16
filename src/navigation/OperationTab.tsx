@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { ClipboardList, Home, Users } from 'lucide-react-native';
+import { ClipboardList, Home,} from 'lucide-react-native';
 import { colors } from '../theme/colors';
 
 import EventRequestListScreen from '../views/EventRequestListScreen/EventRequestListScreen';

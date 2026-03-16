@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, Calendar, Users, Clipboard, ClipboardList } from 'lucide-react-native';
+import { Home, Calendar, Users, ClipboardList } from 'lucide-react-native';
 import { colors } from '../theme/colors';
 
 import AdminHomeScreen from '../views/Admin/AdminHomeScreen';

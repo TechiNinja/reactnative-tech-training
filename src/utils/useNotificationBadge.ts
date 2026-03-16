@@ -3,7 +3,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { createNotificationConnection } from '../utils/signalRClient';
 import { getToken, getUser } from '../utils/authStorage';
 import { API_BASE_URL } from '../config/api';
-import * as signalR from "@microsoft/signalr";
+import * as signalR from '@microsoft/signalr';
+import { Alert } from 'react-native';
 
 export type NotificationAudience = 'Ops' | 'Admin';
 
@@ -40,7 +41,9 @@ export const useNotificationBadge = (audience: NotificationAudience) => {
       const unreadCount = text ? Number(text) : 0;
       setCount(Number.isNaN(unreadCount) ? 0 : unreadCount);
     } catch (err) {
-      console.log('Failed to load unread count:', err);
+      if (err instanceof Error) {
+        Alert.alert(err.message);
+      }
       setCount(0);
     }
   }, [audience]);
@@ -72,7 +75,9 @@ export const useNotificationBadge = (audience: NotificationAudience) => {
           await conn.invoke('JoinAdminGroup', adminId);
         }
       } catch (err) {
-        console.log('SignalR start error:', err);
+        if (err instanceof Error) {
+          Alert.alert(err.message);
+        }
       }
     };
 

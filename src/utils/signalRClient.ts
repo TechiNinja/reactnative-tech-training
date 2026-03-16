@@ -1,9 +1,9 @@
 import * as signalR from '@microsoft/signalr';
-import { API_BASE_URLL } from '../config/api';
+import { API_WS_BASE_URL } from '../config/api';
 
 export const createNotificationConnection = () => {
   return new signalR.HubConnectionBuilder()
-    .withUrl(`${API_BASE_URLL}/hubs/notifications`)
+    .withUrl(`${API_WS_BASE_URL}/hubs/notifications`)
     .withAutomaticReconnect()
     .build();
 };

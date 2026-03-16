@@ -1,15 +1,13 @@
 import { Text, TouchableOpacity, View } from 'react-native';
-import { styles } from '../EventCard/EventCardStyles'; 
+
 import { colors } from '../../theme/colors';
 import { Calendar, MapPin } from 'lucide-react-native';
 import { useState } from 'react';
 import { EventRequestResponse } from '../../models/EventRequest';
-import { UserRoleType } from '../../models/User';
-
+import { styles } from './EventRequestCardStyle';
 
 type EventRequestCardProps = {
   request: EventRequestResponse;
-  role: UserRoleType;
   onPress: () => void;
 };
 
@@ -25,7 +23,6 @@ const EventRequestCard = ({ request, onPress }: EventRequestCardProps) => {
     >
       <View style={styles.container}>
         <View style={styles.status}>
-         
           <Text style={styles.sportText}>{request.sportsName}</Text>
 
           <Text style={styles.statusText}>{request.status}</Text>
@@ -33,7 +30,6 @@ const EventRequestCard = ({ request, onPress }: EventRequestCardProps) => {
 
         <View style={styles.left}>
           <View style={styles.info}>
-        
             <Text style={styles.title}>{request.eventName}</Text>
 
             <View style={styles.details}>
@@ -47,7 +43,6 @@ const EventRequestCard = ({ request, onPress }: EventRequestCardProps) => {
               <MapPin color={colors.textSecondary} />
               <Text style={styles.detailsText}>{request.requestedVenue}</Text>
             </View>
-
           </View>
         </View>
       </View>

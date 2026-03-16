@@ -12,8 +12,8 @@ export const styles = StyleSheet.create({
   actionCardContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    flexWrap : 'wrap',
-    gap : 4
+    flexWrap: 'wrap',
+    gap: 4,
   },
   actionCardWrapper: {
     width: ACTION_CARD_WIDTH,

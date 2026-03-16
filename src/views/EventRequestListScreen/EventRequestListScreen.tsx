@@ -3,12 +3,10 @@ import { FlatList, Pressable, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Bell } from 'lucide-react-native';
-
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import EventRequestStatusTabs from '../../components/EventRequestStatusTab/EventRequestStatusTab';
 import AppButton from '../../components/AppButton/AppButton';
 import EventRequestCard from '../../components/EventRequestCard/EventRequestCard';
-
 import { styles } from './EventRequestListScreenStyles';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { APP_STRINGS } from '../../constants/AppStrings';
@@ -89,7 +87,6 @@ const EventRequestListScreen = ({ role }: EventRequestListScreenProps) => {
             renderItem={({ item }) => (
               <EventRequestCard
                 request={item}
-                role={role}
                 onPress={() => onRequestPress(item)}
               />
             )}

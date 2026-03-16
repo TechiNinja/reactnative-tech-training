@@ -14,41 +14,31 @@ export const useNotificationViewModel = (
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [error, setError] = useState('');
 
+  const getNotificationFilter = useCallback(async () => {
+    if (audience === 'Admin') {
+      const user = await getUser();
+
+      return {
+        audience,
+        userId: user?.id,
+      };
+    }
+
+    return { audience };
+  }, [audience]);
+
   const notificationFetch = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
 
-      const data = await notificationService.getAll(audience);
+      const filter = await getNotificationFilter();
+      const data = await notificationService.getAll(filter);
 
-      let filteredNotifications = data;
-
-      if (audience === 'Admin') {
-        const user = await getUser();
-        filteredNotifications = data.filter(
-          item => Number(item.userId) === Number(user?.id),
-        );
-      }
-
-      const sortedNotifications = [...filteredNotifications].sort(
+      const sortedNotifications = [...data].sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
-
-      console.log(
-  'notifications =>',
-  sortedNotifications.map(item => ({
-    id: item.id,
-    message: item.message,
-    isRead: item.isRead,
-    createdAt: item.createdAt,
-  })),
-);
-
-console.log(
-  'unread from api =>',
-  sortedNotifications.filter(item => !item.isRead).length,
-);
 
       setNotifications(sortedNotifications);
     } catch (error: any) {
@@ -59,20 +49,16 @@ console.log(
     } finally {
       setLoading(false);
     }
-
-    
-
-  }, [audience]);
-
-  
+  }, [getNotificationFilter]);
 
   const markAllAsRead = useCallback(async () => {
     try {
-      await notificationService.markAllAsRead(audience);
+      const filter = await getNotificationFilter();
+      await notificationService.markAllAsRead(filter);
     } catch (error) {
       console.log('Failed to mark notifications as read:', error);
     }
-  }, [audience]);
+  }, [getNotificationFilter]);
 
   useEffect(() => {
     notificationFetch();

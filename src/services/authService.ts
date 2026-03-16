@@ -46,8 +46,7 @@ export const AuthService = {
       role: mapRole(data.role),
     };
 
-    console.log('Login role from backend =>', data.role);
-console.log('Mapped frontend role =>', mapRole(data.role));
+    console.log('LOGGED IN USER ROLE:', user.role);
 
     return { user, token: data.token };
   },
@@ -66,7 +65,9 @@ console.log('Mapped frontend role =>', mapRole(data.role));
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       throw new Error(
-        data?.detail ?? data?.title ?? APP_STRINGS.eventScreen.registrationFailed,
+        data?.detail ??
+          data?.title ??
+          APP_STRINGS.eventScreen.registrationFailed,
       );
     }
 

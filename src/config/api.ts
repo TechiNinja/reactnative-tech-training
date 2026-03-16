@@ -1,5 +1,8 @@
-export const API_BASE_URL = 'http://localhost:5181/api';
-export const API_BASE_URLL = 'http://localhost:5181';
+import { Platform } from "react-native";
+
+const HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+export const API_BASE_URL = `http://${HOST}:5181/api`;
+export const API_WS_BASE_URL = `http://${HOST}:5181`;
 
 export const API_ENDPOINTS = {
   AUTH: {
@@ -8,7 +11,8 @@ export const API_ENDPOINTS = {
   },
   USERS: '/Users',
   ROLES: '/Roles',
-  SPORT: '/Sport',
+  SPORT: '/sports',
+
   EVENT_REQUESTS: {
     BASE: '/event-requests',
     BY_ID: (id: number) => `/event-requests/${id}`,
@@ -16,22 +20,18 @@ export const API_ENDPOINTS = {
     DECIDE: (id: number, status: 'Approved' | 'Rejected') =>
       `/Operation/${id}/${status}`,
   },
+
   PARTICIPANT: {
-    EVENTS: (userId: number) => `/Events/${userId}`,
-    TEAM: (userId: number) => `/Teams/${userId}`,
+    EVENTS: (userId: number) => `/events/user/${userId}`,
     SCHEDULE: (userId: number) => `/Schedules/${userId}`,
-    REGISTER: '/participantregistrations',
+    REGISTER: '/ParticipantRegistrations',
   },
-  ORGANIZER: {
-    CREATE_TEAMS: '/categoryteam/create',
-    GET_TEAMS: (eventCategoryId: number) => `/categoryteam/${eventCategoryId}`,
-    GET_PARTICIPANTS: (eventCategoryId: number) =>
-      `/participantregistrations/${eventCategoryId}`,
-  },
-  ANALYTICS: '/analytics',
+
+  ANALYTICS: '/Analytics',
 
   NOTIFICATIONS: {
     BASE: '/Notifications',
     MARK_READ: '/Notifications/mark-read',
+    UNREAD_COUNT: '/Notifications/unread-count',
   },
 };

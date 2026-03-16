@@ -63,7 +63,7 @@ export const useEventRequestDetailsViewModel = () => {
     const trimmedRemarks = remarks.trim();
 
     if (!trimmedRemarks) {
-      Alert.alert(validationMessages.remarkRequired);
+      Alert.alert(validationMessages.REMARK_REQUIRED);
       return;
     }
 
@@ -74,13 +74,15 @@ export const useEventRequestDetailsViewModel = () => {
 
       closeRemarksModal();
       Alert.alert(
-        validationMessages.success,
-        `${APP_STRINGS.RequestScreen.request} ${decision.toLowerCase()} ${validationMessages.successfully}`,
+        validationMessages.SUCCESS,
+        `${APP_STRINGS.RequestScreen.request} ${decision.toLowerCase()} ${
+          validationMessages.SUCCESSFULLY
+        }`,
       );
       navigation.goBack();
     } catch (error: any) {
       Alert.alert(
-        validationMessages.error,
+        validationMessages.ERROR,
         error?.message || validationMessages.SOMETHING_WRONG,
       );
     } finally {
@@ -118,45 +120,41 @@ export const useEventRequestDetailsViewModel = () => {
   const handleWithdraw = () => {
     if (!request || !canWithdraw) return;
 
-    Alert.alert(
-      validationMessages.withdraw,
-      validationMessages.withdrawSure,
-      [
-        {
-          text: APP_STRINGS.RequestScreen.cancel,
-          style: 'cancel',
-        },
-        {
-          text: validationMessages.ok,
-          onPress: async () => {
-            try {
-              setApprovingOrRejecting(true);
+    Alert.alert(validationMessages.WITHDRAW, validationMessages.WITHDRAW_SURE, [
+      {
+        text: APP_STRINGS.RequestScreen.cancel,
+        style: 'cancel',
+      },
+      {
+        text: validationMessages.OK,
+        onPress: async () => {
+          try {
+            setApprovingOrRejecting(true);
 
-              await withdrawRequest(request.id);
+            await withdrawRequest(request.id);
 
-              Alert.alert(validationMessages.withdrawSuccess);
-              navigation.goBack();
-            } catch (error: any) {
-              Alert.alert(
-                validationMessages.error,
-                error?.message || validationMessages.SOMETHING_WRONG,
-              );
-            } finally {
-              setApprovingOrRejecting(false);
-            }
-          },
+            Alert.alert(validationMessages.WITHDRAWSUCCESS);
+            navigation.goBack();
+          } catch (error: any) {
+            Alert.alert(
+              validationMessages.ERROR,
+              error?.message || validationMessages.SOMETHING_WRONG,
+            );
+          } finally {
+            setApprovingOrRejecting(false);
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const formatDate = (date: string) => {
     const parsedDate = new Date(date);
 
-    const day = parsedDate.getDate();
-    const month = parsedDate.getMonth() + 1;
+    const day = parsedDate.getDate().toString().padStart(2, '0');
+    const month = (parsedDate.getMonth() + 1).toString().padStart(2, '0');
     const year = parsedDate.getFullYear();
-    const hours = parsedDate.getHours();
+    const hours = parsedDate.getHours().toString().padStart(2, '0');
     const minutes = parsedDate.getMinutes().toString().padStart(2, '0');
 
     return `${day}-${month}-${year} ${hours}:${minutes}`;

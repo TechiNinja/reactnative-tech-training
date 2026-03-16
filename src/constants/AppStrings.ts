@@ -1,5 +1,3 @@
-import NotificationScreen from "../views/NotificationScreen/NotificationScreen";
-
 export const APP_STRINGS = {
   app: {
     name: 'SportsCarnival',

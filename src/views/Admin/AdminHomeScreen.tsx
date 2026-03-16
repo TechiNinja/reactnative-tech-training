@@ -31,15 +31,11 @@ const AdminHomeScreen = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const { onLogoutPress, onAddEvent,onRaiseRequest, onAddUser, analytics, loading,onGetNotificaton } =
+  const { onLogoutPress,onRaiseRequest, onAddUser, analytics, loading,onGetNotification } =
     useAdminHomeViewModel();
 
   const { count} = useNotificationBadge("Admin");
-
-  const handleOpenNotifications = async () => {
-    onGetNotificaton();
-  };  
-
+ 
   return (
     <ScreenWrapper scrollable={true}>
       <View style={styles.container}>
@@ -145,7 +141,7 @@ const AdminHomeScreen = () => {
                   </View>
                 }
                 title={APP_STRINGS.adminScreens.bell}
-                onPress={handleOpenNotifications}
+                onPress={onGetNotification}
               />
             </View>
 

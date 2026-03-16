@@ -1,22 +1,47 @@
 import { getToken } from './authStorage';
 import { API_BASE_URL } from '../config/api';
 
-export const authFetch = async <T>(url: string, options: RequestInit = {}): Promise<T> => {
+export const authFetch = async <T>(
+  url: string,
+  options: RequestInit = {},
+): Promise<T> => {
   const token = await getToken();
+  const fullUrl = API_BASE_URL + url;
 
-  try {
-    const res = await fetch(API_BASE_URL + url, {
-      ...options,
-      headers: { 'Content-Type': 'application/json', ...options.headers, ...(token && { Authorization: `Bearer ${token}` }) },
+  console.log('AUTH FETCH ->', {
+    url: fullUrl,
+    method: options.method ?? 'GET',
+    hasToken: !!token,
+  });
+
+  const res = await fetch(fullUrl, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+  });
+
+  if (!res.ok) {
+    const rawText = await res.text();
+    console.log('AUTH FETCH FAILED ->', {
+      url: fullUrl,
+      status: res.status,
+      body: rawText,
     });
 
-    if (res.status === 204) return undefined as T;
+    let errData: any = {};
+    try {
+      errData = rawText ? JSON.parse(rawText) : {};
+    } catch {}
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.detail || data?.title || `Failed request: ${res.status}`);
-
-    return data as T;
-  } catch (err) {
-    throw err;
+    throw new Error(
+      errData?.detail || errData?.title || rawText || `Failed: ${res.status}`,
+    );
   }
+
+  if (res.status === 204) return undefined as T;
+
+  return (await res.json()) as T;
 };
