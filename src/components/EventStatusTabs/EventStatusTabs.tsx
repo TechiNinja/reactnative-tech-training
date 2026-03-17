@@ -4,9 +4,9 @@ import { EventStatusTab } from '../../models/Event';
 
 const TABS: EventStatusTab[] = [
   EventStatusTab.ALL,
-  EventStatusTab.LIVE,
   EventStatusTab.UPCOMING,
-  EventStatusTab.OPEN,
+  EventStatusTab.LIVE,
+  EventStatusTab.COMPLETED,
 ];
 
 type EventStatusTabProps = {

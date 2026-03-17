@@ -1,6 +1,6 @@
 import React from 'react';
-import { Text, View, Pressable, FlatList, TextInput } from 'react-native';
-import { ArrowLeft, User, Users, Search } from 'lucide-react-native';
+import { Text, View, Pressable, FlatList, TextInput, ActivityIndicator } from 'react-native';
+import { ArrowLeft, User, Users, Search, RefreshCw } from 'lucide-react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppButton from '../../components/AppButton/AppButton';
 import MyTeamCard from '../../components/MyTeamCard/MyTeamCard';
@@ -21,18 +21,25 @@ const FIXTURE_TABS: FixtureTabType[] = [
 const CategoryDetailsScreen = () => {
   const viewModel = useCategoryDetailsViewModel();
 
-  if (!viewModel.event) {
+  if (viewModel.loading) {
     return (
       <ScreenWrapper>
-        <Text style={styles.errorText}>
-          {APP_STRINGS.eventScreen.noEventFound}
-        </Text>
+        <View style={styles.emptyState}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </ScreenWrapper>
+    );
+  }
+
+  if (!viewModel.category) {
+    return (
+      <ScreenWrapper>
+        <Text style={styles.errorText}>{APP_STRINGS.eventScreen.noEventFound}</Text>
       </ScreenWrapper>
     );
   }
 
   const {
-    event,
     gender,
     format,
     navigation,
@@ -51,36 +58,33 @@ const CategoryDetailsScreen = () => {
     isAbandoned,
     canCreateTeams,
     canCreateFixtures,
+    canRegenerate,
     minRequiredForTeams,
     hasTeamsForGender,
     hasFixturesForGender,
     getRoundName,
     handleCreateTeams,
     handleCreateFixtures,
-    handleSetLive,
-    handleUpdateScore,
-    handleCompleteFixture,
+    handleDeleteAndRegenerate,
+    handleDeleteFixture,
+    handleFixturePress,
+    handleScheduleFixture,
+    eventVenue,
+    eventName,
+    event,
   } = viewModel;
-
-  const showSearchBar =
-    activeMainTab === 'TEAMS' || activeMainTab === 'FIXTURES';
+  const { refreshing, handleRefresh } = viewModel;
+  const showSearchBar = activeMainTab === 'TEAMS' || activeMainTab === 'FIXTURES';
 
   return (
     <ScreenWrapper scrollable={false}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Pressable
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
+          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
             <ArrowLeft size={24} color={colors.textPrimary} />
           </Pressable>
           <Text style={styles.headerTitle}>
-            {gender === GenderType.Male
-              ? "Men's"
-              : gender === GenderType.Female
-              ? "Women's"
-              : 'Mixed'}{' '}
+            {gender === GenderType.Male ? "Men's" : gender === GenderType.Female ? "Women's" : 'Mixed'}{' '}
             {format}
             {isAbandoned && ' (Abandoned)'}
           </Text>
@@ -92,17 +96,9 @@ const CategoryDetailsScreen = () => {
             <Pressable
               key={tab}
               onPress={() => setActiveMainTab(tab)}
-              style={[
-                styles.mainTabButton,
-                activeMainTab === tab && styles.activeMainTab,
-              ]}
+              style={[styles.mainTabButton, activeMainTab === tab && styles.activeMainTab]}
             >
-              <Text
-                style={[
-                  styles.mainTabText,
-                  activeMainTab === tab && styles.activeMainTabText,
-                ]}
-              >
+              <Text style={[styles.mainTabText, activeMainTab === tab && styles.activeMainTabText]}>
                 {tab}
               </Text>
             </Pressable>
@@ -131,6 +127,8 @@ const CategoryDetailsScreen = () => {
             <FlatList
               data={participants}
               keyExtractor={(item) => item.id}
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
               contentContainerStyle={styles.listContent}
               renderItem={({ item, index }) => (
                 <View style={styles.participantCard}>
@@ -152,13 +150,15 @@ const CategoryDetailsScreen = () => {
                 <FlatList
                   data={teams}
                   keyExtractor={(item) => item.id}
+                  refreshing={refreshing}
+                  onRefresh={handleRefresh}
                   contentContainerStyle={styles.listContent}
                   renderItem={({ item }) => (
                     <MyTeamCard
                       logo={<Users color={colors.appBackground} />}
                       name={item.name}
-                      members={item.players.map((player) => player.name)}
-                      sport={event.sport}
+                      members={item.members}
+                      sport={event?.sport ?? ''}
                       wins={0}
                       losses={0}
                       winRate="0%"
@@ -170,8 +170,7 @@ const CategoryDetailsScreen = () => {
                   <View style={styles.centerButton}>
                     {!canCreateTeams && (
                       <Text style={styles.thresholdText}>
-                        Minimum {minRequiredForTeams} participants required (20%
-                        threshold)
+                        Minimum {minRequiredForTeams} participants required
                       </Text>
                     )}
                     <AppButton
@@ -192,17 +191,9 @@ const CategoryDetailsScreen = () => {
                   <Pressable
                     key={tab}
                     onPress={() => setActiveFixtureTab(tab)}
-                    style={[
-                      styles.fixtureTabButton,
-                      activeFixtureTab === tab && styles.activeFixtureTab,
-                    ]}
+                    style={[styles.fixtureTabButton, activeFixtureTab === tab && styles.activeFixtureTab]}
                   >
-                    <Text
-                      style={[
-                        styles.fixtureTabText,
-                        activeFixtureTab === tab && styles.activeFixtureTabText,
-                      ]}
-                    >
+                    <Text style={[styles.fixtureTabText, activeFixtureTab === tab && styles.activeFixtureTabText]}>
                       {tab}
                     </Text>
                   </Pressable>
@@ -210,28 +201,40 @@ const CategoryDetailsScreen = () => {
               </View>
 
               {hasFixturesForGender ? (
-                <FlatList
-                  data={filteredFixtures}
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={styles.listContent}
-                  renderItem={({ item }) => (
-                    <FixtureManageCard
-                      fixture={item}
-                      roundName={getRoundName(
-                        item.round,
-                        format === FormatType.Singles
-                          ? participants.length
-                          : teams.length,
-                      )}
-                      isOrganizer={isAdminOrOrganizer}
-                      onSetLive={() => handleSetLive(item.id)}
-                      onUpdateScore={(a, b) => handleUpdateScore(item.id, a, b)}
-                      onComplete={(a, b) =>
-                        handleCompleteFixture(item.id, a, b)
-                      }
-                    />
+                <>
+                  {canRegenerate && (
+                    <View style={styles.centerButton}>
+                      <Pressable
+                        onPress={handleDeleteAndRegenerate}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 6, padding: 8 }}
+                      >
+                        <RefreshCw size={16} color={colors.error} />
+                        <Text style={{ color: colors.error, fontSize: 13, fontWeight: '500' }}>
+                          Regenerate Fixtures
+                        </Text>
+                      </Pressable>
+                    </View>
                   )}
-                />
+                  <FlatList
+                    data={filteredFixtures}
+                    keyExtractor={(item) => String(item.id)}
+                    contentContainerStyle={styles.listContent}
+                    refreshing={refreshing}
+                    onRefresh={handleRefresh}
+                    renderItem={({ item }) => (
+                      <FixtureManageCard
+                        fixture={item}
+                        roundName={getRoundName(item.roundNumber, item.matchNumber)}
+                        isOrganizer={isAdminOrOrganizer}
+                        eventVenue={eventVenue}
+                        eventName={eventName}
+                        onPress={() => handleFixturePress(item)}
+                        onSchedule={() => handleScheduleFixture(item)}
+                        onDelete={() => handleDeleteFixture()}
+                      />
+                    )}
+                  />
+                </>
               ) : (
                 canManageEvent && (
                   <View style={styles.centerButton}>

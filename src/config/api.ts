@@ -34,4 +34,34 @@ export const API_ENDPOINTS = {
     MARK_READ: '/Notifications/mark-read',
     UNREAD_COUNT: '/Notifications/unread-count',
   },
+  EVENTS: {
+    BASE: '/events',
+    BY_ID: (id: number) => `/events?id=${id}`,
+    CATEGORIES: (id: number) => `/events/${id}/categories`,
+    ASSIGN_ORGANIZER: (id: number) => `/events/${id}/organizer`,
+    USER_EVENTS: (userId: number) => `/events/user/${userId}`,
+  },
+  CATEGORIES: {
+    BY_ID: (categoryId: number) => `/categories/${categoryId}`,
+    GENERATE_FIXTURE: (categoryId: number) => `/categories/${categoryId}/generate-fixture`,
+    GET_FIXTURES: (categoryId: number, status?: string) =>
+      status ? `/categories/${categoryId}/fixtures?status=${status}` : `/categories/${categoryId}/fixtures`,
+    BULK_SCHEDULE: (categoryId: number) => `/categories/${categoryId}/fixtures/schedule`,
+    DELETE_FIXTURES: (categoryId: number) => `/categories/${categoryId}/fixtures`,
+  },
+  MATCHES: {
+    BY_ID: (matchId: number) => `/matches/${matchId}`,
+    SETS: (matchId: number) => `/matches/${matchId}/sets`,
+    SET_BY_ID: (matchId: number, setId: number) => `/matches/${matchId}/sets/${setId}`,
+  },
+  REGISTRATIONS: {
+    REGISTER: '/participantregistrations',
+    BY_CATEGORY: (categoryId: number) => `/participantregistrations/${categoryId}`,
+  },
+  ORGANIZER: {
+    CREATE_TEAMS: '/Teams/create',
+    GET_TEAMS: (eventCategoryId: number) => `/Teams?eventCategoryId=${eventCategoryId}`,
+    GET_PARTICIPANTS: (eventCategoryId: number) =>
+      `/participantregistrations/${eventCategoryId}`,
+  },
 };
