@@ -43,7 +43,7 @@ const OperationHomeScreen = () => {
       <View style={styles.container}>
         <View style={styles.headerRow}>
           <Text style={styles.greeting}>
-            {APP_STRINGS.OperationScreen.Operation}
+            {APP_STRINGS.OperationScreen.operation}
           </Text>
 
           <TouchableOpacity onPress={onLogoutPress}>

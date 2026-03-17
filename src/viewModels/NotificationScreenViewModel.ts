@@ -5,6 +5,7 @@ import {
   NotificationAudience,
   NotificationItem,
 } from '../services/notificationService';
+import { Alert } from 'react-native';
 
 export const useNotificationViewModel = (
   navigation: any,
@@ -56,7 +57,9 @@ export const useNotificationViewModel = (
       const filter = await getNotificationFilter();
       await notificationService.markAllAsRead(filter);
     } catch (error) {
-      console.log('Failed to mark notifications as read:', error);
+      if(error instanceof Error){
+        Alert.alert(error.message)
+      }
     }
   }, [getNotificationFilter]);
 

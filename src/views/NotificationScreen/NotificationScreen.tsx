@@ -39,7 +39,7 @@ const NotificationScreen = ({ navigation, route }: Props) => {
           </Pressable>
 
           <Text style={styles.headerTitle}>
-            {APP_STRINGS.NotificationScreen.Notification}
+            {APP_STRINGS.NotificationScreen.notification}
           </Text>
 
           <View style={styles.headerRight} />

@@ -44,7 +44,7 @@ const EventRequestListScreen = ({ role }: EventRequestListScreenProps) => {
       <View style={styles.container}>
         <View style={styles.headerContainer}>
           <Text style={headingStyle}>
-            {APP_STRINGS.EventRequestScreen.Request}
+            {APP_STRINGS.EventRequestScreen.request}
           </Text>
 
           {role === 'admin' && (

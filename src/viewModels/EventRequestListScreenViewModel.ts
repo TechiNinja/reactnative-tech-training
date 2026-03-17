@@ -18,7 +18,9 @@ export const useEventRequestListViewModel = (
   const [refreshing, setRefreshing] = useState(false);
 
   const { requests, fetchRequests } = useEventRequestStore();
-  const { count: notificationCount } = useNotificationBadge('Ops');
+
+  const audience = role === 'admin' ? 'Admin' : 'Ops';
+  const { count: notificationCount } = useNotificationBadge(audience);
 
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -40,7 +42,7 @@ export const useEventRequestListViewModel = (
   };
 
   const onOpenNotifications = () => {
-    navigation.navigate('Notification', { audience: 'Ops' });
+    navigation.navigate('Notification', { audience });
   };
 
   const onRefresh = async () => {

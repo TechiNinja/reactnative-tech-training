@@ -6,42 +6,25 @@ export const authFetch = async <T>(
   options: RequestInit = {},
 ): Promise<T> => {
   const token = await getToken();
-  const fullUrl = API_BASE_URL + url;
 
-  console.log('AUTH FETCH ->', {
-    url: fullUrl,
-    method: options.method ?? 'GET',
-    hasToken: !!token,
-  });
+  const headers = {
+    ...(options.headers || {}),
+    Authorization: token ? `Bearer ${token}` : '',
+    'Content-Type': 'application/json',
+  };
 
-  const res = await fetch(fullUrl, {
+  const res = await fetch(`${API_BASE_URL}${url}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
+    headers,
   });
 
   if (!res.ok) {
-    const rawText = await res.text();
-    console.log('AUTH FETCH FAILED ->', {
-      url: fullUrl,
-      status: res.status,
-      body: rawText,
-    });
-
-    let errData: any = {};
-    try {
-      errData = rawText ? JSON.parse(rawText) : {};
-    } catch {}
-
-    throw new Error(
-      errData?.detail || errData?.title || rawText || `Failed: ${res.status}`,
-    );
+    const errorData = await res.json().catch(() => ({}));
+    const message =
+      (errorData as { message?: string })?.message ??
+      `Failed request: ${res.status}`;
+    throw new Error(message);
   }
 
-  if (res.status === 204) return undefined as T;
-
-  return (await res.json()) as T;
+  return res.json() as Promise<T>;
 };

@@ -8,7 +8,7 @@ export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
-  },
+  },  
   USERS: '/Users',
   ROLES: '/Roles',
   SPORT: '/sports',

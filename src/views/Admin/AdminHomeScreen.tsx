@@ -10,7 +10,6 @@ import {
   LogOut,
   MapPin,
   Plus,
-  Settings,
   TrendingUp,
   Trophy,
   UserPlus,

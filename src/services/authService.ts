@@ -46,8 +46,6 @@ export const AuthService = {
       role: mapRole(data.role),
     };
 
-    console.log('LOGGED IN USER ROLE:', user.role);
-
     return { user, token: data.token };
   },
 

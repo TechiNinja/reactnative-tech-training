@@ -180,7 +180,7 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
             <View style={styles.buttonRow}>
               <View style={styles.buttonFlex}>
                 <AppButton
-                  title={APP_STRINGS.RequestScreen.approved}
+                  title={APP_STRINGS.RequestScreen.approve}
                   disabled={!canApprove}
                   onPress={handleApproved}
                 />
@@ -188,7 +188,7 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
 
               <View style={styles.buttonFlex}>
                 <AppButton
-                  title={APP_STRINGS.RequestScreen.rejected}
+                  title={APP_STRINGS.RequestScreen.reject}
                   disabled={!canReject}
                   onPress={handleRejected}
                 />
