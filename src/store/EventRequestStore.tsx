@@ -8,8 +8,6 @@ import {
 } from '../models/EventRequest';
 import { eventRequestService } from '../services/eventRequestService';
 
-type DecideStatus = 'Approved' | 'Rejected';
-
 type EventRequestStoreType = {
   requests: EventRequestResponse[];
   selectedRequest: EventRequestResponse | null;
@@ -25,21 +23,24 @@ type EventRequestStoreType = {
   withdrawRequest: (id: number) => Promise<EventRequestResponse>;
   decideRequest: (
     id: number,
-    status: DecideStatus,
     payload: DecideEventRequest,
   ) => Promise<EventRequestResponse>;
   setSelectedRequest: (request: EventRequestResponse | null) => void;
 };
 
-const EventRequestContext = createContext<EventRequestStoreType | undefined>(undefined);
+const EventRequestContext = createContext<EventRequestStoreType | undefined>(
+  undefined,
+);
 
-export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [requests, setRequests] = useState<EventRequestResponse[]>([]);
-  const [selectedRequest, setSelectedRequest] = useState<EventRequestResponse | null>(null);
+  const [selectedRequest, setSelectedRequest] =
+    useState<EventRequestResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Helper to update request lists and selected request
   const updateRequestInState = (updated: EventRequestResponse) => {
     setRequests(prev => prev.map(r => (r.id === updated.id ? updated : r)));
     setSelectedRequest(prev => (prev?.id === updated.id ? updated : prev));
@@ -93,8 +94,8 @@ export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return updated;
   };
 
-  const decideRequest = async (id: number, status: DecideStatus, payload: DecideEventRequest) => {
-    const updated = await eventRequestService.decide(id, status, payload);
+  const decideRequest = async (id: number, payload: DecideEventRequest) => {
+    const updated = await eventRequestService.decide(id, payload);
     updateRequestInState(updated);
     return updated;
   };
@@ -122,6 +123,10 @@ export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
 export const useEventRequestStore = () => {
   const context = useContext(EventRequestContext);
-  if (!context) throw new Error('useEventRequestStore must be used inside EventRequestProvider');
+
+  if (!context) {
+    throw new Error('useEventRequestStore must be used inside EventRequestProvider');
+  }
+
   return context;
 };

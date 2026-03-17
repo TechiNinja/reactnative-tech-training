@@ -130,7 +130,7 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
 
             {request.updatedDate && (
               <Text style={styles.description}>
-                {APP_STRINGS.RequestScreen.update}{' '}
+                {APP_STRINGS.RequestScreen.update}
                 {formatDate(request.updatedDate)}
               </Text>
             )}
@@ -146,7 +146,7 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
                 <>
                   <View style={styles.buttonFlex}>
                     <AppButton
-                      title={APP_STRINGS.RequestScreen.update}
+                      title={APP_STRINGS.RequestScreen.updateRequired}
                       disabled={!canUpdate}
                       onPress={handleUpdate}
                     />

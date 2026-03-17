@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getUser } from '../utils/authStorage';
 import {
   notificationService,
   NotificationAudience,
@@ -15,33 +14,14 @@ export const useNotificationViewModel = (
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [error, setError] = useState('');
 
-  const getNotificationFilter = useCallback(async () => {
-    if (audience === 'Admin') {
-      const user = await getUser();
-
-      return {
-        audience,
-        userId: user?.id,
-      };
-    }
-
-    return { audience };
-  }, [audience]);
-
   const notificationFetch = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
 
-      const filter = await getNotificationFilter();
-      const data = await notificationService.getAll(filter);
+      const data = await notificationService.getAll({ audience });
 
-      const sortedNotifications = [...data].sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-
-      setNotifications(sortedNotifications);
+      setNotifications(data);
     } catch (error: any) {
       setError(
         error?.message || 'Something went wrong while fetching notifications.',
@@ -50,18 +30,17 @@ export const useNotificationViewModel = (
     } finally {
       setLoading(false);
     }
-  }, [getNotificationFilter]);
+  }, [audience]);
 
   const markAllAsRead = useCallback(async () => {
     try {
-      const filter = await getNotificationFilter();
-      await notificationService.markAllAsRead(filter);
+      await notificationService.markAllAsRead(audience);
     } catch (error) {
-      if(error instanceof Error){
-        Alert.alert(error.message)
+      if (error instanceof Error) {
+        Alert.alert(error.message);
       }
     }
-  }, [getNotificationFilter]);
+  }, [audience]);
 
   useEffect(() => {
     notificationFetch();
@@ -76,14 +55,11 @@ export const useNotificationViewModel = (
     navigation.goBack();
   }, [markAllAsRead, navigation]);
 
-  const unreadCount = notifications.filter(item => !item.isRead).length;
-
   return {
     handleBack,
     refresh,
     loading,
     notifications,
     error,
-    unreadCount,
   };
 };

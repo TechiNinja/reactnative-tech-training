@@ -34,7 +34,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
         </View>
 
         <Text style={styles.inputLabels}>
-          {APP_STRINGS.eventScreen.eventName}
+          {APP_STRINGS.RequestScreen.eventName}
         </Text>
         <AppInput
           placeholder={APP_STRINGS.placeHolders.eventName}
@@ -44,7 +44,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
         />
 
         <Text style={styles.inputLabels}>
-          {APP_STRINGS.eventScreen.sportName}
+          {APP_STRINGS.RequestScreen.sportsName}
         </Text>
 
         {vm.isEdit ? (
@@ -104,7 +104,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
 
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabels}>
-            {APP_STRINGS.RequestScreen.gender}
+            {APP_STRINGS.eventScreen.gender}
           </Text>
           <View style={styles.formatOptions}>
             {vm.genderOptions.map((option) => (
@@ -135,7 +135,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
 
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabels}>
-            {APP_STRINGS.RequestScreen.format}
+            {APP_STRINGS.RequestScreen.formatRequired}
           </Text>
           <View style={styles.formatOptions}>
             {vm.formatOptions.map((option) => (
@@ -167,7 +167,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
         <View style={styles.inputRow}>
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabels}>
-              {APP_STRINGS.RequestScreen.startDate}
+              {APP_STRINGS.RequestScreen.startDateRequired}
             </Text>
             <Pressable onPress={vm.showStartPicker}>
               <View pointerEvents="none">
@@ -193,7 +193,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
 
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabels}>
-              {APP_STRINGS.RequestScreen.endDate}
+              {APP_STRINGS.RequestScreen.endDateRequired}
             </Text>
             <Pressable onPress={vm.showEndPicker}>
               <View pointerEvents="none">

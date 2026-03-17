@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { createNotificationConnection } from '../utils/signalRClient';
-import { getToken, getUser } from '../utils/authStorage';
-import { API_BASE_URL } from '../config/api';
+import { getUser } from '../utils/authStorage';
 import * as signalR from '@microsoft/signalr';
 import { Alert } from 'react-native';
+import { notificationService } from '../services/notificationService';
 
 export type NotificationAudience = 'Ops' | 'Admin';
 
@@ -13,33 +13,8 @@ export const useNotificationBadge = (audience: NotificationAudience) => {
 
   const loadUnreadCount = useCallback(async () => {
     try {
-      const token = await getToken();
-      const user = await getUser();
-
-      let url = `${API_BASE_URL}/Notifications/unread-count?audience=${audience}`;
-
-      if (audience === 'Admin' && !user?.id) {
-        setCount(0);
-        return;
-      }
-
-      const res = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-
-      if (!res.ok) {
-        setCount(0);
-        return;
-      }
-
-      const text = await res.text();
-      const unreadCount = text ? Number(text) : 0;
-      setCount(Number.isNaN(unreadCount) ? 0 : unreadCount);
+      const unreadCount = await notificationService.getUnreadCount(audience);
+      setCount(Number.isNaN(Number(unreadCount)) ? 0 : Number(unreadCount));
     } catch (err) {
       if (err instanceof Error) {
         Alert.alert(err.message);
