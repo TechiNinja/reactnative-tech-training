@@ -8,6 +8,13 @@ export type AdminAnalytics = {
   matchesToday: number;
 };
 
+export type OperationAnalytics = {
+  totalRequests: number;
+  pendingRequests: number;
+  totalEvents: number;
+  matchesToday: number;
+};
+
 export type OrganizerAnalytics = {
   myEvents: number;
   totalRegistrations: number;
@@ -20,4 +27,7 @@ export const AnalyticsService = {
 
   getOrganizerAnalytics: () =>
     authFetch<OrganizerAnalytics>(API_ENDPOINTS.ANALYTICS),
+
+  getOperationAnalytics : () =>
+    authFetch<OperationAnalytics>(API_ENDPOINTS.ANALYTICS),
 };

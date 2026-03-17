@@ -1,24 +1,20 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, Calendar, Users, ClipboardList } from 'lucide-react-native';
+import { ClipboardList, Home,} from 'lucide-react-native';
 import { colors } from '../theme/colors';
 
-import AdminHomeScreen from '../views/Admin/AdminHomeScreen';
-import EventsListScreen from '../views/EventListScreen/EventsListScreen';
-import { fonts } from '../theme/fonts';
-import UsersListScreen from '../views/UsersListScreen/UsersListScreen';
 import EventRequestListScreen from '../views/EventRequestListScreen/EventRequestListScreen';
+import { fonts } from '../theme/fonts';
+import OperationHomeScreen from '../views/Operation/OperationHomeScreen';
 
-export type AdminTabParamList = {
+export type OperationTabParamList = {
   Home: undefined;
-  Events: undefined;
-  Users : undefined;
   Request: undefined;
 };
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<OperationTabParamList>();
 
-const AdminTabs = () => {
+const OperationTabs = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -46,24 +42,6 @@ const AdminTabs = () => {
             );
           }
 
-          if (route.name === 'Events') {
-            return (
-              <Calendar
-                size={22}
-                color={focused ? colors.primary : colors.textSecondary}
-              />
-            );
-          }
-
-          if (route.name === 'Users') {
-            return (
-              <Users
-                size={22}
-                color={focused ? colors.primary : colors.textSecondary}
-              />
-            );
-          }
-
           if (route.name === 'Request') {
             return (
               <ClipboardList
@@ -77,16 +55,13 @@ const AdminTabs = () => {
         },
       })}
     >
-      <Tab.Screen name="Home" component={AdminHomeScreen} />
-      <Tab.Screen name="Events">
-        {() => <EventsListScreen role="admin" />}
-      </Tab.Screen>
-      <Tab.Screen name="Users" component={UsersListScreen} />
+      <Tab.Screen name="Home" component={OperationHomeScreen} />
+
       <Tab.Screen name="Request">
-        {() => <EventRequestListScreen role="admin" />}
+        {() => <EventRequestListScreen role="operations" />}
       </Tab.Screen>
     </Tab.Navigator>
   );
 };
 
-export default AdminTabs;
+export default OperationTabs;

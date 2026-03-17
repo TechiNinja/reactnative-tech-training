@@ -48,16 +48,17 @@ const roleMap: Record<string, UserRoleType> = {
   participant: 'participant',
   operations: 'operations',
   'operations team': 'operations',
+  opsteam: 'operations',
   ops: 'operations',
 };
 
 const normalizeRole = (role: string): UserRoleType => {
-  const normalized = role.toLowerCase();
+  const normalized = role.trim().toLowerCase();
   return roleMap[normalized] ?? 'participant';
 };
 
 export const getUserList = async (): Promise<User[]> => {
-  const data = await authFetch<ApiUser[] | { users: ApiUser[] }>('/users');
+  const data = await authFetch<ApiUser[] | { users: ApiUser[] }>('/Users');
   const users = Array.isArray(data)
     ? data
     : (data as { users: ApiUser[] }).users;
@@ -65,12 +66,12 @@ export const getUserList = async (): Promise<User[]> => {
 };
 
 export const getUserById = async (userId: string): Promise<User> => {
-  const apiUser = await authFetch<ApiUser>(`/users/${userId}`);
+  const apiUser = await authFetch<ApiUser>(`/Users/${userId}`);
   return mapApiUserToUser(apiUser);
 };
 
 export const createUser = async (payload: CreateUserPayload): Promise<User> => {
-  const created = await authFetch<ApiUser>('/users', {
+  const created = await authFetch<ApiUser>('/Users', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -81,7 +82,7 @@ export const updateUserApi = async (
   userId: string,
   payload: UpdateUserPayload,
 ): Promise<User> => {
-  const updated = await authFetch<ApiUser>(`/users/${userId}`, {
+  const updated = await authFetch<ApiUser>(`/Users/${userId}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
   });

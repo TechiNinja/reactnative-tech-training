@@ -87,7 +87,7 @@ export interface Event {
   venue: string;
 
   status: EventStatus;
-  format: FormatType[];
+  formats: FormatType[];
 
   registeredTeams: number;
   totalTeams: number;
@@ -109,3 +109,4 @@ export interface Event {
 
   abandonedCategories?: string[];
 }
+
