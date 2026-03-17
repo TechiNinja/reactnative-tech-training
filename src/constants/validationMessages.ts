@@ -41,4 +41,6 @@ export const validationMessages = {
   SUCCESS: 'Success',
   OK: 'OK',
   SUCCESSFULLY: 'successfully',
+  REQUEST_APPROVED_SUCCESS: 'Request approved successfully',
+  REQUEST_REJECTED_SUCCESS: 'Request rejected successfully',
 };

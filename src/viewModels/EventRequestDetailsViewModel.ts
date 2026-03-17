@@ -72,13 +72,13 @@ export const useEventRequestDetailsViewModel = () => {
 
       await decideRequest(request.id, decision, { remarks: trimmedRemarks });
 
+      const successMessage =
+        decision === 'Approved'
+          ? validationMessages.REQUEST_APPROVED_SUCCESS
+          : validationMessages.REQUEST_REJECTED_SUCCESS;
+
       closeRemarksModal();
-      Alert.alert(
-        validationMessages.SUCCESS,
-        `${APP_STRINGS.RequestScreen.request} ${decision.toLowerCase()} ${
-          validationMessages.SUCCESSFULLY
-        }`,
-      );
+      Alert.alert(validationMessages.SUCCESS, successMessage);
       navigation.goBack();
     } catch (error: any) {
       Alert.alert(
@@ -151,11 +151,11 @@ export const useEventRequestDetailsViewModel = () => {
   const formatDate = (date: string) => {
     const parsedDate = new Date(date);
 
-    const day = parsedDate.getDate().toString().padStart(2, '0');
-    const month = (parsedDate.getMonth() + 1).toString().padStart(2, '0');
-    const year = parsedDate.getFullYear();
-    const hours = parsedDate.getHours().toString().padStart(2, '0');
-    const minutes = parsedDate.getMinutes().toString().padStart(2, '0');
+    const day = parsedDate.getUTCDate().toString().padStart(2, '0');
+    const month = (parsedDate.getUTCMonth() + 1).toString().padStart(2, '0');
+    const year = parsedDate.getUTCFullYear();
+    const hours = parsedDate.getUTCHours().toString().padStart(2, '0');
+    const minutes = parsedDate.getUTCMinutes().toString().padStart(2, '0');
 
     return `${day}-${month}-${year} ${hours}:${minutes}`;
   };
