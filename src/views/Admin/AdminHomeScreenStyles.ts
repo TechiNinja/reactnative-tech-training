@@ -53,4 +53,24 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     paddingTop: 10,
   },
+  countHeader: { 
+    position: 'relative'
+  },
+  iconStyle: {
+    position: 'absolute',
+    top: -8,
+    right: -10,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: 'red',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  countStyle: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: '700',
+  },
 });

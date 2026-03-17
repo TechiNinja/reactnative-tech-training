@@ -124,7 +124,7 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
             </Text>
 
             <Text style={styles.description}>
-              {APP_STRINGS.RequestScreen.created}{' '}
+              {APP_STRINGS.RequestScreen.create}{' '}
               {formatDate(request.createdDate)}
             </Text>
 

@@ -109,29 +109,14 @@ const AdminHomeScreen = () => {
             <View style={styles.actionCardWrapper}>
               <ActionCard
                 icon={
-                  <View style={{ position: 'relative' }}>
+                  <View style={styles.countHeader}>
                     <Bell size={20} color={colors.primary} />
                     {count > 0 ? (
                       <View
-                        style={{
-                          position: 'absolute',
-                          top: -8,
-                          right: -10,
-                          minWidth: 18,
-                          height: 18,
-                          borderRadius: 9,
-                          backgroundColor: 'red',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          paddingHorizontal: 4,
-                        }}
+                        style={styles.iconStyle}
                       >
                         <Text
-                          style={{
-                            color: 'white',
-                            fontSize: 10,
-                            fontWeight: '700',
-                          }}
+                          style={styles.countStyle}
                         >
                           {count > 99 ? '99+' : count}
                         </Text>
