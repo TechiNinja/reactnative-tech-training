@@ -42,9 +42,9 @@ export enum FixtureTabType {
 
 export enum EventStatusTab {
   ALL = 'ALL',
-  LIVE = 'LIVE',
-  UPCOMING = 'UPCOMING',
-  OPEN = 'OPEN',
+  UPCOMING = 'Upcoming',
+  LIVE = 'Live',
+  COMPLETED = 'Completed',
 }
 
 export interface Registration {
