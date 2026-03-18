@@ -1,15 +1,14 @@
 import React from 'react';
 import { Text, View, Pressable } from 'react-native';
-import { User, Calendar, MapPin, Trophy, Play, Trash2 } from 'lucide-react-native';
+import { User, Calendar, MapPin, Trophy, Play } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
 import { styles } from './FixtureManageCardStyles';
 import { Fixture, FormatType } from '../../models/Event';
 import { APP_STRINGS } from '../../constants/appStrings';
 import { useFixtureManageCardViewModel } from './FixtureManageCardViewModel';
 import { FixtureResponse } from '../../models/ApiResponses';
-import { useFixtureManageCardVM } from './FixtureManageCardViewModel';
 
-type Props = {
+type FixtureManageCardProps = {
   fixture: FixtureResponse;
   roundName: string;
   isOrganizer: boolean;
@@ -17,7 +16,6 @@ type Props = {
   eventName?: string;
   onPress: () => void;
   onSchedule: () => void;
-  onDelete: () => void;
 };
 
 const TBD = APP_STRINGS.fixtureScreen.tbd;
@@ -30,8 +28,7 @@ const FixtureManageCard = ({
   eventName,
   onPress,
   onSchedule,
-  onDelete,
-}: Props) => {
+}: FixtureManageCardProps) => {
   const {
     isLive,
     isCompleted,
@@ -45,12 +42,11 @@ const FixtureManageCard = ({
     showActions,
     showLiveWatch,
     showSchedule,
-    showDelete,
     teams,
-  } = useFixtureManageCardVM({ fixture, isOrganizer });
+  } = useFixtureManageCardViewModel({ fixture, isOrganizer });
 
   return (
-    <Pressable style={styles.container} onPress={onPress}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.roundName}>{roundName}</Text>
@@ -124,21 +120,9 @@ const FixtureManageCard = ({
       {showActions ? (
         <View style={styles.actionsRow}>
           {showSchedule ? (
-            <Pressable
-              style={styles.scheduleBtn}
-              onPress={(e) => { e.stopPropagation?.(); onSchedule(); }}
-            >
+            <Pressable style={styles.scheduleBtn} onPress={onSchedule}>
               <Calendar size={14} color={colors.primary} />
               <Text style={styles.scheduleBtnText}>{APP_STRINGS.fixtureScreen.schedule}</Text>
-            </Pressable>
-          ) : null}
-          {showDelete ? (
-            <Pressable
-              style={styles.deleteBtn}
-              onPress={(e) => { e.stopPropagation?.(); onDelete(); }}
-            >
-              <Trash2 size={14} color={colors.error} />
-              <Text style={styles.deleteBtnText}>{APP_STRINGS.eventScreen.delete}</Text>
             </Pressable>
           ) : null}
           <Pressable style={styles.viewBtn} onPress={onPress}>
@@ -155,7 +139,7 @@ const FixtureManageCard = ({
           </Text>
         </View>
       ) : null}
-    </Pressable>
+    </View>
   );
 };
 

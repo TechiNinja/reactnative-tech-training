@@ -8,6 +8,7 @@ import { APP_STRINGS } from '../constants/appStrings';
 import { authFetch } from '../utils/authFetch';
 import { EventResponse, EventCategoryResponse } from '../models/EventResponse';
 import { API_ENDPOINTS } from '../config/api';
+import { getEventById } from '../services/eventService';
 
 type EventDetailsRouteProp = RouteProp<RootStackParamList, 'EventDetails'>;
 
@@ -118,7 +119,7 @@ export const useEventDetailsViewModel = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await authFetch<EventResponse[]>(`/events?id=${eventId}`);
+      const data = await getEventById(Number(eventId));
       if (data && data.length > 0) {
         const ev = data[0];
         setEvent(ev);

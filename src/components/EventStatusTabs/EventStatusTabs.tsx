@@ -9,6 +9,11 @@ const TABS: EventStatusTab[] = [
   EventStatusTab.COMPLETED,
 ];
 
+const formatTabLabel = (tab: EventStatusTab): string => {
+  if (tab === EventStatusTab.ALL) return 'All';
+  return tab.charAt(0).toUpperCase() + tab.slice(1).toLowerCase();
+};
+
 type EventStatusTabProps = {
   activeTab: EventStatusTab;
   onChange: (tab: EventStatusTab) => void;
@@ -19,7 +24,6 @@ const EventStatusTabs = ({ activeTab, onChange }: EventStatusTabProps) => {
     <View style={styles.container}>
       {TABS.map((tab) => {
         const isActive = activeTab === tab;
-
         return (
           <Pressable
             key={tab}
@@ -27,7 +31,7 @@ const EventStatusTabs = ({ activeTab, onChange }: EventStatusTabProps) => {
             style={[styles.tab, isActive && styles.activeTab]}
           >
             <Text style={[styles.tabText, isActive && styles.activeTabText]}>
-              {tab}
+              {formatTabLabel(tab)}
             </Text>
           </Pressable>
         );

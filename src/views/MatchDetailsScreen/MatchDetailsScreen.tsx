@@ -7,9 +7,10 @@ import { ArrowLeft, Calendar, MapPin, Minus, Plus, CheckCircle, X, Play, Edit2 }
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppButton from '../../components/AppButton/AppButton';
 import { colors } from '../../theme/colors';
-import { useMatchDetailsViewModel } from '../../viewModels/MatchDetailsScreenViewModel';
+import { useMatchDetailsScreenViewModel } from '../../viewModels/MatchDetailsScreenViewModel';
 import { styles } from './MatchDetailsScreenStyles';
 import { APP_STRINGS } from '../../constants/AppStrings';
+import { formatDisplayDateTime } from '../../utils/dateUtils';
 
 const SetStatus = {
   COMPLETED: 'Completed',
@@ -17,7 +18,7 @@ const SetStatus = {
 } as const;
 
 const MatchDetailsScreen = () => {
-  const viewModel = useMatchDetailsViewModel();
+  const viewModel = useMatchDetailsScreenViewModel();
 
   if (viewModel.loading) {
     return (
@@ -107,7 +108,7 @@ const MatchDetailsScreen = () => {
             {match.matchDateTime && (
               <View style={styles.infoRow}>
                 <Calendar size={15} color={colors.textSecondary} />
-                <Text style={styles.infoText}>{viewModel.formatDateTimeFromUTC(match.matchDateTime)}</Text>
+                <Text style={styles.infoText}>{formatDisplayDateTime(match.matchDateTime)}</Text>
               </View>
             )}
 
@@ -293,7 +294,7 @@ const MatchDetailsScreen = () => {
             <Text style={styles.modalLabel}>{APP_STRINGS.matchScreen.date}</Text>
             <Pressable style={styles.datePickerBtn} onPress={() => viewModel.setShowDatePicker(true)}>
               <Calendar size={16} color={colors.primary} />
-              <Text style={styles.datePickerText}>{viewModel.formatDateTime(viewModel.selectedDate) ?? ''}</Text>
+              <Text style={styles.datePickerText}>{formatDisplayDateTime(viewModel.selectedDate)}</Text>
             </Pressable>
 
             {viewModel.showDatePicker && (
@@ -317,9 +318,7 @@ const MatchDetailsScreen = () => {
             <Text style={styles.modalLabel}>{APP_STRINGS.matchScreen.time}</Text>
             <Pressable style={styles.datePickerBtn} onPress={() => viewModel.setShowTimePicker(true)}>
               <Calendar size={16} color={colors.primary} />
-              <Text style={styles.datePickerText}>
-                {viewModel.formatDateTime(viewModel.selectedDate) ?? ''}
-              </Text>
+              <Text style={styles.datePickerText}>{formatDisplayDateTime(viewModel.selectedDate)}</Text>
             </Pressable>
 
             {viewModel.showTimePicker && (

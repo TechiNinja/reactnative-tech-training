@@ -6,12 +6,11 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { EventStatusTab } from '../models/Event';
 import { UserRoleType } from '../models/User';
 import { EventResponse } from '../models/EventResponse';
-import { authFetch } from '../utils/authFetch';
+import { getAllEvents } from '../services/eventService';
 
 export const useEventsListViewModel = (role: UserRoleType) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const tabBarHeight = useBottomTabBarHeight();
-
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<EventStatusTab>(EventStatusTab.ALL);
@@ -20,8 +19,7 @@ export const useEventsListViewModel = (role: UserRoleType) => {
     try {
       setLoading(true);
       const status = activeTab === EventStatusTab.ALL ? undefined : activeTab;
-      const url = status ? `/events?status=${status}` : '/events';
-      const data = await authFetch<EventResponse[]>(url);
+      const data = await getAllEvents(status ? { status } : undefined);
       setEvents(data ?? []);
     } catch {
       setEvents([]);
@@ -36,8 +34,13 @@ export const useEventsListViewModel = (role: UserRoleType) => {
 
   const filteredEvents = useMemo(() => {
     if (activeTab === EventStatusTab.ALL) return events;
-    return events.filter((e) => e.status === activeTab);
+    return events.filter((e) => e.status.toUpperCase() === activeTab);
   }, [events, activeTab]);
+
+  const listContentStyle = useMemo(
+    () => ({ paddingBottom: tabBarHeight + 65 }),
+    [tabBarHeight],
+  );
 
   const onEventPress = (event: EventResponse) => {
     navigation.navigate('EventDetails', {
@@ -55,7 +58,7 @@ export const useEventsListViewModel = (role: UserRoleType) => {
     setActiveTab,
     filteredEvents,
     loading,
-    tabBarHeight,
+    listContentStyle,
     onEventPress,
     onCreateEvent,
   };

@@ -5,6 +5,7 @@ import { colors } from '../../theme/colors';
 import { Calendar, MapPin } from 'lucide-react-native';
 import { useState } from 'react';
 import { UserRoleType } from '../../models/User';
+import { formatDisplayDate } from '../../utils/dateUtils';
 
 type EventCardProps = {
   event: EventResponse;
@@ -34,7 +35,7 @@ const EventCard = ({ event, onPress }: EventCardProps) => {
             <Text style={styles.title}>{event.name}</Text>
             <View style={styles.details}>
               <Calendar color={colors.textSecondary} />
-              <Text style={styles.detailsText}>{String(event.startDate)}</Text>
+              <Text style={styles.detailsText}>{formatDisplayDate(event.startDate)}</Text>
             </View>
             <View style={styles.details}>
               <MapPin color={colors.textSecondary} />

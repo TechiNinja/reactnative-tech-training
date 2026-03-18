@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,16 +11,15 @@ import {
   getCategoryById,
   generateFixtures,
   getFixtures,
-  deleteFixtures,
   getParticipantsByCategory,
 } from '../services/categoryService';
-import { OrganizerService } from '../services/organizerService';
+import { OrganizerService, ApiTeamResponse } from '../services/organizerService';
 
 type CategoryDetailsRouteProp = RouteProp<RootStackParamList, 'CategoryDetails'>;
 type Participant = { id: string; name: string };
 type ApiTeam = { id: string; name: string; members: string[] };
 
-export const useCategoryDetailsViewModel = () => {
+export const useCategoryDetailsScreenViewModel = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<CategoryDetailsRouteProp>();
   const { eventId, gender, format, role, eventCategoryId, eventStartDate, eventEndDate, eventVenue } = route.params;
@@ -36,13 +35,13 @@ export const useCategoryDetailsViewModel = () => {
   const [activeFixtureTab, setActiveFixtureTab] = useState<FixtureTabType>(FixtureTabType.ALL);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const mainTabs = (() => {
+  const mainTabs = useMemo(() => {
     const tabs: string[] = [];
     if (role !== 'participant') tabs.push('PARTICIPANTS');
     if (format === FormatType.Doubles) tabs.push('TEAMS');
     tabs.push('FIXTURES');
     return tabs;
-  })();
+  }, [role, format]);
 
   const isAdminOrOrganizer = role === 'admin' || role === 'organizer';
   const canManageEvent = role === 'admin' || role === 'organizer';
@@ -50,11 +49,10 @@ export const useCategoryDetailsViewModel = () => {
   const canCreateTeams = format === FormatType.Doubles && participants.length >= 2 && !isAbandoned;
   const canCreateFixtures = participants.length >= 2;
 
-  const hasAnyLiveOrCompleted = fixtures.some(
-    (f) => f.status.toUpperCase() === 'LIVE' || f.status.toUpperCase() === 'COMPLETED',
+  const hasAnyLiveOrCompleted = useMemo(
+    () => fixtures.some((f) => f.status.toUpperCase() === 'LIVE' || f.status.toUpperCase() === 'COMPLETED'),
+    [fixtures],
   );
-
-  const canRegenerate = canManageEvent && fixtures.length > 0 && !hasAnyLiveOrCompleted;
 
   const loadData = useCallback(async (silent = false) => {
     if (!eventCategoryId) return;
@@ -70,7 +68,7 @@ export const useCategoryDetailsViewModel = () => {
       setFixtures(fixtureList ?? []);
       if (format === FormatType.Doubles) {
         const apiTeams = await OrganizerService.getTeams(eventCategoryId);
-        setTeams((apiTeams ?? []).map((t: any) => ({
+        setTeams((apiTeams ?? []).map((t: ApiTeamResponse) => ({
           id: String(t.id),
           name: t.name,
           members: t.members ?? [],
@@ -101,11 +99,14 @@ export const useCategoryDetailsViewModel = () => {
     loadData(true);
   }, [loadData]);
 
-  const filteredTeams = searchQuery.trim()
-    ? teams.filter((t) => t.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : teams;
+  const filteredTeams = useMemo(
+    () => searchQuery.trim()
+      ? teams.filter((t) => t.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      : teams,
+    [teams, searchQuery],
+  );
 
-  const filteredFixtures = (() => {
+  const filteredFixtures = useMemo(() => {
     let result = fixtures;
     if (activeFixtureTab !== FixtureTabType.ALL) {
       result = result.filter((f) => f.status.toUpperCase() === activeFixtureTab);
@@ -117,14 +118,14 @@ export const useCategoryDetailsViewModel = () => {
       );
     }
     return result;
-  })();
+  }, [fixtures, activeFixtureTab, searchQuery]);
 
-  const visibleFixtures = (() => {
-    if (canManageEvent) return filteredFixtures;
-    return filteredFixtures.filter(
-      (f) => !(f.sideAName === 'BYE' && f.sideBName === 'BYE'),
-    );
-  })();
+  const visibleFixtures = useMemo(
+    () => canManageEvent
+      ? filteredFixtures
+      : filteredFixtures.filter((f) => !(f.sideAName === 'BYE' && f.sideBName === 'BYE')),
+    [canManageEvent, filteredFixtures],
+  );
 
   const getRoundName = (roundNumber: number, matchNumber: number) => {
     const maxRound = fixtures.length > 0
@@ -151,7 +152,7 @@ export const useCategoryDetailsViewModel = () => {
     if (participants.length < 2) { Alert.alert(APP_STRINGS.eventScreen.noEnoughRegistrations); return; }
     try {
       const apiTeams = await OrganizerService.createTeams(eventCategoryId);
-      setTeams((apiTeams ?? []).map((t) => ({ id: String(t.id), name: t.name, members: t.members ?? [] })));
+      setTeams((apiTeams ?? []).map((t: ApiTeamResponse) => ({ id: String(t.id), name: t.name, members: t.members ?? [] })));
     } catch {
       Alert.alert(APP_STRINGS.eventScreen.createTeam, APP_STRINGS.eventScreen.teamCreationFailed);
     }
@@ -169,55 +170,6 @@ export const useCategoryDetailsViewModel = () => {
     } catch (e: any) {
       Alert.alert(APP_STRINGS.eventScreen.createFixtures, e?.message ?? APP_STRINGS.eventScreen.teamCreationFailed);
     }
-  };
-
-  const handleDeleteAndRegenerate = async () => {
-    if (!eventCategoryId) return;
-    if (hasAnyLiveOrCompleted) {
-      Alert.alert(APP_STRINGS.fixtureScreen.cannotRegenerate, APP_STRINGS.fixtureScreen.cannotRegenerateDesc);
-      return;
-    }
-    Alert.alert(APP_STRINGS.fixtureScreen.regenerateFixtures, APP_STRINGS.fixtureScreen.regenerateFixturesDesc, [
-      { text: APP_STRINGS.buttons.cancel, style: 'cancel' },
-      {
-        text: APP_STRINGS.buttons.continue,
-        onPress: async () => {
-          try {
-            await deleteFixtures(eventCategoryId);
-            const generated = await generateFixtures(eventCategoryId);
-            setFixtures(generated ?? []);
-          } catch (e: any) {
-            Alert.alert(APP_STRINGS.fixtureScreen.error, e?.message ?? APP_STRINGS.eventScreen.teamCreationFailed);
-          }
-        },
-      },
-    ]);
-  };
-
-  const handleDeleteFixture = async () => {
-    if (hasAnyLiveOrCompleted) {
-      Alert.alert(APP_STRINGS.fixtureScreen.cannotDelete, APP_STRINGS.fixtureScreen.cannotDeleteDesc);
-      return;
-    }
-    Alert.alert(
-      APP_STRINGS.fixtureScreen.deleteAllFixtures,
-      APP_STRINGS.fixtureScreen.deleteAllFixturesDesc,
-      [
-        { text: APP_STRINGS.buttons.cancel, style: 'cancel' },
-        {
-          text: APP_STRINGS.buttons.deleteAll,
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteFixtures(eventCategoryId!);
-              setFixtures([]);
-            } catch (e: any) {
-              Alert.alert(APP_STRINGS.fixtureScreen.error, e?.message ?? APP_STRINGS.fixtureScreen.failedToDeleteFixtures);
-            }
-          },
-        },
-      ],
-    );
   };
 
   const handleFixturePress = (fixture: FixtureResponse) => {
@@ -267,16 +219,13 @@ export const useCategoryDetailsViewModel = () => {
     filteredFixtures: visibleFixtures,
     canCreateTeams,
     canCreateFixtures,
-    canRegenerate,
     hasAnyLiveOrCompleted,
     minRequiredForTeams: 2,
     hasTeamsForGender: teams.length > 0,
     hasFixturesForGender: fixtures.length > 0,
-    handleDeleteFixture,
     getRoundName,
     handleCreateTeams,
     handleCreateFixtures,
-    handleDeleteAndRegenerate,
     handleFixturePress,
     handleScheduleFixture,
     handleRefresh,
