@@ -24,8 +24,7 @@ import { colors } from '../../theme/colors';
 import { styles } from './EventDetailsScreenStyles';
 import { APP_STRINGS } from '../../constants/AppStrings';
 import { useEventDetailsViewModel } from '../../viewModels/EventDetailsScreenViewModel';
-import { useAssignOrganizerViewModel } from '../../viewModels/AssignOrganizerViewModel';
-
+import { useAssignOrganizerScreenViewModel } from '../../viewModels/AssignOrganizerScreenViewModel';
 const statusStyleMap: Record<string, object> = {
   LIVE:      styles.status_LIVE,
   OPEN:      styles.status_OPEN,
@@ -62,7 +61,7 @@ const EventDetailsScreen = () => {
     loading: loadingOrganizers,
     saving,
     handleAssign,
-  } = useAssignOrganizerViewModel(
+  } = useAssignOrganizerScreenViewModel(
     event?.id ?? 0,
     event?.organizerName,
     handleAssignOrganizerSuccess,

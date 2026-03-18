@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { FixtureResponse } from '../../models/ApiResponses';
 import { APP_STRINGS } from '../../constants/AppStrings';
+import { formatDisplayDateTime } from '../../utils/dateUtils';
 
-type UseFixtureManageCardVMProps = {
+type FixtureManageCardVMProps = {
   fixture: FixtureResponse;
   isOrganizer: boolean;
 };
@@ -18,22 +19,10 @@ const SideName = {
   TBD: APP_STRINGS.fixtureScreen.tbd,
 } as const;
 
-const formatDateTimeLocal = (dt: string | null | undefined): string | null => {
-  if (!dt) return null;
-  return new Date(dt).toLocaleString(undefined, {
-    day:    '2-digit',
-    month:  '2-digit',
-    year:   'numeric',
-    hour:   '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-};
-
-export const useFixtureManageCardVM = ({
+export const useFixtureManageCardViewModel = ({
   fixture,
   isOrganizer,
-}: UseFixtureManageCardVMProps) => {
+}: FixtureManageCardVMProps) => {
   const isLive      = fixture.status?.toUpperCase() === MatchStatus.LIVE;
   const isCompleted = fixture.status?.toUpperCase() === MatchStatus.COMPLETED;
   const isUpcoming  = fixture.status?.toUpperCase() === MatchStatus.UPCOMING;
@@ -51,7 +40,6 @@ export const useFixtureManageCardVM = ({
     () => fixture.sets?.reduce((sum, s) => sum + (s.scoreA > s.scoreB ? 1 : 0), 0) ?? 0,
     [fixture.sets],
   );
-
   const totalScoreB = useMemo(
     () => fixture.sets?.reduce((sum, s) => sum + (s.scoreB > s.scoreA ? 1 : 0), 0) ?? 0,
     [fixture.sets],
@@ -65,7 +53,7 @@ export const useFixtureManageCardVM = ({
   }, [isCompleted, fixture.result, fixture.sideAId, fixture.sideAName, fixture.sideBName]);
 
   const displayDateTime = useMemo(
-    () => formatDateTimeLocal(fixture.matchDateTime),
+    () => formatDisplayDateTime(fixture.matchDateTime) || null,
     [fixture.matchDateTime],
   );
 
@@ -78,7 +66,6 @@ export const useFixtureManageCardVM = ({
   const showActions   = isOrganizer && !isBye && !isTBDMatch;
   const showLiveWatch = !isOrganizer && isLive;
   const showSchedule  = isUpcoming;
-  const showDelete    = isUpcoming;
 
   const teams = [
     { name: sideADisplay, score: totalScoreA, index: 0 },
@@ -101,7 +88,6 @@ export const useFixtureManageCardVM = ({
     showActions,
     showLiveWatch,
     showSchedule,
-    showDelete,
     teams,
   };
 };

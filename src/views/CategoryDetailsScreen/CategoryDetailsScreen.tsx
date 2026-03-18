@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View, Pressable, FlatList, TextInput, ActivityIndicator } from 'react-native';
-import { ArrowLeft, User, Users, Search, RefreshCw } from 'lucide-react-native';
+import { ArrowLeft, User, Users, Search } from 'lucide-react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppButton from '../../components/AppButton/AppButton';
 import MyTeamCard from '../../components/MyTeamCard/MyTeamCard';
@@ -8,7 +8,7 @@ import FixtureManageCard from '../../components/FixtureManageCard/FixtureManageC
 import { colors } from '../../theme/colors';
 import { styles } from './CategoryDetailsScreenStyles';
 import { APP_STRINGS } from '../../constants/AppStrings';
-import { useCategoryDetailsViewModel } from '../../viewModels/CategoryDetailsScreenViewModel';
+import { useCategoryDetailsScreenViewModel } from '../../viewModels/CategoryDetailsScreenViewModel';
 import { FixtureTabType, FormatType, GenderType } from '../../models/Event';
 
 const FIXTURE_TABS: FixtureTabType[] = [
@@ -19,7 +19,7 @@ const FIXTURE_TABS: FixtureTabType[] = [
 ];
 
 const CategoryDetailsScreen = () => {
-  const viewModel = useCategoryDetailsViewModel();
+  const viewModel = useCategoryDetailsScreenViewModel();
 
   if (viewModel.loading) {
     return (
@@ -58,15 +58,12 @@ const CategoryDetailsScreen = () => {
     isAbandoned,
     canCreateTeams,
     canCreateFixtures,
-    canRegenerate,
     minRequiredForTeams,
     hasTeamsForGender,
     hasFixturesForGender,
     getRoundName,
     handleCreateTeams,
     handleCreateFixtures,
-    handleDeleteAndRegenerate,
-    handleDeleteFixture,
     handleFixturePress,
     handleScheduleFixture,
     eventVenue,
@@ -201,40 +198,24 @@ const CategoryDetailsScreen = () => {
               </View>
 
               {hasFixturesForGender ? (
-                <>
-                  {canRegenerate && (
-                    <View style={styles.centerButton}>
-                      <Pressable
-                        onPress={handleDeleteAndRegenerate}
-                        style={{ flexDirection: 'row', alignItems: 'center', gap: 6, padding: 8 }}
-                      >
-                        <RefreshCw size={16} color={colors.error} />
-                        <Text style={{ color: colors.error, fontSize: 13, fontWeight: '500' }}>
-                          Regenerate Fixtures
-                        </Text>
-                      </Pressable>
-                    </View>
+                <FlatList
+                  data={filteredFixtures}
+                  keyExtractor={(item) => String(item.id)}
+                  contentContainerStyle={styles.listContent}
+                  refreshing={refreshing}
+                  onRefresh={handleRefresh}
+                  renderItem={({ item }) => (
+                    <FixtureManageCard
+                      fixture={item}
+                      roundName={getRoundName(item.roundNumber, item.matchNumber)}
+                      isOrganizer={isAdminOrOrganizer}
+                      eventVenue={eventVenue}
+                      eventName={eventName}
+                      onPress={() => handleFixturePress(item)}
+                      onSchedule={() => handleScheduleFixture(item)}
+                    />
                   )}
-                  <FlatList
-                    data={filteredFixtures}
-                    keyExtractor={(item) => String(item.id)}
-                    contentContainerStyle={styles.listContent}
-                    refreshing={refreshing}
-                    onRefresh={handleRefresh}
-                    renderItem={({ item }) => (
-                      <FixtureManageCard
-                        fixture={item}
-                        roundName={getRoundName(item.roundNumber, item.matchNumber)}
-                        isOrganizer={isAdminOrOrganizer}
-                        eventVenue={eventVenue}
-                        eventName={eventName}
-                        onPress={() => handleFixturePress(item)}
-                        onSchedule={() => handleScheduleFixture(item)}
-                        onDelete={() => handleDeleteFixture()}
-                      />
-                    )}
-                  />
-                </>
+                />
               ) : (
                 canManageEvent && (
                   <View style={styles.centerButton}>

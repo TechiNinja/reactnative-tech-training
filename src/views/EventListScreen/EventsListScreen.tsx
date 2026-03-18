@@ -39,7 +39,7 @@ const EventsListScreen = ({ role }: EventListScreenProps) => {
         />
 
         {viewModel.loading ? (
-          <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
+          <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
         ) : viewModel.filteredEvents.length === 0 ? (
           <Text style={styles.noEventStyle}>{APP_STRINGS.eventScreen.noEventFound}</Text>
         ) : (
@@ -50,7 +50,7 @@ const EventsListScreen = ({ role }: EventListScreenProps) => {
               <EventCard event={item} role={role} onPress={() => viewModel.onEventPress(item)} />
             )}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: viewModel.tabBarHeight + 65 }}
+            contentContainerStyle={viewModel.listContentStyle}
           />
         )}
       </View>

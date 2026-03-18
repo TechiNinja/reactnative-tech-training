@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Alert } from 'react-native';
+import { Alert, AppState, AppStateStatus } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -7,10 +7,13 @@ import { FixtureResponse, MatchSetResponse } from '../models/ApiResponses';
 import { getMatchById, getMatchSets, updateSetScore, updateSetById } from '../services/matchService';
 import { bulkScheduleFixtures } from '../services/categoryService';
 import { APP_STRINGS } from '../constants/AppStrings';
+import { formatDisplayDateTime } from '../utils/dateUtils';
 
 type MatchDetailsRouteProp = RouteProp<RootStackParamList, 'MatchDetails'>;
 
-export const useMatchDetailsViewModel = () => {
+const LIVE_POLL_INTERVAL_MS = 5000;
+
+export const useMatchDetailsScreenViewModel = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<MatchDetailsRouteProp>();
   const { matchId, role, eventStartDate, eventEndDate, eventVenue, categoryId, openSchedule } = route.params;
@@ -35,7 +38,8 @@ export const useMatchDetailsViewModel = () => {
   const [tempScoreB, setTempScoreB] = useState(0);
   const [editingSetId, setEditingSetId] = useState<number | null>(null);
 
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollingRef  = useRef<ReturnType<typeof setInterval> | null>(null);
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
   const fetchMatch = useCallback(async () => {
     try {
@@ -61,12 +65,36 @@ export const useMatchDetailsViewModel = () => {
   useEffect(() => { fetchMatch(); }, [fetchMatch]);
 
   useEffect(() => {
-    if (match?.status?.toUpperCase() === 'LIVE') {
-      pollingRef.current = setInterval(() => { fetchMatch(); }, 5000);
-    } else {
+    const isLive = match?.status?.toUpperCase() === 'LIVE';
+
+    const startPolling = () => {
+      if (pollingRef.current) return;
+      pollingRef.current = setInterval(() => { fetchMatch(); }, LIVE_POLL_INTERVAL_MS);
+    };
+
+    const stopPolling = () => {
       if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
+    };
+
+    if (isLive) {
+      if (appStateRef.current === 'active') startPolling();
+
+      const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {
+        appStateRef.current = nextState;
+        if (nextState === 'active') {
+          startPolling();
+        } else {
+          stopPolling();
+        }
+      });
+
+      return () => {
+        stopPolling();
+        subscription.remove();
+      };
+    } else {
+      stopPolling();
     }
-    return () => { if (pollingRef.current) clearInterval(pollingRef.current); };
   }, [match?.status, fetchMatch]);
 
   const setTotalSets = (updater: number | ((prev: number) => number)) => {
@@ -78,39 +106,14 @@ export const useMatchDetailsViewModel = () => {
     });
   };
 
-  const formatDateTime = (dt: string | Date | null | undefined): string | null => {
-    if (!dt) return null;
-    const date = typeof dt === 'string' ? new Date(dt) : dt;
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const displayHours = (hours % 12 || 12).toString().padStart(2, '0');
-    return `${day}/${month}/${year}, ${displayHours}:${minutes} ${ampm}`;
-  };
-
-  const formatDateTimeFromUTC = (dt: string | null | undefined): string | null => {
-    if (!dt) return null;
-    return new Date(dt).toLocaleString(undefined, {
-      day:    '2-digit',
-      month:  '2-digit',
-      year:   'numeric',
-      hour:   '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  };
-
   const validateSchedule = (): boolean => {
     const start = new Date(eventStartDate);
     const end   = new Date(eventEndDate);
     end.setHours(23, 59, 59);
     if (selectedDate < start || selectedDate > end) {
       setScheduleError(APP_STRINGS.matchScreen.scheduleDateRange(
-        formatDateTime(start) ?? '',
-        formatDateTime(end)   ?? '',
+        formatDisplayDateTime(start),
+        formatDisplayDateTime(end),
       ));
       return false;
     }
@@ -299,7 +302,5 @@ export const useMatchDetailsViewModel = () => {
     handleCancelEditSet,
     incrementScore,
     decrementScore,
-    formatDateTime,
-    formatDateTimeFromUTC,
   };
 };
