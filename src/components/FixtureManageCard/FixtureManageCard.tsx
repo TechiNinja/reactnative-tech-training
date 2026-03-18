@@ -12,7 +12,7 @@ import {
 import { colors } from '../../theme/colors';
 import { styles } from './FixtureManageCardStyles';
 import { Fixture, FormatType } from '../../models/Event';
-import { APP_STRINGS } from '../../constants/AppStrings';
+import { APP_STRINGS } from '../../constants/appStrings';
 import { useFixtureManageCardViewModel } from './FixtureManageCardViewModel';
 
 type FixtureManageCardProps = {

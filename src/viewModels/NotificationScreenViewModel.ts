@@ -5,6 +5,7 @@ import {
   NotificationItem,
 } from '../services/notificationService';
 import { Alert } from 'react-native';
+import { validationMessages } from '../constants/validationMessages';
 
 export const useNotificationViewModel = (
   navigation: any,
@@ -37,7 +38,14 @@ export const useNotificationViewModel = (
       await notificationService.markAllAsRead(audience);
     } catch (error) {
       if (error instanceof Error) {
-        Alert.alert(error.message);
+        const isEmptyJsonError =
+          error.message.includes(validationMessages.UNEXPECTED_ERROR) ||
+          error.message.includes(validationMessages.JSON_PARSE_ERROR);
+
+        if (isEmptyJsonError) {
+          return;
+        }
+        Alert.alert(validationMessages.ERROR, error.message);
       }
     }
   }, [audience]);

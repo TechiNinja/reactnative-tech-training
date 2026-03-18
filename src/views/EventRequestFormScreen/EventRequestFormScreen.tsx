@@ -11,7 +11,7 @@ import AppButton from '../../components/AppButton/AppButton';
 import { colors } from '../../theme/colors';
 import { useEventRequestFormViewModel } from '../../viewModels/EventRequestFormViewModel';
 import { RootStackParamList } from '../../navigation/AppNavigator';
-import { APP_STRINGS } from '../../constants/AppStrings';
+import { APP_STRINGS } from '../../constants/appStrings';
 import { styles } from './EventRequestFormScreenStyles';
 
 

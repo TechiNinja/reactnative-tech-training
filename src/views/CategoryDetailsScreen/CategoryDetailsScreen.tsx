@@ -7,7 +7,7 @@ import MyTeamCard from '../../components/MyTeamCard/MyTeamCard';
 import FixtureManageCard from '../../components/FixtureManageCard/FixtureManageCard';
 import { colors } from '../../theme/colors';
 import { styles } from './CategoryDetailsScreenStyles';
-import { APP_STRINGS } from '../../constants/AppStrings';
+import { APP_STRINGS } from '../../constants/appStrings';
 import { useCategoryDetailsViewModel } from '../../viewModels/CategoryDetailsScreenViewModel';
 import { FixtureTabType, FormatType, GenderType } from '../../models/Event';
 

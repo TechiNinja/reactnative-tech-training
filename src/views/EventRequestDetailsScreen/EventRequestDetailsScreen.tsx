@@ -14,7 +14,7 @@ import AppButton from '../../components/AppButton/AppButton';
 
 import { colors } from '../../theme/colors';
 import { useEventRequestDetailsViewModel } from '../../viewModels/EventRequestDetailsViewModel';
-import { APP_STRINGS } from '../../constants/AppStrings';
+import { APP_STRINGS } from '../../constants/appStrings';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { RequestStatus } from '../../models/EventRequest';

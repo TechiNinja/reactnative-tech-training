@@ -7,7 +7,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { EventRequestResponse, RequestStatus } from '../models/EventRequest';
 import { useEventRequestStore } from '../store/EventRequestStore';
 import { validationMessages } from '../constants/validationMessages';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { APP_STRINGS } from '../constants/appStrings';
 
 type RouteType = {
   key: string;
@@ -57,7 +57,7 @@ export const useEventRequestDetailsViewModel = () => {
   }, [request?.id, request?.status]);
 
   const openRemarksModal = () => {
-    setDecision('Rejected');
+    setDecision(RequestStatus.REJECTED);
     setRemarks('');
     setRemarksModalVisible(true);
   };
@@ -88,9 +88,9 @@ export const useEventRequestDetailsViewModel = () => {
       setApprovingOrRejecting(true);
 
       await decideRequest(request.id, {
-  status: RequestStatus.REJECTED,
-  remarks: trimmedRemarks,
-});
+        status: RequestStatus.REJECTED,
+        remarks: trimmedRemarks,
+      });
 
       closeRemarksModal();
       Alert.alert(
@@ -99,14 +99,11 @@ export const useEventRequestDetailsViewModel = () => {
       );
       navigation.goBack();
     } catch (error: any) {
-  console.log('Approve/Reject error:', error);
-  console.log('Approve/Reject error message:', error?.message);
-  console.log('Approve/Reject error response:', error?.response);
-  Alert.alert(
-    validationMessages.ERROR,
-    error?.message || validationMessages.SOMETHING_WRONG,
-  );
-} finally {
+      Alert.alert(
+        validationMessages.ERROR,
+        error?.message || validationMessages.SOMETHING_WRONG,
+      );
+    } finally {
       setApprovingOrRejecting(false);
     }
   };
@@ -120,9 +117,9 @@ export const useEventRequestDetailsViewModel = () => {
       setApprovingOrRejecting(true);
 
       await decideRequest(request.id, {
-  status: RequestStatus.APPROVED,
-  remarks: '',
-});
+        status: RequestStatus.APPROVED,
+        remarks: '',
+      });
 
       Alert.alert(
         validationMessages.SUCCESS,
@@ -130,14 +127,11 @@ export const useEventRequestDetailsViewModel = () => {
       );
       navigation.goBack();
     } catch (error: any) {
-  console.log('Approve/Reject error:', error);
-  console.log('Approve/Reject error message:', error?.message);
-  console.log('Approve/Reject error response:', error?.response);
-  Alert.alert(
-    validationMessages.ERROR,
-    error?.message || validationMessages.SOMETHING_WRONG,
-  );
-}finally {
+      Alert.alert(
+        validationMessages.ERROR,
+        error?.message || validationMessages.SOMETHING_WRONG,
+      );
+    } finally {
       setApprovingOrRejecting(false);
     }
   };

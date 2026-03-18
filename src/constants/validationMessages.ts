@@ -43,4 +43,6 @@ export const validationMessages = {
   SUCCESSFULLY: 'successfully',
   REQUEST_APPROVED_SUCCESS: 'Request approved successfully',
   REQUEST_REJECTED_SUCCESS: 'Request rejected successfully',
+  UNEXPECTED_ERROR: 'Unexpected end of input',
+  JSON_PARSE_ERROR: 'JSON Parse Error'
 };

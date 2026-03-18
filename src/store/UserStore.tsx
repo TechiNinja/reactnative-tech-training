@@ -11,7 +11,7 @@ import {
   createUser as createUserApi,
   updateUserApi,
 } from '../services/userService';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { APP_STRINGS } from '../constants/appStrings';
 import { useAuthStore } from './AuthStore';
 
 type CreateUserParams = {
