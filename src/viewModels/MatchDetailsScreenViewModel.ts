@@ -6,7 +6,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { FixtureResponse, MatchSetResponse } from '../models/ApiResponses';
 import { getMatchById, getMatchSets, updateSetScore, updateSetById } from '../services/matchService';
 import { bulkScheduleFixtures } from '../services/categoryService';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { APP_STRINGS } from '../constants/appStrings';
 import { formatDisplayDateTime } from '../utils/dateUtils';
 
 type MatchDetailsRouteProp = RouteProp<RootStackParamList, 'MatchDetails'>;

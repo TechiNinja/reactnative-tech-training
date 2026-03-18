@@ -6,7 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { EventRequestResponse } from '../models/EventRequest';
 import { EventResponse } from '../models/EventResponse';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { APP_STRINGS } from '../constants/appStrings';
 import { createEvent, patchEvent, CreateEventPayload, PatchEventPayload } from '../services/eventService';
 
 type Mode = 'create' | 'edit';

@@ -22,7 +22,7 @@ import CategoryCard from '../../components/CategoryCard/CategoryCard';
 import AppButton from '../../components/AppButton/AppButton';
 import { colors } from '../../theme/colors';
 import { styles } from './EventDetailsScreenStyles';
-import { APP_STRINGS } from '../../constants/AppStrings';
+import { APP_STRINGS } from '../../constants/appStrings';
 import { useEventDetailsViewModel } from '../../viewModels/EventDetailsScreenViewModel';
 import { useAssignOrganizerScreenViewModel } from '../../viewModels/AssignOrganizerScreenViewModel';
 const statusStyleMap: Record<string, object> = {

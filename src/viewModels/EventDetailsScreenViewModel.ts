@@ -7,7 +7,7 @@ import { useAuthStore } from '../store/AuthStore';
 import { authFetch } from '../utils/authFetch';
 import { EventResponse, EventCategoryResponse } from '../models/EventResponse';
 import { API_ENDPOINTS } from '../config/api';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { APP_STRINGS } from '../constants/appStrings';
 import { getEventById } from '../services/eventService';
 
 type EventDetailsRouteProp = RouteProp<RootStackParamList, 'EventDetails'>;

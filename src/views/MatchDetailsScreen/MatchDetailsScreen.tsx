@@ -9,7 +9,7 @@ import AppButton from '../../components/AppButton/AppButton';
 import { colors } from '../../theme/colors';
 import { useMatchDetailsScreenViewModel } from '../../viewModels/MatchDetailsScreenViewModel';
 import { styles } from './MatchDetailsScreenStyles';
-import { APP_STRINGS } from '../../constants/AppStrings';
+import { APP_STRINGS } from '../../constants/appStrings';
 import { formatDisplayDateTime } from '../../utils/dateUtils';
 
 const SetStatus = {

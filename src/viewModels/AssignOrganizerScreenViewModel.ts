@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { authFetch } from '../utils/authFetch';
 import { API_ENDPOINTS } from '../config/api';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { APP_STRINGS } from '../constants/appStrings';
 import { assignOrganizer } from '../services/eventService';
 
 type OrganizerOption = {

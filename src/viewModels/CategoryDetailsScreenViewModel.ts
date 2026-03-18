@@ -5,7 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { FormatType, GenderType, FixtureTabType } from '../models/Event';
 import { useAuthStore } from '../store/AuthStore';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { APP_STRINGS } from '../constants/appStrings';
 import { FixtureResponse, CategoryResponse } from '../models/ApiResponses';
 import {
   getCategoryById,

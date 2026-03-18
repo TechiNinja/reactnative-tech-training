@@ -5,7 +5,7 @@ import EventCard from '../../components/EventCard/EventCard';
 import { styles } from './EventsListScreenStyles';
 import EventStatusTabs from '../../components/EventStatusTabs/EventStatusTabs';
 import AppButton from '../../components/AppButton/AppButton';
-import { APP_STRINGS } from '../../constants/AppStrings';
+import { APP_STRINGS } from '../../constants/appStrings';
 import { useEventsListViewModel } from '../../viewModels/EventListScreenViewModel';
 import { colors } from '../../theme/colors';
 import { EventResponse } from '../../models/EventResponse';

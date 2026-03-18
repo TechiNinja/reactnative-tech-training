@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { FixtureResponse } from '../../models/ApiResponses';
-import { APP_STRINGS } from '../../constants/AppStrings';
+import { APP_STRINGS } from '../../constants/appStrings';
 import { formatDisplayDateTime } from '../../utils/dateUtils';
 
 type FixtureManageCardVMProps = {

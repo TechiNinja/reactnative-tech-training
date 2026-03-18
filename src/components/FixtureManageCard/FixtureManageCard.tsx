@@ -5,7 +5,7 @@ import { colors } from '../../theme/colors';
 import { styles } from './FixtureManageCardStyles';
 import { FixtureResponse } from '../../models/ApiResponses';
 import { useFixtureManageCardViewModel } from './FixtureManageCardViewModel';
-import { APP_STRINGS } from '../../constants/AppStrings';
+import { APP_STRINGS } from '../../constants/appStrings';
 
 type FixtureManageCardProps = {
   fixture: FixtureResponse;
