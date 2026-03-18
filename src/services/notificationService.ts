@@ -16,16 +16,16 @@ export type NotificationItem = {
 
 type NotificationFilter = {
   audience: NotificationAudience;
-  userId?: number;
+  isRead?: boolean;
 };
 
-const toQueryString = ({ audience, userId }: NotificationFilter) => {
+const toQueryString = ({ audience, isRead }: NotificationFilter) => {
   const params = new URLSearchParams();
 
   params.append('audience', audience);
 
-  if (userId !== undefined) {
-    params.append('userId', String(userId));
+  if (isRead !== undefined) {
+    params.append('isRead', String(isRead));
   }
 
   return `?${params.toString()}`;
@@ -38,9 +38,15 @@ export const notificationService = {
     );
   },
 
-  markAllAsRead(filter: NotificationFilter): Promise<void> {
+  getUnreadCount(audience: NotificationAudience): Promise<number> {
+    return authFetch<number>(
+      `${API_ENDPOINTS.NOTIFICATIONS.UNREAD_COUNT}?audience=${audience}`,
+    );
+  },
+
+  markAllAsRead(audience: NotificationAudience): Promise<void> {
     return authFetch<void>(
-      `${API_ENDPOINTS.NOTIFICATIONS.MARK_READ}${toQueryString(filter)}`,
+      `${API_ENDPOINTS.NOTIFICATIONS.MARK_READ}?audience=${audience}`,
       {
         method: 'PUT',
       },

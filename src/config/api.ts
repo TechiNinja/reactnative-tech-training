@@ -1,14 +1,14 @@
-import { Platform } from "react-native";
+import { Platform } from 'react-native';
 
 const HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-export const API_BASE_URL = `http://${HOST}:5181/api`;
-export const API_WS_BASE_URL = `http://${HOST}:5181`;
+export const API_BASE_URL = `http://${HOST}:5000/api`;
+export const API_WS_BASE_URL = `http://${HOST}:5000`;
 
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
-  },  
+  },
   USERS: '/Users',
   ROLES: '/Roles',
   SPORT: '/sports',
@@ -17,8 +17,7 @@ export const API_ENDPOINTS = {
     BASE: '/event-requests',
     BY_ID: (id: number) => `/event-requests/${id}`,
     WITHDRAW: (id: number) => `/event-requests/${id}/withdraw`,
-    DECIDE: (id: number, status: 'Approved' | 'Rejected') =>
-      `/Operation/${id}/${status}`,
+    DECIDE: (id: number) => `/Operation/${id}`,
   },
 
   PARTICIPANT: {

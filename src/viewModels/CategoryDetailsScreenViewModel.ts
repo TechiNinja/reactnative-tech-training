@@ -9,7 +9,7 @@ import {
 } from '../services/organizerService';
 import { useEventStore } from '../store/EventStore';
 import { useAuthStore } from '../store/AuthStore';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { APP_STRINGS } from '../constants/appStrings';
 import {
   EventStatus,
   FixtureTabType,

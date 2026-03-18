@@ -61,6 +61,7 @@ export type EditEventRequest = {
 };
 
 export type DecideEventRequest = {
+  status: RequestStatus;
   remarks: string;
 };
 

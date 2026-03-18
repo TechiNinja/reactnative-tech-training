@@ -6,7 +6,7 @@ import { RouteProp } from '@react-navigation/native';
 import { useEventStore } from '../store/EventStore';
 import { useAuthStore } from '../store/AuthStore';
 import { FormatType, GenderType } from '../models/Event';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { APP_STRINGS } from '../constants/appStrings';
 
 export const useEventRegistrationViewModel = (
   navigation: NativeStackNavigationProp<RootStackParamList>,

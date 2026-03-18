@@ -14,7 +14,7 @@ import AppButton from '../../components/AppButton/AppButton';
 
 import { colors } from '../../theme/colors';
 import { useEventRequestDetailsViewModel } from '../../viewModels/EventRequestDetailsViewModel';
-import { APP_STRINGS } from '../../constants/AppStrings';
+import { APP_STRINGS } from '../../constants/appStrings';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { RequestStatus } from '../../models/EventRequest';
@@ -130,7 +130,7 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
 
             {request.updatedDate && (
               <Text style={styles.description}>
-                {APP_STRINGS.RequestScreen.update}{' '}
+                {APP_STRINGS.RequestScreen.update}
                 {formatDate(request.updatedDate)}
               </Text>
             )}
@@ -146,7 +146,7 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
                 <>
                   <View style={styles.buttonFlex}>
                     <AppButton
-                      title={APP_STRINGS.RequestScreen.update}
+                      title={APP_STRINGS.RequestScreen.updateRequired}
                       disabled={!canUpdate}
                       onPress={handleUpdate}
                     />

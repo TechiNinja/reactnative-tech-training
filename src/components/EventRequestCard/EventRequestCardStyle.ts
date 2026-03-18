@@ -117,8 +117,12 @@ export const styles = StyleSheet.create({
   },
 
   statusText: {
+    backgroundColor: colors.primary,
     fontSize: fontsSize.small,
     fontWeight: 'bold',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 10,
   },
 
   status_CANCELLED: {

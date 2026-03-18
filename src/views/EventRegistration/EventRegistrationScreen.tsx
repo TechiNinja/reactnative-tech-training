@@ -6,7 +6,7 @@ import { ArrowLeft, Check } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
-import { APP_STRINGS } from '../../constants/AppStrings';
+import { APP_STRINGS } from '../../constants/appStrings';
 import { styles } from './EventRegistrationScreenStyles';
 import { useEventRegistrationViewModel } from '../../viewModels/EventRegistrationViewModel';
 import { FormatType, GenderType } from '../../models/Event';
