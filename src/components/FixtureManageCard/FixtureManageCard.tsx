@@ -45,7 +45,7 @@ const FixtureManageCard = ({
   } = useFixtureManageCardViewModel({ fixture, isOrganizer });
 
   return (
-    <Pressable style={styles.container} onPress={onPress}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.roundName}>{roundName}</Text>
@@ -138,7 +138,7 @@ const FixtureManageCard = ({
           </Text>
         </View>
       ) : null}
-    </Pressable>
+    </View>
   );
 };
 

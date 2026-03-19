@@ -86,6 +86,7 @@ export interface Event {
   time: string;
   venue: string;
   status: EventStatus;
+  format: FormatType[];
   formats: FormatType[];
   registeredTeams: number;
   totalTeams: number;
