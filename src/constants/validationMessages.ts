@@ -44,5 +44,6 @@ export const validationMessages = {
   REQUEST_APPROVED_SUCCESS: 'Request approved successfully',
   REQUEST_REJECTED_SUCCESS: 'Request rejected successfully',
   UNEXPECTED_ERROR: 'Unexpected end of input',
-  JSON_PARSE_ERROR: 'JSON Parse Error'
+  JSON_PARSE_ERROR: 'JSON Parse Error',
+  FAILD_CREATE_SPORTS: 'Failed to create sports'
 };

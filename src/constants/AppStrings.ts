@@ -3,6 +3,11 @@ export const APP_STRINGS = {
     name: 'SportsCarnival',
     loginTagline: 'Manage your events',
     registerTagline: 'Join the competition',
+    sportsName: 'Sport Name',
+    create: 'Create',
+    formats: 'Formats',
+    addSports: 'Add Sports',
+    cancel: 'Cancel'
   },
   auth: {
     welcomeBack: 'Welcome Back',
