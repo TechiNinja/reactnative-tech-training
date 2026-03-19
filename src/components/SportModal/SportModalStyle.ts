@@ -50,7 +50,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginRight: 10,
     marginBottom: 10,
-    backgroundColor : colors.inputField,
+    backgroundColor: colors.inputField,
   },
   selectedTab: {
     borderColor: colors.border,
@@ -76,7 +76,7 @@ export const styles = StyleSheet.create({
     marginTop: 24,
   },
   cancelButton: {
-    backgroundColor : colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 16,

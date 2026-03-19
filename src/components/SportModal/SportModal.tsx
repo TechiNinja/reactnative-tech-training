@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { CreateSportRequest, SportFormat } from '../../models/Sport';
 import { sportService } from '../../services/sportService';
 import { styles } from './SportModalStyle';
@@ -96,7 +90,11 @@ export const SportModal = ({
       onClose();
       onCreated?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : validationMessages.FAILD_CREATE_SPORTS);
+      setError(
+        err instanceof Error
+          ? err.message
+          : validationMessages.FAILD_CREATE_SPORTS,
+      );
     } finally {
       setLoading(false);
     }
@@ -161,7 +159,9 @@ export const SportModal = ({
               style={styles.cancelButton}
               disabled={loading}
             >
-              <Text style={styles.cancelButtonText}>{APP_STRINGS.app.cancel}</Text>
+              <Text style={styles.cancelButtonText}>
+                {APP_STRINGS.app.cancel}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
