@@ -9,7 +9,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { ArrowLeft } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
-import { useEventFormScreenViewModel } from '../../viewModels/EventFormScreenViewModel';import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { useEventFormScreenViewModel } from '../../viewModels/EventFormScreenViewModel';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 type EventFormScreenProps = NativeStackScreenProps<RootStackParamList, 'EventForm'>;
 

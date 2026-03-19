@@ -106,7 +106,7 @@ export const useCategoryDetailsScreenViewModel = () => {
     [teams, searchQuery],
   );
 
-  const filteredFixtures = useMemo(() => {
+  const filteredFixtures = (() => {
     let result = fixtures;
     if (activeFixtureTab !== FixtureTabType.ALL) {
       result = result.filter((f) => f.status.toUpperCase() === activeFixtureTab);
@@ -118,7 +118,7 @@ export const useCategoryDetailsScreenViewModel = () => {
       );
     }
     return result;
-  }, [fixtures, activeFixtureTab, searchQuery]);
+  })();
 
   const visibleFixtures = useMemo(
     () => canManageEvent

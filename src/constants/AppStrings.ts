@@ -257,6 +257,9 @@ export const APP_STRINGS = {
     failedToCancel: 'Failed to cancel event',
     somethingWentWrong: 'Something went wrong',
     gender: 'Gender *',
+    womens: "Women's",
+    mens: "Men's",
+    mixed: 'Mixed',
   },
   RequestScreen: {
     sportsName: 'Sports Name *',
