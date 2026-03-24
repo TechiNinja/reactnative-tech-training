@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { FormatType, GenderType } from '../models/Event';
+import { EventStatus, CategoryStatus, FormatType, GenderType } from '../models/Event';
 import { useAuthStore } from '../store/AuthStore';
 import { authFetch } from '../utils/authFetch';
 import { EventResponse, EventCategoryResponse } from '../models/EventResponse';
@@ -40,14 +40,6 @@ type TeamResponse = {
   eventCategoryId: number;
 };
 
-const EventStatus = {
-  LIVE:      'Live',
-  COMPLETED: 'Completed',
-  CANCELLED: 'Cancelled',
-  OPEN:      'Open',
-  ABANDONED: 'Abandoned',
-} as const;
-
 const GenderValue = {
   FEMALE: 'Female',
   MIXED:  'Mixed',
@@ -83,7 +75,7 @@ const mapCategory = (
       : gender === GenderType.Mixed
       ? APP_STRINGS.eventScreen.mixed
       : APP_STRINGS.eventScreen.mens;
-  const isAbandoned      = cat.status === EventStatus.ABANDONED;
+  const isAbandoned = cat.status === CategoryStatus.ABANDONED;
   const participantCount = registrations.filter((r) => r.eventCategoryId === cat.id).length;
   const teamCount        = teamCounts[cat.id] ?? 0;
   const slotsFull        = participantCount >= maxParticipants;
@@ -177,10 +169,10 @@ export const useEventDetailsViewModel = () => {
   const canAssignOrganizer =
     role === 'admin' && !hasEventStarted && event?.status !== EventStatus.CANCELLED;
 
-  const canRegister = role === 'participant' && event?.status === EventStatus.OPEN;
+  const canRegister = role === 'participant' && event?.status === EventStatus.UPCOMING;
 
   const getRegisterButtonText = () => {
-    if (event?.status !== EventStatus.OPEN) return APP_STRINGS.eventScreen.registrationClosed;
+    if (event?.status !== EventStatus.UPCOMING) return APP_STRINGS.eventScreen.registrationClosed;
     return APP_STRINGS.eventScreen.register;
   };
 

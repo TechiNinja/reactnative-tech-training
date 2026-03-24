@@ -1,16 +1,18 @@
 import { View, Text, Pressable } from 'react-native';
 import { styles } from './EventStatusTabsStyle';
 import { EventStatusTab } from '../../models/Event';
+import { APP_STRINGS } from '../../constants/appStrings';
 
 const TABS: EventStatusTab[] = [
   EventStatusTab.ALL,
   EventStatusTab.UPCOMING,
   EventStatusTab.LIVE,
   EventStatusTab.COMPLETED,
+  EventStatusTab.CANCELLED,
 ];
 
 const formatTabLabel = (tab: EventStatusTab): string => {
-  if (tab === EventStatusTab.ALL) return 'All';
+  if (tab === EventStatusTab.ALL) return APP_STRINGS.eventStatusTabs.all;
   return tab.charAt(0).toUpperCase() + tab.slice(1).toLowerCase();
 };
 

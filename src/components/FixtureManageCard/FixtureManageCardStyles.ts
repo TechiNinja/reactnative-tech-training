@@ -190,4 +190,19 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
+  participantViewBtn: {
+    alignItems: 'center',
+    borderColor: colors.primary,
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  participantViewBtnText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '600',
+  },
 });

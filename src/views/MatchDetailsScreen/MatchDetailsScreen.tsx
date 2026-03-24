@@ -3,7 +3,7 @@ import {
   View, Text, Pressable, ScrollView, ActivityIndicator, Modal,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { ArrowLeft, Calendar, MapPin, Minus, Plus, CheckCircle, X, Play, Edit2 } from 'lucide-react-native';
+import { ArrowLeft, Calendar, MapPin, Minus, Plus, CheckCircle, X, Edit2 } from 'lucide-react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppButton from '../../components/AppButton/AppButton';
 import { colors } from '../../theme/colors';
@@ -39,10 +39,9 @@ const MatchDetailsScreen = () => {
   }
 
   const { match, sets } = viewModel;
-  const isLive      = viewModel.isMatchLive;
+  const isLive = viewModel.isMatchLive;
   const isCompleted = viewModel.isMatchCompleted;
-  const isUpcoming  = viewModel.isMatchUpcoming;
-  const isScheduled = isUpcoming && !!match.matchDateTime && match.totalSets > 0;
+  const isUpcoming = viewModel.isMatchUpcoming;
 
   return (
     <ScreenWrapper scrollable={false}>
@@ -64,21 +63,16 @@ const MatchDetailsScreen = () => {
                 isUpcoming && styles.statusUpcoming,
                 isCompleted && styles.statusCompleted,
               ]}>
+                {isLive ? <View style={styles.liveDot} /> : null}
                 <Text style={[
                   styles.statusText,
                   isLive && styles.statusTextLive,
                   isUpcoming && styles.statusTextUpcoming,
                   isCompleted && styles.statusTextCompleted,
                 ]}>
-                  {match.status}
+                  {isLive ? APP_STRINGS.eventScreen.live.toUpperCase() : match.status}
                 </Text>
               </View>
-              {isLive && (
-                <View style={styles.liveIndicator}>
-                  <View style={styles.liveDot} />
-                  <Text style={styles.liveText}>{APP_STRINGS.eventScreen.live.toUpperCase()}</Text>
-                </View>
-              )}
             </View>
 
             <View style={styles.teamsRow}>
@@ -128,9 +122,9 @@ const MatchDetailsScreen = () => {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{APP_STRINGS.matchScreen.sets}</Text>
               {sets.map((s) => {
-                const isEditing      = viewModel.editingSetId === s.id;
+                const isEditing = viewModel.editingSetId === s.id;
                 const isSetCompleted = s.status === SetStatus.COMPLETED;
-                const isSetLive      = s.status === SetStatus.LIVE;
+                const isSetLive = s.status === SetStatus.LIVE;
                 return (
                   <View key={s.id}>
                     <View style={styles.setRow}>
@@ -211,22 +205,9 @@ const MatchDetailsScreen = () => {
 
           {viewModel.isOrganizer && isUpcoming && (
             <AppButton
-              title={match.matchDateTime ? APP_STRINGS.matchScreen.reschedule : APP_STRINGS.matchScreen.scheduleMatch}
+              title={APP_STRINGS.matchScreen.reschedule}
               onPress={() => viewModel.setShowScheduleModal(true)}
             />
-          )}
-
-          {viewModel.isOrganizer && isScheduled && (
-            <Pressable
-              style={styles.startMatchBtn}
-              onPress={viewModel.handleStartMatch}
-              disabled={viewModel.saving}
-            >
-              <Play size={16} color={colors.primaryText} />
-              <Text style={styles.startMatchBtnText}>
-                {viewModel.saving ? APP_STRINGS.matchScreen.starting : APP_STRINGS.matchScreen.startMatchBtn}
-              </Text>
-            </Pressable>
           )}
 
           {viewModel.canEditScore && viewModel.currentSetNumber !== null && viewModel.editingSetId === null && (
@@ -259,11 +240,21 @@ const MatchDetailsScreen = () => {
                 </View>
               </View>
               <View style={styles.scoreActions}>
-                <Pressable style={styles.saveScoreBtn} onPress={() => viewModel.handleSaveScore(false)} disabled={viewModel.saving}>
-                  <Text style={styles.saveScoreBtnText}>{APP_STRINGS.matchScreen.saveScore}</Text>
+                <Pressable
+                  style={styles.saveScoreBtn}
+                  onPress={() => viewModel.handleSaveScore(false)}
+                  disabled={viewModel.saving}
+                >
+                  <Text style={styles.saveScoreBtnText}>
+                    {viewModel.saving ? APP_STRINGS.matchScreen.saving : APP_STRINGS.matchScreen.saveScore}
+                  </Text>
                 </Pressable>
                 {viewModel.canCompleteSet ? (
-                  <Pressable style={styles.completeSetBtn} onPress={() => viewModel.handleSaveScore(true)} disabled={viewModel.saving}>
+                  <Pressable
+                    style={styles.completeSetBtn}
+                    onPress={() => viewModel.handleSaveScore(true)}
+                    disabled={viewModel.saving}
+                  >
                     <CheckCircle size={16} color={colors.primaryText} />
                     <Text style={styles.completeSetBtnText}>{APP_STRINGS.matchScreen.completeSet}</Text>
                   </Pressable>
@@ -285,7 +276,7 @@ const MatchDetailsScreen = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalSheet}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{APP_STRINGS.matchScreen.scheduleMatch}</Text>
+              <Text style={styles.modalTitle}>{APP_STRINGS.matchScreen.reschedule}</Text>
               <Pressable onPress={() => viewModel.setShowScheduleModal(false)}>
                 <X size={22} color={colors.textPrimary} />
               </Pressable>
@@ -336,17 +327,6 @@ const MatchDetailsScreen = () => {
                 }}
               />
             )}
-
-            <Text style={styles.modalLabel}>{APP_STRINGS.matchScreen.totalSetsLabel}</Text>
-            <View style={styles.setsInputRow}>
-              <Pressable style={styles.scoreBtn} onPress={() => viewModel.setTotalSets((p) => Math.max(1, p - 1))}>
-                <Minus size={18} color={colors.textPrimary} />
-              </Pressable>
-              <Text style={styles.setsValue}>{viewModel.totalSets}</Text>
-              <Pressable style={styles.scoreBtn} onPress={() => viewModel.setTotalSets((p) => Math.min(10, p + 1))}>
-                <Plus size={18} color={colors.textPrimary} />
-              </Pressable>
-            </View>
 
             {viewModel.scheduleError ? (
               <Text style={styles.errorText}>{viewModel.scheduleError}</Text>

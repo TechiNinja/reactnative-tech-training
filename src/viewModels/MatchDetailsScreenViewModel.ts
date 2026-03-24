@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Alert, AppState, AppStateStatus } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { FixtureResponse, MatchSetResponse } from '../models/ApiResponses';
@@ -38,10 +38,12 @@ export const useMatchDetailsScreenViewModel = () => {
   const [tempScoreB, setTempScoreB] = useState(0);
   const [editingSetId, setEditingSetId] = useState<number | null>(null);
 
-  const pollingRef  = useRef<ReturnType<typeof setInterval> | null>(null);
-  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const initializedSetId = useRef<number | null>(null);
+  const scoresDirty      = useRef(false);
+  const pollingRef       = useRef<ReturnType<typeof setInterval> | null>(null);
+  const appStateRef      = useRef<AppStateStatus>(AppState.currentState);
 
-  const fetchMatch = useCallback(async () => {
+  const fetchMatchFull = useCallback(async () => {
     try {
       setError(null);
       const [m, s] = await Promise.all([getMatchById(matchId), getMatchSets(matchId)]);
@@ -55,47 +57,53 @@ export const useMatchDetailsScreenViewModel = () => {
     }
   }, [matchId]);
 
-  const handleRetry = useCallback(() => {
-    setLoading(true);
-    fetchMatch();
-  }, [fetchMatch]);
+  const fetchMatchSilent = useCallback(async () => {
+    try {
+      const [m, s] = await Promise.all([getMatchById(matchId), getMatchSets(matchId)]);
+      setMatch(m ?? null);
+      if (!scoresDirty.current) {
+        setSets(s ?? []);
+      }
+    } catch {}
+  }, [matchId]);
 
-  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+  const handleRetry = useCallback(() => { setLoading(true); fetchMatchFull(); }, [fetchMatchFull]);
+  const handleBack  = useCallback(() => navigation.goBack(), [navigation]);
 
-  useEffect(() => { fetchMatch(); }, [fetchMatch]);
+  useEffect(() => { fetchMatchFull(); }, [fetchMatchFull]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!scoresDirty.current) {
+        fetchMatchFull();
+      } else {
+        fetchMatchSilent();
+      }
+    }, [fetchMatchFull, fetchMatchSilent]),
+  );
 
   useEffect(() => {
     const isLive = match?.status?.toUpperCase() === 'LIVE';
-
     const startPolling = () => {
       if (pollingRef.current) return;
-      pollingRef.current = setInterval(() => { fetchMatch(); }, LIVE_POLL_INTERVAL_MS);
+      if (isOrganizer) return;
+      pollingRef.current = setInterval(() => { fetchMatchSilent(); }, LIVE_POLL_INTERVAL_MS);
     };
-
     const stopPolling = () => {
       if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
     };
-
     if (isLive) {
       if (appStateRef.current === 'active') startPolling();
-
       const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {
         appStateRef.current = nextState;
-        if (nextState === 'active') {
-          startPolling();
-        } else {
-          stopPolling();
-        }
+        if (nextState === 'active') startPolling();
+        else stopPolling();
       });
-
-      return () => {
-        stopPolling();
-        subscription.remove();
-      };
+      return () => { stopPolling(); subscription.remove(); };
     } else {
       stopPolling();
     }
-  }, [match?.status, fetchMatch]);
+  }, [match?.status, fetchMatchSilent, isOrganizer]);
 
   const setTotalSets = (updater: number | ((prev: number) => number)) => {
     setTotalSetsState((prev) => {
@@ -117,10 +125,6 @@ export const useMatchDetailsScreenViewModel = () => {
       ));
       return false;
     }
-    if (totalSets < 1 || totalSets > 9) {
-      setScheduleError(APP_STRINGS.matchScreen.invalidTotalSets);
-      return false;
-    }
     setScheduleError('');
     return true;
   };
@@ -135,36 +139,9 @@ export const useMatchDetailsScreenViewModel = () => {
         totalSets,
       }]);
       setShowScheduleModal(false);
-      await fetchMatch();
+      await fetchMatchFull();
     } catch (e: any) {
-      const msg = e?.message ?? APP_STRINGS.matchScreen.failedToScheduleMatch;
-      if (msg.includes('overlap') || msg.includes('conflict') || msg.includes('409')) {
-        setScheduleError(APP_STRINGS.matchScreen.scheduleConflict);
-      } else {
-        setScheduleError(msg);
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleStartMatch = async () => {
-    try {
-      setSaving(true);
-      const result = await updateSetScore(matchId, { scoreA: 0, scoreB: 0, isCompleted: false });
-      setSets((prev) => {
-        const idx = prev.findIndex((s) => s.id === result?.set?.id);
-        if (idx >= 0) { const updated = [...prev]; updated[idx] = result.set; return updated; }
-        return [...prev, result.set];
-      });
-      await fetchMatch();
-    } catch (e: any) {
-      const msg = e?.message ?? APP_STRINGS.matchScreen.failedToStartMatch;
-      if (msg.includes('Previous round')) {
-        Alert.alert(APP_STRINGS.matchScreen.cannotStartMatch, APP_STRINGS.matchScreen.cannotStartMatchDesc);
-      } else {
-        Alert.alert(APP_STRINGS.matchScreen.error, msg);
-      }
+      setScheduleError(e?.message ?? APP_STRINGS.matchScreen.failedToScheduleMatch);
     } finally {
       setSaving(false);
     }
@@ -186,12 +163,12 @@ export const useMatchDetailsScreenViewModel = () => {
 
   useEffect(() => {
     if (editingSetId !== null) return;
-    if (activeSet) {
-      setTempScoreA(activeSet.scoreA);
-      setTempScoreB(activeSet.scoreB);
-    } else {
-      setTempScoreA(0);
-      setTempScoreB(0);
+    const newId = activeSet?.id ?? null;
+    if (newId !== initializedSetId.current) {
+      initializedSetId.current = newId;
+      scoresDirty.current = false;
+      setTempScoreA(activeSet?.scoreA ?? 0);
+      setTempScoreB(activeSet?.scoreB ?? 0);
     }
   }, [activeSet?.id, editingSetId]);
 
@@ -203,13 +180,9 @@ export const useMatchDetailsScreenViewModel = () => {
 
   const handleCancelEditSet = () => {
     setEditingSetId(null);
-    if (activeSet) {
-      setTempScoreA(activeSet.scoreA);
-      setTempScoreB(activeSet.scoreB);
-    } else {
-      setTempScoreA(0);
-      setTempScoreB(0);
-    }
+    scoresDirty.current = false;
+    setTempScoreA(activeSet?.scoreA ?? 0);
+    setTempScoreB(activeSet?.scoreB ?? 0);
   };
 
   const handleSaveScore = async (isCompleted: boolean) => {
@@ -228,18 +201,30 @@ export const useMatchDetailsScreenViewModel = () => {
           return prev;
         });
         setEditingSetId(null);
+        scoresDirty.current = false;
       } else {
         const result = await updateSetScore(matchId, {
           scoreA: tempScoreA,
           scoreB: tempScoreB,
           isCompleted,
         });
+
         setSets((prev) => {
           const idx = prev.findIndex((s) => s.id === result?.set?.id);
-          if (idx >= 0) { const updated = [...prev]; updated[idx] = result.set; return updated; }
+          if (idx >= 0) {
+            const updated = [...prev];
+            updated[idx] = result.set;
+            return updated;
+          }
           return [...prev, result.set];
         });
-        if (result.result) { await fetchMatch(); }
+
+        if (isCompleted) {
+          scoresDirty.current = false;
+          await fetchMatchFull();
+        }
+
+        if (result.result) { await fetchMatchFull(); }
       }
     } catch (e: any) {
       Alert.alert(APP_STRINGS.matchScreen.error, e?.message ?? APP_STRINGS.matchScreen.failedToSaveScore);
@@ -249,11 +234,13 @@ export const useMatchDetailsScreenViewModel = () => {
   };
 
   const incrementScore = (team: 'A' | 'B') => {
+    scoresDirty.current = true;
     if (team === 'A') setTempScoreA((prev) => prev + 1);
     else setTempScoreB((prev) => prev + 1);
   };
 
   const decrementScore = (team: 'A' | 'B') => {
+    scoresDirty.current = true;
     if (team === 'A') setTempScoreA((prev) => Math.max(0, prev - 1));
     else setTempScoreB((prev) => Math.max(0, prev - 1));
   };
@@ -296,7 +283,6 @@ export const useMatchDetailsScreenViewModel = () => {
     setTotalSets,
     scheduleError,
     handleSaveSchedule,
-    handleStartMatch,
     handleSaveScore,
     handleEditCompletedSet,
     handleCancelEditSet,

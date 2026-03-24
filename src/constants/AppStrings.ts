@@ -195,8 +195,7 @@ export const APP_STRINGS = {
     noMoreSlots: 'No more slots available',
     registered: 'Registered',
     registrationSuccessfull: 'You have registered successfully',
-    noTeamsRequired:
-      'No teams required for Singles format. Players will compete individually.',
+    noTeamsRequired: 'No teams required for Singles format. Players will compete individually.',
     notEnoughSameGenderParticipants: 'Not enough same-gender participants',
     notEnoughSameGenderPairs: 'Not enough same-gender pairs',
     maleSlots: 'Male Slots',
@@ -205,6 +204,7 @@ export const APP_STRINGS = {
     activeUserText: 'User can access the platform',
     inactiveUserText: 'User will not be able to sign in',
     abandoned: 'Abandoned',
+    abandonedLabel: ' (Abandoned)',
     startMatch: 'Start Match',
     updateScore: 'Update Score',
     saveScore: 'Save Score',
@@ -343,6 +343,7 @@ export const APP_STRINGS = {
     goLive: 'Go Live →',
     updateScore: 'Update Score →',
     viewResult: 'View Result →',
+    viewScore: 'View Score →',
     startMatchBtn: 'Start Match (Go Live)',
     tapToWatchLive: 'Tap to watch live →',
     saveEdit: 'Save Edit',
@@ -360,5 +361,55 @@ export const APP_STRINGS = {
     date: 'Date',
     time: 'Time',
     vs: 'vs',
+  },
+  goLiveModal: {
+    title: 'Go Live',
+    selectSets: 'Select Number of Sets',
+    mustBeOdd: '(Best of — must be odd)',
+    bestOfSummary: (n: number, wins: number) => `Best of ${n} — first to ${wins} wins`,
+    confirmGoLive: 'Confirm & Go Live',
+    failedToGoLive: 'Failed to go live',
+    livePollFailed : 'Live poll failed:',
+    minimumParticipants: (n: number) => `Minimum ${n} participants required`,
+    teamsAndFixturesCreated: 'Teams and fixtures created successfully',
+  },
+  rescheduleModal: {
+    title: 'Reschedule Match',
+    selectMatch: 'Select Match to Reschedule',
+    noUpcomingMatches: 'No upcoming matches to reschedule',
+    selectDateTime: 'Select New Date & Time',
+    selectMatchFirst: 'Select a match first',
+    noteShift: 'All matches scheduled after this one will also shift.',
+    confirm: 'Confirm Reschedule',
+    rescheduling: 'Rescheduling...',
+    success: 'Match rescheduled successfully',
+    failed: 'Failed to reschedule match',
+    button: 'Reschedule',
+    date: 'Date',
+    time: 'Time',
+  },
+  registrationScreen: {
+    alreadyRegistered: 'Already Registered',
+    alreadyRegisteredForFormat: (gender: string, format: string) =>
+      `You are already registered for ${gender} ${format}.`,
+    categoryFullAlert: (gender: string, format: string) =>
+      `${gender} ${format} category is full.`,
+    notAllowed: 'Not Allowed',
+    cannotSwitchGender: (registered: string, newGender: string) =>
+      `You are already registered as ${registered}. You cannot register for ${newGender}.`,
+    alreadyRegisteredMultiple: (formats: string) =>
+      `You are already registered for: ${formats}`,
+    failedToLoadEvent: 'Failed to load event details',
+    categoryNotFound: (gender: string, format: string) =>
+      `Category not found for ${gender} ${format}`,
+    registeredBadge: 'Registered',
+  },
+  stores: {
+    userStoreError: 'useUserStore must be used inside UserProvider',
+    eventRequestStoreError: 'useEventRequestStore must be used inside EventRequestProvider',
+    somethingWentWrong: 'Something went wrong',
+  },
+  eventStatusTabs: {
+    all: 'All',
   },
 };

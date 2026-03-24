@@ -34,7 +34,7 @@ export const useAssignOrganizerScreenViewModel = (
       setLoading(true);
       const data = await authFetch<UserResponse[]>(API_ENDPOINTS.USERS);
       const filtered = (data ?? [])
-        .filter((u) => u.roleName === 'organizer' && u.isActive)
+        .filter((u) => u.roleName.toLowerCase() === 'organizer' && u.isActive)
         .map((u) => ({ id: u.id, fullName: u.fullName, email: u.email }));
       setOrganizers(filtered);
     } catch {

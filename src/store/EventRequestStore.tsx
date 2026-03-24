@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import {
   CreateEventRequest,
   DecideEventRequest,
@@ -7,6 +7,7 @@ import {
   EventRequestResponse,
 } from '../models/EventRequest';
 import { eventRequestService } from '../services/eventRequestService';
+import { APP_STRINGS } from '../constants/appStrings';
 
 type DecideStatus = 'Approved' | 'Rejected';
 
@@ -45,7 +46,7 @@ export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setSelectedRequest(prev => (prev?.id === updated.id ? updated : prev));
   };
 
-  const fetchRequests = async (filter?: EventRequestFilter) => {
+  const fetchRequests = useCallback(async (filter?: EventRequestFilter) => {
     setLoading(true);
     setError(null);
     try {
@@ -53,11 +54,11 @@ export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setRequests(data);
     } catch (err) {
       setRequests([]);
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : APP_STRINGS.stores.somethingWentWrong);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const fetchRequestById = async (id: number) => {
     setLoading(true);
@@ -68,7 +69,7 @@ export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({ 
       return data;
     } catch (err) {
       setSelectedRequest(null);
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : APP_STRINGS.stores.somethingWentWrong);
       return null;
     } finally {
       setLoading(false);
@@ -122,6 +123,8 @@ export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
 export const useEventRequestStore = () => {
   const context = useContext(EventRequestContext);
-  if (!context) throw new Error('useEventRequestStore must be used inside EventRequestProvider');
+  if (!context) {
+    throw new Error(APP_STRINGS.stores.eventRequestStoreError);
+  }
   return context;
 };

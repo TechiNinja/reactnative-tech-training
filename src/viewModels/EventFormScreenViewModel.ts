@@ -32,12 +32,12 @@ export const useEventFormScreenViewModel = ({ mode, eventRequest, event }: Event
   const [submitting, setSubmitting] = useState(false);
   const [isDeadlinePickerVisible, setDeadlinePickerVisible] = useState(false);
 
-  const sport     = isEdit ? event!.sportName    : eventRequest?.sportsName      ?? '';
-  const venue     = isEdit ? event!.eventVenue   : eventRequest?.requestedVenue  ?? '';
-  const startDate = isEdit ? String(event!.startDate) : eventRequest?.startDate  ?? '';
-  const endDate   = isEdit ? String(event!.endDate)   : eventRequest?.endDate    ?? '';
-  const gender    = isEdit ? event!.categories?.[0]?.gender ?? '' : eventRequest?.gender  ?? '';
-  const format    = isEdit ? event!.categories?.[0]?.format ?? '' : eventRequest?.format  ?? '';
+  const sport = isEdit ? event!.sportName : eventRequest?.sportsName ?? '';
+  const venue = isEdit ? event!.eventVenue : eventRequest?.requestedVenue ?? '';
+  const startDate = isEdit ? String(event!.startDate) : eventRequest?.startDate ?? '';
+  const endDate = isEdit ? String(event!.endDate) : eventRequest?.endDate ?? '';
+  const gender = isEdit ? event!.categories?.[0]?.gender ?? '' : eventRequest?.gender ?? '';
+  const format = isEdit ? event!.categories?.[0]?.format ?? '' : eventRequest?.format ?? '';
 
   const [name, setName] = useState(isEdit ? event!.name : eventRequest?.eventName ?? '');
   const [description, setDescription] = useState(isEdit ? event!.description : '');
@@ -71,7 +71,7 @@ export const useEventFormScreenViewModel = ({ mode, eventRequest, event }: Event
       newErrors.registrationDeadline = APP_STRINGS.eventFormScreen.registrationDeadlineRequired;
 
     const deadline = new Date(registrationDeadline);
-    const start    = new Date(startDate);
+    const start = new Date(startDate);
     if (registrationDeadline && deadline >= start)
       newErrors.registrationDeadline = APP_STRINGS.eventFormScreen.deadlineBeforeStart;
 

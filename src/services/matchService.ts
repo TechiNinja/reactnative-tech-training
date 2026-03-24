@@ -20,9 +20,15 @@ export const updateSetById = (
 
 export const updateSetScore = (
   matchId: number,
-  payload: { scoreA: number; scoreB: number; isCompleted: boolean },
+  payload: { scoreA: number; scoreB: number; isCompleted: boolean; totalSets?: number },
 ) =>
   authFetch<SetUpdateResponse>(API_ENDPOINTS.MATCHES.SETS(matchId), {
     method: 'PATCH',
     body: JSON.stringify(payload),
+  });
+
+  export const rescheduleMatch = (matchId: number, newStartDateTime: string) =>
+  authFetch<FixtureResponse>(API_ENDPOINTS.MATCHES.RESCHEDULE(matchId), {
+    method: 'PATCH',
+    body: JSON.stringify(newStartDateTime),
   });

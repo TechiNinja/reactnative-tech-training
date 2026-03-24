@@ -7,7 +7,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { EventRequestResponse, RequestStatus } from '../models/EventRequest';
 import { useEventRequestStore } from '../store/EventRequestStore';
 import { validationMessages } from '../constants/validationMessages';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { APP_STRINGS } from '../constants/appStrings';
 
 type RouteType = {
   key: string;

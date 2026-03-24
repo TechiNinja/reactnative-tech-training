@@ -1,14 +1,13 @@
 export enum EventStatus {
-  OPEN = 'OPEN',
-  UPCOMING = 'UPCOMING',
-  LIVE = 'LIVE',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
+  UPCOMING  = 'Upcoming',   
+  LIVE      = 'Live',
+  COMPLETED = 'Completed',
+  CANCELLED = 'Cancelled',
 }
 
 export enum CategoryStatus {
-  ACTIVE = 'ACTIVE',
-  ABANDONED = 'ABANDONED',
+  ACTIVE    = 'Active',
+  ABANDONED = 'Abandoned',
 }
 
 export enum GenderType {
@@ -45,6 +44,7 @@ export enum EventStatusTab {
   UPCOMING = 'UPCOMING',
   LIVE = 'LIVE',
   COMPLETED = 'COMPLETED',
+  CANCELLED = "CANCELLED",
 }
 
 export interface Registration {

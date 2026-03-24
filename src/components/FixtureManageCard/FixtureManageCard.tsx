@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View, Pressable } from 'react-native';
-import { User, Calendar, MapPin, Trophy, Play } from 'lucide-react-native';
+import { User, Calendar, MapPin, Trophy, Play, Eye } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
 import { styles } from './FixtureManageCardStyles';
 import { FixtureResponse } from '../../models/ApiResponses';
@@ -14,7 +14,6 @@ type FixtureManageCardProps = {
   eventVenue: string;
   eventName?: string;
   onPress: () => void;
-  onSchedule: () => void;
 };
 
 const TBD = APP_STRINGS.fixtureScreen.tbd;
@@ -26,7 +25,6 @@ const FixtureManageCard = ({
   eventVenue,
   eventName,
   onPress,
-  onSchedule,
 }: FixtureManageCardProps) => {
   const {
     isLive,
@@ -38,9 +36,10 @@ const FixtureManageCard = ({
     winnerName,
     displayDateTime,
     viewBtnLabel,
+    participantBtnLabel,
     showActions,
     showLiveWatch,
-    showSchedule,
+    showViewResult,
     teams,
   } = useFixtureManageCardViewModel({ fixture, isOrganizer });
 
@@ -57,7 +56,6 @@ const FixtureManageCard = ({
           isUpcoming && styles.statusUpcoming,
           isCompleted && styles.statusCompleted,
         ]}>
-          {isLive ? <View style={styles.liveDot} /> : null}
           <Text style={[
             styles.statusText,
             isLive && styles.statusTextLive,
@@ -118,12 +116,6 @@ const FixtureManageCard = ({
 
       {showActions ? (
         <View style={styles.actionsRow}>
-          {showSchedule ? (
-            <Pressable style={styles.scheduleBtn} onPress={onSchedule}>
-              <Calendar size={14} color={colors.primary} />
-              <Text style={styles.scheduleBtnText}>{APP_STRINGS.fixtureScreen.schedule}</Text>
-            </Pressable>
-          ) : null}
           <Pressable style={styles.viewBtn} onPress={onPress}>
             {isUpcoming ? <Play size={14} color={colors.primaryText} /> : null}
             <Text style={styles.viewBtnText}>{viewBtnLabel}</Text>
@@ -131,11 +123,12 @@ const FixtureManageCard = ({
         </View>
       ) : null}
 
-      {showLiveWatch ? (
-        <View style={styles.liveWatchContainer}>
-          <Text style={styles.liveWatchText}>
-            {APP_STRINGS.matchScreen.tapToWatchLive}
-          </Text>
+      {showLiveWatch || showViewResult ? (
+        <View style={styles.actionsRow}>
+          <Pressable style={styles.participantViewBtn} onPress={onPress}>
+            <Eye size={14} color={colors.primary} />
+            <Text style={styles.participantViewBtnText}>{participantBtnLabel}</Text>
+          </Pressable>
         </View>
       ) : null}
     </View>
