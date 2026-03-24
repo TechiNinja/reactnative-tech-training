@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, Text, View, Switch } from 'react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import { styles } from './UserFormScreenStyles';
-import { APP_STRINGS } from '../../constants/appStrings';
+import { APP_STRINGS } from '../../constants/AppStrings';
 import AppInput from '../../components/AppInput/AppInput';
 import AppButton from '../../components/AppButton/AppButton';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';

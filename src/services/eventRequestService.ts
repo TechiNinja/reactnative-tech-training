@@ -65,10 +65,11 @@ export const eventRequestService = {
 
   decide(
     id: number,
+    status: 'Approved' | 'Rejected',
     payload: DecideEventRequest,
   ): Promise<EventRequestResponse> {
     return authFetch<EventRequestResponse>(
-      API_ENDPOINTS.EVENT_REQUESTS.DECIDE(id),
+      API_ENDPOINTS.EVENT_REQUESTS.DECIDE(id, status),
       {
         method: 'PUT',
         body: JSON.stringify(payload),

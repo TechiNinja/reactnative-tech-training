@@ -5,7 +5,7 @@ import { useUserStore } from '../store/UserStore';
 import { ROLE_TO_ID } from '../constants/roleIds';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { APP_STRINGS } from '../constants/appStrings';
+import { APP_STRINGS } from '../constants/AppStrings';
 
 type Mode = 'create' | 'edit';
 

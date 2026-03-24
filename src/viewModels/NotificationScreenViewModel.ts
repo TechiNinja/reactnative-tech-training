@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
+import { getUser } from '../utils/authStorage';
 import {
   notificationService,
   NotificationAudience,
   NotificationItem,
 } from '../services/notificationService';
 import { Alert } from 'react-native';
-import { validationMessages } from '../constants/validationMessages';
 
 export const useNotificationViewModel = (
   navigation: any,
@@ -15,14 +15,33 @@ export const useNotificationViewModel = (
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [error, setError] = useState('');
 
+  const getNotificationFilter = useCallback(async () => {
+    if (audience === 'Admin') {
+      const user = await getUser();
+
+      return {
+        audience,
+        userId: user?.id,
+      };
+    }
+
+    return { audience };
+  }, [audience]);
+
   const notificationFetch = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
 
-      const data = await notificationService.getAll({ audience });
+      const filter = await getNotificationFilter();
+      const data = await notificationService.getAll(filter);
 
-      setNotifications(data);
+      const sortedNotifications = [...data].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+
+      setNotifications(sortedNotifications);
     } catch (error: any) {
       setError(
         error?.message || 'Something went wrong while fetching notifications.',
@@ -31,24 +50,18 @@ export const useNotificationViewModel = (
     } finally {
       setLoading(false);
     }
-  }, [audience]);
+  }, [getNotificationFilter]);
 
   const markAllAsRead = useCallback(async () => {
     try {
-      await notificationService.markAllAsRead(audience);
+      const filter = await getNotificationFilter();
+      await notificationService.markAllAsRead(filter);
     } catch (error) {
-      if (error instanceof Error) {
-        const isEmptyJsonError =
-          error.message.includes(validationMessages.UNEXPECTED_ERROR) ||
-          error.message.includes(validationMessages.JSON_PARSE_ERROR);
-
-        if (isEmptyJsonError) {
-          return;
-        }
-        Alert.alert(validationMessages.ERROR, error.message);
+      if(error instanceof Error){
+        Alert.alert(error.message)
       }
     }
-  }, [audience]);
+  }, [getNotificationFilter]);
 
   useEffect(() => {
     notificationFetch();
@@ -63,11 +76,14 @@ export const useNotificationViewModel = (
     navigation.goBack();
   }, [markAllAsRead, navigation]);
 
+  const unreadCount = notifications.filter(item => !item.isRead).length;
+
   return {
     handleBack,
     refresh,
     loading,
     notifications,
     error,
+    unreadCount,
   };
 };

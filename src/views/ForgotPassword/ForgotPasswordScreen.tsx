@@ -7,7 +7,7 @@ import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppInput from '../../components/AppInput/AppInput';
 import { validationMessages } from '../../constants/validationMessages';
 import { styles } from './ForgotPasswordScreenStyles';
-import { APP_STRINGS } from '../../constants/appStrings';
+import { APP_STRINGS } from '../../constants/AppStrings';
 import { useEffect } from 'react';
 
 const ForgotPasswordScreen = () => {

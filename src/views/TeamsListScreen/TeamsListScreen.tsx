@@ -1,7 +1,7 @@
 import { FlatList, Text, View } from 'react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import { styles } from './TeamsListScreenStyles';
-import { APP_STRINGS } from '../../constants/appStrings';
+import { APP_STRINGS } from '../../constants/AppStrings';
 import MyTeamCard from '../../components/MyTeamCard/MyTeamCard';
 import TeamStatusTabs from '../../components/TeamStatusTabs/TeamStatusTabs';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';

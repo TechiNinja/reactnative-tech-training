@@ -11,7 +11,7 @@ import {
   createUser as createUserApi,
   updateUserApi,
 } from '../services/userService';
-import { APP_STRINGS } from '../constants/appStrings';
+import { APP_STRINGS } from '../constants/AppStrings';
 import { useAuthStore } from './AuthStore';
 
 type CreateUserParams = {
@@ -46,12 +46,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const { user } = useAuthStore();
 
   const refreshUsers = useCallback(async () => {
     if (user?.role !== 'admin') return;
-
     setLoading(true);
     setError(null);
     try {
@@ -59,9 +57,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       setUsers(fetchedUsers);
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : APP_STRINGS.eventScreen.failedUserLoad,
+        err instanceof Error ? err.message : APP_STRINGS.eventScreen.failedUserLoad,
       );
       setUsers([]);
     } finally {
@@ -84,7 +80,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     async (userId: string, params: UpdateUserParams) => {
       const updated = await updateUserApi(userId, params);
       setUsers((prev) =>
-        prev.map((user) => (user.id === userId ? updated : user)),
+        prev.map((u) => (u.id === userId ? updated : u)),
       );
     },
     [],
@@ -108,6 +104,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useUserStore = () => {
   const ctx = useContext(UserContext);
-  if (!ctx) throw new Error('useUserStore must be used inside UserProvider');
+  if (!ctx) throw new Error(APP_STRINGS.stores.userStoreError);
   return ctx;
 };

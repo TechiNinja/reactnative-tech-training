@@ -1,83 +1,119 @@
-import { useState, useMemo } from 'react';
-import { Fixture, MatchStatus } from '../../models/Event';
+import { useMemo } from 'react';
+import { FixtureResponse } from '../../models/ApiResponses';
+import { APP_STRINGS } from '../../constants/appStrings';
+import { formatDisplayDateTime } from '../../utils/dateUtils';
 
-type UseFixtureManageCardVMProps = {
-  fixture: Fixture;
-  onSetLive?: () => void;
-  onUpdateScore?: (scoreA: number, scoreB: number) => void;
-  onComplete?: (scoreA: number, scoreB: number) => void;
+type FixtureManageCardVMProps = {
+  fixture: FixtureResponse;
+  isOrganizer: boolean;
 };
+
+const MatchStatus = {
+  LIVE: 'LIVE',
+  COMPLETED: 'COMPLETED',
+  UPCOMING: 'UPCOMING',
+} as const;
+
+const SideName = {
+  BYE: 'BYE',
+  TBD: APP_STRINGS.fixtureScreen.tbd,
+} as const;
 
 export const useFixtureManageCardViewModel = ({
   fixture,
-  onSetLive,
-  onUpdateScore,
-  onComplete,
-}: UseFixtureManageCardVMProps) => {
-  const [showScoreModal, setShowScoreModal] = useState(false);
-  const [tempScoreA, setTempScoreA] = useState(fixture.scoreA);
-  const [tempScoreB, setTempScoreB] = useState(fixture.scoreB);
+  isOrganizer,
+}: FixtureManageCardVMProps) => {
+  const isLive = fixture.status?.toUpperCase() === MatchStatus.LIVE;
+  const isCompleted = fixture.status?.toUpperCase() === MatchStatus.COMPLETED;
+  const isUpcoming = fixture.status?.toUpperCase() === MatchStatus.UPCOMING;
+  const isBye = fixture.isBye;
 
-  const isLive = fixture.status === MatchStatus.LIVE;
-  const isUpcoming = fixture.status === MatchStatus.UPCOMING;
-  const isCompleted = fixture.status === MatchStatus.COMPLETED;
+  const sideADisplay = !fixture.sideAName || fixture.sideAName === SideName.BYE
+    ? SideName.TBD
+    : fixture.sideAName;
+  const sideBDisplay = !fixture.sideBName || fixture.sideBName === SideName.BYE
+    ? SideName.TBD
+    : fixture.sideBName;
 
-  const isTBD = fixture.teamA === 'TBD' || fixture.teamB === 'TBD';
+  const isTBDMatch = sideADisplay === SideName.TBD || sideBDisplay === SideName.TBD;
 
-  const handleOpenScoreModal = () => {
-    setTempScoreA(fixture.scoreA);
-    setTempScoreB(fixture.scoreB);
-    setShowScoreModal(true);
-  };
-
-  const handleSaveScore = () => {
-    onUpdateScore?.(tempScoreA, tempScoreB);
-    setShowScoreModal(false);
-  };
-
-  const handleCompleteMatch = () => {
-    onComplete?.(tempScoreA, tempScoreB);
-    setShowScoreModal(false);
-  };
-
-  const incrementScore = (team: 'A' | 'B') => {
-    if (team === 'A') {
-      setTempScoreA((prev) => prev + 1);
-    } else {
-      setTempScoreB((prev) => prev + 1);
-    }
-  };
-
-  const decrementScore = (team: 'A' | 'B') => {
-    if (team === 'A') {
-      setTempScoreA((prev) => Math.max(0, prev - 1));
-    } else {
-      setTempScoreB((prev) => Math.max(0, prev - 1));
-    }
-  };
-
-  const canComplete = useMemo(
-    () => tempScoreA !== tempScoreB,
-    [tempScoreA, tempScoreB],
+  const liveSet = useMemo(
+    () => fixture.sets?.find((s) => s.status?.toLowerCase() === 'live') ?? null,
+    [fixture.sets],
   );
 
+  const scoreA = useMemo(() => {
+    if (isLive) {
+      if (liveSet) return liveSet.scoreA;
+      return fixture.sets?.find((s) => s.status?.toLowerCase() === 'live')?.scoreA ?? 0;
+    }
+    if (isCompleted) {
+      return fixture.sets?.reduce((sum, s) => sum + (s.scoreA > s.scoreB ? 1 : 0), 0) ?? 0;
+    }
+    return 0;
+  }, [isLive, isCompleted, liveSet, fixture.sets]);
+
+  const scoreB = useMemo(() => {
+    if (isLive) {
+      if (liveSet) return liveSet.scoreB;
+      return fixture.sets?.find((s) => s.status?.toLowerCase() === 'live')?.scoreB ?? 0;
+    }
+    if (isCompleted) {
+      return fixture.sets?.reduce((sum, s) => sum + (s.scoreB > s.scoreA ? 1 : 0), 0) ?? 0;
+    }
+    return 0;
+  }, [isLive, isCompleted, liveSet, fixture.sets]);
+
+  const winnerName = useMemo(() => {
+    if (!isCompleted || !fixture.result) return null;
+    return fixture.result.winnerId === fixture.sideAId
+      ? fixture.sideAName
+      : fixture.sideBName;
+  }, [isCompleted, fixture.result, fixture.sideAId, fixture.sideAName, fixture.sideBName]);
+
+  const displayDateTime = useMemo(
+    () => formatDisplayDateTime(fixture.matchDateTime) || null,
+    [fixture.matchDateTime],
+  );
+
+  const viewBtnLabel = isLive
+    ? APP_STRINGS.matchScreen.updateScore
+    : isCompleted
+    ? APP_STRINGS.matchScreen.viewResult
+    : APP_STRINGS.matchScreen.goLive;
+
+  const participantBtnLabel = isLive
+    ? APP_STRINGS.matchScreen.tapToWatchLive
+    : APP_STRINGS.matchScreen.viewScore;
+
+  const showActions = isOrganizer && !isBye;
+  const showLiveWatch = !isOrganizer && isLive && !isBye;
+  const showViewResult = !isOrganizer && isCompleted && !isBye;
+  const showSchedule = false;
+
+  const teams = [
+    { name: sideADisplay, score: scoreA, index: 0 },
+    { name: sideBDisplay, score: scoreB, index: 1 },
+  ];
+
   return {
-    showScoreModal,
-    setShowScoreModal,
-    tempScoreA,
-    tempScoreB,
-
     isLive,
-    isUpcoming,
     isCompleted,
-    isTBD,
-    canComplete,
-
-    handleOpenScoreModal,
-    handleSaveScore,
-    handleCompleteMatch,
-    incrementScore,
-    decrementScore,
-    onSetLive,
+    isUpcoming,
+    isBye,
+    isTBDMatch,
+    sideADisplay,
+    sideBDisplay,
+    totalScoreA: scoreA,
+    totalScoreB: scoreB,
+    winnerName,
+    displayDateTime,
+    viewBtnLabel,
+    participantBtnLabel,
+    showActions,
+    showLiveWatch,
+    showViewResult,
+    showSchedule,
+    teams,
   };
 };

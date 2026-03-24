@@ -11,7 +11,7 @@ import AppButton from '../../components/AppButton/AppButton';
 import { colors } from '../../theme/colors';
 import { useEventRequestFormViewModel } from '../../viewModels/EventRequestFormViewModel';
 import { RootStackParamList } from '../../navigation/AppNavigator';
-import { APP_STRINGS } from '../../constants/appStrings';
+import { APP_STRINGS } from '../../constants/AppStrings';
 import { styles } from './EventRequestFormScreenStyles';
 
 
@@ -34,7 +34,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
         </View>
 
         <Text style={styles.inputLabels}>
-          {APP_STRINGS.RequestScreen.eventName}
+          {APP_STRINGS.eventScreen.eventName}
         </Text>
         <AppInput
           placeholder={APP_STRINGS.placeHolders.eventName}
@@ -44,7 +44,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
         />
 
         <Text style={styles.inputLabels}>
-          {APP_STRINGS.RequestScreen.sportsName}
+          {APP_STRINGS.eventScreen.sportName}
         </Text>
 
         {vm.isEdit ? (
@@ -104,7 +104,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
 
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabels}>
-            {APP_STRINGS.eventScreen.gender}
+            {APP_STRINGS.RequestScreen.gender}
           </Text>
           <View style={styles.formatOptions}>
             {vm.genderOptions.map((option) => (
@@ -135,7 +135,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
 
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabels}>
-            {APP_STRINGS.RequestScreen.formatRequired}
+            {APP_STRINGS.RequestScreen.format}
           </Text>
           <View style={styles.formatOptions}>
             {vm.formatOptions.map((option) => (
@@ -167,7 +167,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
         <View style={styles.inputRow}>
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabels}>
-              {APP_STRINGS.RequestScreen.startDateRequired}
+              {APP_STRINGS.RequestScreen.startDate}
             </Text>
             <Pressable onPress={vm.showStartPicker}>
               <View pointerEvents="none">
@@ -193,7 +193,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
 
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabels}>
-              {APP_STRINGS.RequestScreen.endDateRequired}
+              {APP_STRINGS.RequestScreen.endDate}
             </Text>
             <Pressable onPress={vm.showEndPicker}>
               <View pointerEvents="none">

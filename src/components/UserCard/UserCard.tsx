@@ -4,7 +4,7 @@ import { styles } from './UserCardStyles';
 import { ChevronRight } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
 import { useState } from 'react';
-import { APP_STRINGS } from '../../constants/appStrings';
+import { APP_STRINGS } from '../../constants/AppStrings';
 
 type UserCardProps = {
   user: User;

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import {
   CreateEventRequest,
   DecideEventRequest,
@@ -7,6 +7,9 @@ import {
   EventRequestResponse,
 } from '../models/EventRequest';
 import { eventRequestService } from '../services/eventRequestService';
+import { APP_STRINGS } from '../constants/appStrings';
+
+type DecideStatus = 'Approved' | 'Rejected';
 
 type EventRequestStoreType = {
   requests: EventRequestResponse[];
@@ -23,30 +26,27 @@ type EventRequestStoreType = {
   withdrawRequest: (id: number) => Promise<EventRequestResponse>;
   decideRequest: (
     id: number,
+    status: DecideStatus,
     payload: DecideEventRequest,
   ) => Promise<EventRequestResponse>;
   setSelectedRequest: (request: EventRequestResponse | null) => void;
 };
 
-const EventRequestContext = createContext<EventRequestStoreType | undefined>(
-  undefined,
-);
+const EventRequestContext = createContext<EventRequestStoreType | undefined>(undefined);
 
-export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [requests, setRequests] = useState<EventRequestResponse[]>([]);
-  const [selectedRequest, setSelectedRequest] =
-    useState<EventRequestResponse | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<EventRequestResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Helper to update request lists and selected request
   const updateRequestInState = (updated: EventRequestResponse) => {
     setRequests(prev => prev.map(r => (r.id === updated.id ? updated : r)));
     setSelectedRequest(prev => (prev?.id === updated.id ? updated : prev));
   };
 
-  const fetchRequests = async (filter?: EventRequestFilter) => {
+  const fetchRequests = useCallback(async (filter?: EventRequestFilter) => {
     setLoading(true);
     setError(null);
     try {
@@ -54,11 +54,11 @@ export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({
       setRequests(data);
     } catch (err) {
       setRequests([]);
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : APP_STRINGS.stores.somethingWentWrong);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const fetchRequestById = async (id: number) => {
     setLoading(true);
@@ -69,7 +69,7 @@ export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({
       return data;
     } catch (err) {
       setSelectedRequest(null);
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : APP_STRINGS.stores.somethingWentWrong);
       return null;
     } finally {
       setLoading(false);
@@ -94,8 +94,8 @@ export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({
     return updated;
   };
 
-  const decideRequest = async (id: number, payload: DecideEventRequest) => {
-    const updated = await eventRequestService.decide(id, payload);
+  const decideRequest = async (id: number, status: DecideStatus, payload: DecideEventRequest) => {
+    const updated = await eventRequestService.decide(id, status, payload);
     updateRequestInState(updated);
     return updated;
   };
@@ -123,10 +123,8 @@ export const EventRequestProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useEventRequestStore = () => {
   const context = useContext(EventRequestContext);
-
   if (!context) {
-    throw new Error('useEventRequestStore must be used inside EventRequestProvider');
+    throw new Error(APP_STRINGS.stores.eventRequestStoreError);
   }
-
   return context;
 };

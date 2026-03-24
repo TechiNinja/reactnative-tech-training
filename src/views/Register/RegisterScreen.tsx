@@ -10,7 +10,7 @@ import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppInput from '../../components/AppInput/AppInput';
 import AppButton from '../../components/AppButton/AppButton';
 import { styles } from './RegisterScreenStyles';
-import { APP_STRINGS } from '../../constants/appStrings';
+import { APP_STRINGS } from '../../constants/AppStrings';
 
 const RegisterScreen = () => {
   const navigation = useNavigation();

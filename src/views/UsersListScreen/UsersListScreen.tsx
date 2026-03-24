@@ -15,7 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import AppButton from '../../components/AppButton/AppButton';
-import { APP_STRINGS } from '../../constants/appStrings';
+import { APP_STRINGS } from '../../constants/AppStrings';
 import { useUsersListViewModel } from '../../viewModels/UsersListScreenViewModel';
 import { Search } from 'lucide-react-native';
 import { colors } from '../../theme/colors';

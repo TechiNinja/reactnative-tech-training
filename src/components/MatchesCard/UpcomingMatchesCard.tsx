@@ -3,7 +3,7 @@ import { View, Text } from 'react-native';
 import { Calendar, MapPin, Users } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
 import { styles } from './UpcomingMatchesCardStyles';
-import { APP_STRINGS } from '../../constants/appStrings';
+import { APP_STRINGS } from '../../constants/AppStrings';
 import { UpcomingMatchStatus } from '../../models/Event';
 
 type UpcomingMatchesCardProps = {

@@ -9,7 +9,7 @@ import AppButton from '../../components/AppButton/AppButton';
 import EventRequestCard from '../../components/EventRequestCard/EventRequestCard';
 import { styles } from './EventRequestListScreenStyles';
 import { RootStackParamList } from '../../navigation/AppNavigator';
-import { APP_STRINGS } from '../../constants/appStrings';
+import { APP_STRINGS } from '../../constants/AppStrings';
 import { colors } from '../../theme/colors';
 import { useEventRequestListViewModel } from '../../viewModels/EventRequestListScreenViewModel';
 import { UserRoleType } from '../../models/User';

@@ -1,6 +1,6 @@
 import { Text, TouchableOpacity, View } from 'react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
-import { APP_STRINGS } from '../../constants/appStrings';
+import { APP_STRINGS } from '../../constants/AppStrings';
 import AnalyticsCard from '../../components/AnalyticsCard/AnalyticsCard';
 import {
   Calendar,

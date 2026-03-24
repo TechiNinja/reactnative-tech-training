@@ -14,7 +14,7 @@ import {
 import { validationMessages } from '../constants/validationMessages';
 import { eventRequestService } from '../services/eventRequestService';
 import { useEventRequestStore } from '../store/EventRequestStore';
-import { APP_STRINGS } from '../constants/appStrings';
+import { APP_STRINGS } from '../constants/AppStrings';
 
 type Mode = 'create' | 'edit';
 

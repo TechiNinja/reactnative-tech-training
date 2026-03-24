@@ -15,7 +15,7 @@ import { styles } from './NotificationScreenStyle';
 import { colors } from '../../theme/colors';
 import { useNotificationViewModel } from '../../viewModels/NotificationScreenViewModel';
 import { RootStackParamList } from '../../navigation/AppNavigator';
-import { APP_STRINGS } from '../../constants/appStrings';
+import { APP_STRINGS } from '../../constants/AppStrings';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Notification'>;
 

@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Alert } from 'react-native';
-import { APP_STRINGS } from '../constants/appStrings';
+import { APP_STRINGS } from '../constants/AppStrings';
 
 type ApiTeam = {
   teamId: number;

@@ -1,7 +1,7 @@
 import { API_ENDPOINTS, API_BASE_URL } from '../config/api';
 import { StoredUser } from '../utils/authStorage';
 import { UserRoleType } from '../models/User';
-import { APP_STRINGS } from '../constants/appStrings';
+import { APP_STRINGS } from '../constants/AppStrings';
 
 type AuthApiResponse = {
   id: number;
