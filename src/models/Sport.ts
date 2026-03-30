@@ -1,12 +1,12 @@
-export type SportFormat = 'Singles' | 'Doubles' | 'Both';
+import { FormatType } from "./Event";
 
 export type CreateSportRequest = {
   name: string;
-  allowedFormats: SportFormat[];
+  allowedFormats: FormatType[];
 };
 
 export type SportResponse = {
   id: number;
   name: string;
-  allowedFormats: SportFormat[];
+  allowedFormats: FormatType[];
 };

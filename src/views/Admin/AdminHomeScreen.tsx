@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import { APP_STRINGS } from '../../constants/appStrings';
@@ -32,18 +31,12 @@ const AdminHomeScreen = () => {
     analytics,
     loading,
     onGetNotification,
+    isSportModalVisible,
+    onOpenSportModal,
+    onCloseSportModal,
   } = useAdminHomeViewModel();
 
   const { count } = useNotificationBadge('Admin');
-  const [isSportModalVisible, setIsSportModalVisible] = useState(false);
-
-  const onOpenSportModal = () => {
-    setIsSportModalVisible(true);
-  };
-
-  const onCloseSportModal = () => {
-    setIsSportModalVisible(false);
-  };
 
   return (
     <ScreenWrapper scrollable={true}>
@@ -121,7 +114,7 @@ const AdminHomeScreen = () => {
             <View style={styles.actionCardWrapper}>
               <ActionCard
                 icon={<Plus size={20} color={colors.primary} />}
-                title="Add Sport"
+                title={APP_STRINGS.app.addSports}
                 onPress={onOpenSportModal}
               />
             </View>

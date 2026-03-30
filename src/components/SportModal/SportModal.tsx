@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity } from 'react-native';
-import { CreateSportRequest, SportFormat } from '../../models/Sport';
+import { CreateSportRequest } from '../../models/Sport';
 import { sportService } from '../../services/sportService';
 import { styles } from './SportModalStyle';
 import { APP_STRINGS } from '../../constants/appStrings';
 import { validationMessages } from '../../constants/validationMessages';
+import { FormatType } from '../../models/Event';
 
 type SportModalProps = {
   visible: boolean;
@@ -12,7 +13,7 @@ type SportModalProps = {
   onCreated?: () => void;
 };
 
-const formatOptions: SportFormat[] = ['Singles', 'Doubles', 'Both'];
+const formatOptions: FormatType[] = [FormatType.Singles, FormatType.Doubles, FormatType.Both];
 
 export const SportModal = ({
   visible,
@@ -20,7 +21,7 @@ export const SportModal = ({
   onCreated,
 }: SportModalProps) => {
   const [name, setName] = useState('');
-  const [formats, setFormats] = useState<SportFormat[]>([]);
+  const [formats, setFormats] = useState<FormatType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nameError, setNameError] = useState('');
@@ -43,7 +44,7 @@ export const SportModal = ({
     onClose();
   };
 
-  const handleToggleFormat = (format: SportFormat) => {
+  const handleToggleFormat = (format: FormatType) => {
     setFormatError('');
 
     setFormats((prev) =>
@@ -93,7 +94,7 @@ export const SportModal = ({
       setError(
         err instanceof Error
           ? err.message
-          : validationMessages.FAILD_CREATE_SPORTS,
+          : validationMessages.FAILED_CREATE_SPORTS,
       );
     } finally {
       setLoading(false);
@@ -104,7 +105,7 @@ export const SportModal = ({
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType="slide"
       onRequestClose={handleClose}
     >
       <View style={styles.overlay}>
