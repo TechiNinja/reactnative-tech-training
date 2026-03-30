@@ -6,19 +6,23 @@ import { styles } from './SportModalStyle';
 import { APP_STRINGS } from '../../constants/appStrings';
 import { validationMessages } from '../../constants/validationMessages';
 import { FormatType } from '../../models/Event';
+import { ActivityIndicator } from 'react-native';
+import { colors } from '../../theme/colors';
 
 type SportModalProps = {
   visible: boolean;
   onClose: () => void;
-  onCreated?: () => void;
 };
 
-const formatOptions: FormatType[] = [FormatType.Singles, FormatType.Doubles, FormatType.Both];
+const formatOptions: FormatType[] = [
+  FormatType.Singles,
+  FormatType.Doubles,
+  FormatType.Both,
+];
 
 export const SportModal = ({
   visible,
   onClose,
-  onCreated,
 }: SportModalProps) => {
   const [name, setName] = useState('');
   const [formats, setFormats] = useState<FormatType[]>([]);
@@ -89,7 +93,6 @@ export const SportModal = ({
       await sportService.create(payload);
       resetForm();
       onClose();
-      onCreated?.();
     } catch (err) {
       setError(
         err instanceof Error
@@ -170,9 +173,13 @@ export const SportModal = ({
               style={styles.createButton}
               disabled={loading}
             >
-              <Text style={styles.createButtonText}>
-                {APP_STRINGS.app.create}
-              </Text>
+              {loading ? (
+                <ActivityIndicator color={colors.textSecondary} />
+              ) : (
+                <Text style={styles.createButtonText}>
+                  {APP_STRINGS.app.create}
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
