@@ -5,9 +5,9 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { EventRequestResponse } from '../models/EventRequest';
-import { authFetch } from '../utils/authFetch';
 import { EventResponse } from '../models/EventResponse';
 import { APP_STRINGS } from '../constants/AppStrings';
+import { createEvent, patchEvent, CreateEventPayload, PatchEventPayload } from '../services/eventService';
 
 type Mode = 'create' | 'edit';
 
@@ -24,23 +24,7 @@ type EventFormErrors = {
   registrationDeadline?: string;
 };
 
-type CreateEventPayload = {
-  eventRequestId: number;
-  name: string;
-  registrationDeadline: string;
-  description: string;
-  maxParticipantsCount: number;
-};
-
-type PatchEventPayload = {
-  action: 'update' | 'cancel';
-  name?: string;
-  description?: string;
-  maxParticipantsCount?: number;
-  registrationDeadline?: string;
-};
-
-export const useEventFormViewModel = ({ mode, eventRequest, event }: EventFormParams) => {
+export const useEventFormScreenViewModel = ({ mode, eventRequest, event }: EventFormParams) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const isEdit = mode === 'edit' && !!event;
@@ -109,16 +93,10 @@ export const useEventFormViewModel = ({ mode, eventRequest, event }: EventFormPa
           maxParticipantsCount: Number(maxParticipantsCount),
           registrationDeadline,
         };
-
-        await authFetch(`/events/${event!.id}`, {
-          method: 'PATCH',
-          body: JSON.stringify(payload),
-        });
-
+        await patchEvent(event!.id, payload);
         Alert.alert(APP_STRINGS.common.success, APP_STRINGS.eventFormScreen.eventUpdated);
       } else {
         if (!eventRequest) return;
-
         const payload: CreateEventPayload = {
           eventRequestId: eventRequest.id,
           name: name.trim(),
@@ -126,12 +104,7 @@ export const useEventFormViewModel = ({ mode, eventRequest, event }: EventFormPa
           description: description.trim(),
           maxParticipantsCount: Number(maxParticipantsCount),
         };
-
-        await authFetch('/events', {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        });
-
+        await createEvent(payload);
         Alert.alert(APP_STRINGS.common.success, APP_STRINGS.eventFormScreen.eventCreated);
       }
 
@@ -155,10 +128,8 @@ export const useEventFormViewModel = ({ mode, eventRequest, event }: EventFormPa
           onPress: async () => {
             try {
               setSubmitting(true);
-              await authFetch(`/events/${event!.id}`, {
-                method: 'PATCH',
-                body: JSON.stringify({ action: 'cancel' }),
-              });
+              const payload: PatchEventPayload = { action: 'cancel' };
+              await patchEvent(event!.id, payload);
               Alert.alert(APP_STRINGS.common.success, APP_STRINGS.eventFormScreen.eventCancelled);
               navigation.navigate('AdminTabs', { screen: 'Events' });
             } catch (e: any) {

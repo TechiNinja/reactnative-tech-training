@@ -7,24 +7,16 @@ import AppInput from '../../components/AppInput/AppInput';
 import AppButton from '../../components/AppButton/AppButton';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
-import { ArrowLeft, Check } from 'lucide-react-native';
+import { ArrowLeft } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
-import { useEventFormViewModel } from '../../viewModels/EventFormViewModel';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { FormatType } from '../../models/Event';
+import { useEventFormScreenViewModel } from '../../viewModels/EventFormScreenViewModel';import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-type EventFormScreenProps = NativeStackScreenProps<
-  RootStackParamList,
-  'EventForm'
->;
+type EventFormScreenProps = NativeStackScreenProps<RootStackParamList, 'EventForm'>;
 
 const EventFormScreen = ({ route }: EventFormScreenProps) => {
-  const { mode, event } = route.params;
+  const { mode, eventRequest, event } = route.params;
 
-  const viewModel = useEventFormViewModel({
-    mode,
-    event,
-  });
+  const viewModel = useEventFormScreenViewModel({ mode, eventRequest, event });
 
   return (
     <ScreenWrapper scrollable withBottomSafeArea>
@@ -41,10 +33,10 @@ const EventFormScreen = ({ route }: EventFormScreenProps) => {
         </View>
 
         <Text style={styles.inputLabels}>
-          {APP_STRINGS.eventScreen.eventName}
+          {APP_STRINGS.eventScreen.eventName}<Text style={{ color: colors.error }}> *</Text>
         </Text>
         <AppInput
-          placeholder={APP_STRINGS.eventScreen.eventName}
+          placeholder={APP_STRINGS.placeHolders.eventName}
           value={viewModel.name}
           onChangeText={viewModel.setName}
           error={viewModel.errors.name}
@@ -55,99 +47,47 @@ const EventFormScreen = ({ route }: EventFormScreenProps) => {
             {APP_STRINGS.eventScreen.sportName}
           </Text>
           <AppInput
-            placeholder={APP_STRINGS.eventScreen.sportName}
+            placeholder={APP_STRINGS.placeHolders.sportsName}
             value={viewModel.sport}
-            onChangeText={viewModel.onSportChange}
-            error={viewModel.errors.sport}
+            editable={false}
+            onChangeText={() => {}}
           />
         </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabels}>
-            {APP_STRINGS.eventScreen.format}
+            {APP_STRINGS.eventScreen.venue}
           </Text>
-          <View style={styles.formatOptions}>
-            {[FormatType.Singles, FormatType.Doubles].map((fmt) => {
-              const isSelected = viewModel.selectedFormats.includes(fmt);
-              const isDisabled =
-                viewModel.sport.toLowerCase() === 'chess' &&
-                fmt === FormatType.Doubles;
-              return (
-                <Pressable
-                  key={fmt}
-                  onPress={() => !isDisabled && viewModel.toggleFormat(fmt)}
-                  style={[
-                    styles.formatOption,
-                    isSelected && styles.formatOptionActive,
-                    isDisabled && styles.formatOptionDisabled,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.formatOptionText,
-                      isSelected && styles.formatOptionTextActive,
-                    ]}
-                  >
-                    {fmt}
-                  </Text>
-                  {isSelected && <Check size={14} color={colors.primaryText} />}
-                </Pressable>
-              );
-            })}
-          </View>
-          {viewModel.errors.formats && (
-            <Text style={styles.errorText}>{viewModel.errors.formats}</Text>
-          )}
+          <AppInput
+            placeholder={APP_STRINGS.placeHolders.venue}
+            value={viewModel.venue}
+            editable={false}
+            onChangeText={() => {}}
+          />
         </View>
 
         <View style={styles.inputRow}>
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabels}>
-              {APP_STRINGS.eventScreen.date}
+              {APP_STRINGS.RequestScreen.startDate}
             </Text>
-            <Pressable onPress={viewModel.showDatePicker}>
-              <View pointerEvents="none">
-                <AppInput
-                  placeholder={APP_STRINGS.eventScreen.date}
-                  value={viewModel.date}
-                  editable={false}
-                  onChangeText={() => {}}
-                />
-              </View>
-            </Pressable>
-
-            <DateTimePickerModal
-              isVisible={viewModel.isDatePickerVisible}
-              mode="date"
-              display="inline"
-              date={viewModel.date ? new Date(viewModel.date) : new Date()}
-              onConfirm={viewModel.handleConfirmDate}
-              onCancel={viewModel.hideDatePicker}
+            <AppInput
+              placeholder={APP_STRINGS.placeHolders.date}
+              value={viewModel.startDate}
+              editable={false}
+              onChangeText={() => {}}
             />
           </View>
 
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabels}>
-              {APP_STRINGS.eventScreen.time}
+              {APP_STRINGS.RequestScreen.endDate}
             </Text>
-            <Pressable onPress={viewModel.showTimePicker}>
-              <View pointerEvents="none">
-                <AppInput
-                  placeholder={APP_STRINGS.eventScreen.time}
-                  value={viewModel.time}
-                  editable={false}
-                  onChangeText={() => {}}
-                />
-              </View>
-            </Pressable>
-
-            <DateTimePickerModal
-              isVisible={viewModel.isTimePickerVisible}
-              mode="time"
-              date={new Date()}
-              display="spinner"
-              onConfirm={viewModel.handleConfirmTime}
-              onCancel={viewModel.hideTimePicker}
+            <AppInput
+              placeholder={APP_STRINGS.placeHolders.date}
+              value={viewModel.endDate}
+              editable={false}
+              onChangeText={() => {}}
             />
           </View>
         </View>
@@ -155,87 +95,80 @@ const EventFormScreen = ({ route }: EventFormScreenProps) => {
         <View style={styles.inputRow}>
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabels}>
-              {APP_STRINGS.eventScreen.venue}
+              {APP_STRINGS.RequestScreen.gender}
             </Text>
             <AppInput
-              placeholder={APP_STRINGS.eventScreen.venue}
-              value={viewModel.venue}
-              onChangeText={viewModel.setVenue}
-              error={viewModel.errors.venue}
+              placeholder="Gender"
+              value={viewModel.gender}
+              editable={false}
+              onChangeText={() => {}}
             />
           </View>
 
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabels}>
-              {APP_STRINGS.eventScreen.totalParticipants}
+              {APP_STRINGS.RequestScreen.format}
             </Text>
             <AppInput
-              placeholder={APP_STRINGS.eventScreen.totalParticipants}
-              value={viewModel.totalTeams}
-              onChangeText={viewModel.setTotalTeams}
-              keyboardType="number-pad"
-              error={viewModel.errors.totalTeams}
+              placeholder="Format"
+              value={viewModel.format}
+              editable={false}
+              onChangeText={() => {}}
             />
           </View>
         </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabels}>
-            {APP_STRINGS.eventScreen.description}
+            {APP_STRINGS.eventScreen.registrationDeadline}<Text style={{ color: colors.error }}> *</Text>
+          </Text>
+          <Pressable onPress={viewModel.showDeadlinePicker}>
+            <View pointerEvents="none">
+              <AppInput
+                placeholder={APP_STRINGS.placeHolders.registrationDeadline}
+                value={viewModel.registrationDeadline}
+                editable={false}
+                onChangeText={() => {}}
+                error={viewModel.errors.registrationDeadline}
+              />
+            </View>
+          </Pressable>
+          <DateTimePickerModal
+            isVisible={viewModel.isDeadlinePickerVisible}
+            mode="date"
+            display="inline"
+            date={
+              viewModel.registrationDeadline
+                ? new Date(viewModel.registrationDeadline)
+                : new Date()
+            }
+            onConfirm={viewModel.handleConfirmDeadline}
+            onCancel={viewModel.hideDeadlinePicker}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabels}>
+            {APP_STRINGS.eventScreen.totalParticipants}<Text style={{ color: colors.error }}> *</Text>
+          </Text>
+          <AppInput
+            placeholder={APP_STRINGS.eventScreen.totalParticipants}
+            value={viewModel.maxParticipantsCount}
+            onChangeText={viewModel.setMaxParticipantsCount}
+            keyboardType="number-pad"
+            error={viewModel.errors.maxParticipantsCount}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabels}>
+            {APP_STRINGS.eventScreen.description}<Text style={{ color: colors.error }}> *</Text>
           </Text>
           <AppInput
             placeholder={APP_STRINGS.eventScreen.description}
             value={viewModel.description}
             onChangeText={viewModel.setDescription}
             error={viewModel.errors.description}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputLabels}>
-            {APP_STRINGS.eventScreen.rulesAndRegulations}
-          </Text>
-          <AppInput
-            placeholder={APP_STRINGS.placeHolders.rules}
-            value={viewModel.rulesText}
-            onChangeText={viewModel.setRulesText}
-            error={viewModel.errors.rules}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputLabels}>
-            {APP_STRINGS.eventScreen.prizeForFirst}
-          </Text>
-          <AppInput
-            placeholder={APP_STRINGS.placeHolders.prizeForFirst}
-            value={viewModel.firstPrize}
-            onChangeText={viewModel.setFirstPrize}
-            error={viewModel.errors.totalTeams}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputLabels}>
-            {APP_STRINGS.eventScreen.prizeForSecond}
-          </Text>
-          <AppInput
-            placeholder={APP_STRINGS.placeHolders.prizeForSecond}
-            value={viewModel.secondPrize}
-            onChangeText={viewModel.setSecondPrize}
-            error={viewModel.errors.totalTeams}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputLabels}>
-            {APP_STRINGS.eventScreen.prizeForThird}
-          </Text>
-          <AppInput
-            placeholder={APP_STRINGS.placeHolders.prizeForThird}
-            value={viewModel.thirdPrize}
-            onChangeText={viewModel.setThirdPrize}
-            error={viewModel.errors.totalTeams}
           />
         </View>
 
@@ -246,7 +179,16 @@ const EventFormScreen = ({ route }: EventFormScreenProps) => {
               : APP_STRINGS.eventScreen.createEvent
           }
           onPress={viewModel.onSubmit}
+          disabled={viewModel.submitting}
         />
+
+        {viewModel.isEdit && (
+          <AppButton
+            title={APP_STRINGS.eventScreen.deleteEvent}
+            onPress={viewModel.onDelete}
+            disabled={viewModel.submitting}
+          />
+        )}
       </View>
     </ScreenWrapper>
   );

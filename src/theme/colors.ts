@@ -20,4 +20,5 @@ export const colors = {
   matchesIconBackgound: '#ffc007',
 
   mixedBackground: '#EC4899',
+  status: '#ab5a20',
 } as const;
