@@ -1,200 +1,230 @@
 import { useState } from 'react';
-import { Alert } from 'react-native';
+import { Event, EventStatus, FormatType } from '../models/Event';
 import { validationMessages } from '../constants/validationMessages';
+import { useEventStore } from '../store/EventStore';
+import { useAuthStore } from '../store/AuthStore';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { EventRequestResponse } from '../models/EventRequest';
-import { authFetch } from '../utils/authFetch';
-import { EventResponse } from '../models/EventResponse';
-import { APP_STRINGS } from '../constants/AppStrings';
 
 type Mode = 'create' | 'edit';
 
 type EventFormParams = {
   mode: Mode;
-  eventRequest?: EventRequestResponse;
-  event?: EventResponse;
+  event?: Event;
 };
 
 type EventFormErrors = {
   name?: string;
+  sport?: string;
+  formats?: string;
+  date?: string;
+  time?: string;
+  venue?: string;
+  totalTeams?: string;
   description?: string;
-  maxParticipantsCount?: string;
-  registrationDeadline?: string;
+  rules?: string;
+  prizes?: string;
 };
 
-type CreateEventPayload = {
-  eventRequestId: number;
-  name: string;
-  registrationDeadline: string;
-  description: string;
-  maxParticipantsCount: number;
-};
+export const useEventFormViewModel = ({ mode, event }: EventFormParams) => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { createEvent, updateEvent } = useEventStore();
+  const { user } = useAuthStore();
 
-type PatchEventPayload = {
-  action: 'update' | 'cancel';
-  name?: string;
-  description?: string;
-  maxParticipantsCount?: number;
-  registrationDeadline?: string;
-};
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const [isTimePickerVisible, setTimePickerVisible] = useState(false);
 
-export const useEventFormViewModel = ({ mode, eventRequest, event }: EventFormParams) => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const showDatePicker = () => setDatePickerVisible(true);
+  const showTimePicker = () => setTimePickerVisible(true);
+
+  const hideDatePicker = () => setDatePickerVisible(false);
+  const hideTimePicker = () => setTimePickerVisible(false);
+
+  const handleConfirmDate = (date: Date) => {
+    const formattedDate = date.toISOString().split('T')[0];
+    setDate(formattedDate);
+    hideDatePicker();
+  };
+
+  const handleConfirmTime = (time: Date) => {
+    const formattedTime = time.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    setTime(formattedTime);
+    hideTimePicker();
+  };
 
   const isEdit = mode === 'edit' && !!event;
 
-  const [submitting, setSubmitting] = useState(false);
-  const [isDeadlinePickerVisible, setDeadlinePickerVisible] = useState(false);
-
-  const sport     = isEdit ? event!.sportName    : eventRequest?.sportsName      ?? '';
-  const venue     = isEdit ? event!.eventVenue   : eventRequest?.requestedVenue  ?? '';
-  const startDate = isEdit ? String(event!.startDate) : eventRequest?.startDate  ?? '';
-  const endDate   = isEdit ? String(event!.endDate)   : eventRequest?.endDate    ?? '';
-  const gender    = isEdit ? event!.categories?.[0]?.gender ?? '' : eventRequest?.gender  ?? '';
-  const format    = isEdit ? event!.categories?.[0]?.format ?? '' : eventRequest?.format  ?? '';
-
-  const [name, setName] = useState(isEdit ? event!.name : eventRequest?.eventName ?? '');
-  const [description, setDescription] = useState(isEdit ? event!.description : '');
-  const [maxParticipantsCount, setMaxParticipantsCount] = useState(
-    isEdit ? String(event!.maxParticipantsCount) : '',
+  const [name, setName] = useState(isEdit ? event!.name : '');
+  const [sport, setSport] = useState(isEdit ? event!.sport : '');
+  const [selectedFormats, setSelectedFormats] = useState<FormatType[]>(
+    isEdit ? event!.format : [FormatType.Singles],
   );
-  const [registrationDeadline, setRegistrationDeadline] = useState(
-    isEdit ? String(event!.registrationDeadline) : '',
+  const [date, setDate] = useState(isEdit ? event!.date : '');
+  const [time, setTime] = useState(isEdit ? event!.time : '');
+  const [venue, setVenue] = useState(isEdit ? event!.venue : '');
+  const [totalTeams, setTotalTeams] = useState(
+    isEdit ? String(event!.totalTeams) : '',
+  );
+  const [description, setDescription] = useState(
+    isEdit ? event!.description : '',
+  );
+
+  const [rulesText, setRulesText] = useState(
+    isEdit ? event!.rules.join('\n') : '',
+  );
+
+  const [firstPrize, setFirstPrize] = useState(
+    isEdit ? event?.prizes[0] ?? '' : '',
+  );
+  const [secondPrize, setSecondPrize] = useState(
+    isEdit ? event?.prizes[1] ?? '' : '',
+  );
+  const [thirdPrize, setThirdPrize] = useState(
+    isEdit ? event?.prizes[2] ?? '' : '',
   );
 
   const [errors, setErrors] = useState<EventFormErrors>({});
 
-  const showDeadlinePicker = () => setDeadlinePickerVisible(true);
-  const hideDeadlinePicker = () => setDeadlinePickerVisible(false);
+  const onSportChange = (value: string) => {
+    setSport(value);
 
-  const handleConfirmDeadline = (date: Date) => {
-    setRegistrationDeadline(date.toISOString().split('T')[0]);
-    hideDeadlinePicker();
+    if (value.toLowerCase() === 'chess') {
+      setSelectedFormats([FormatType.Singles]);
+    }
+  };
+
+  const toggleFormat = (format: FormatType) => {
+    setSelectedFormats((prev) =>
+      prev.includes(format)
+        ? prev.filter((fixture) => fixture !== format)
+        : [...prev, format],
+    );
   };
 
   const validate = () => {
     const newErrors: EventFormErrors = {};
 
-    if (!name.trim())
-      newErrors.name = validationMessages.REQUIRED_EVENT_NAME;
+    if (!name.trim()) newErrors.name = validationMessages.REQUIRED_EVENT_NAME;
+    if (!sport.trim()) newErrors.sport = validationMessages.REQUIRED_SPORT;
+    if (selectedFormats.length === 0)
+      newErrors.formats = validationMessages.REQUIRED_FORMAT;
+    if (
+      sport.toLowerCase() === 'chess' &&
+      selectedFormats.includes(FormatType.Doubles)
+    ) {
+      newErrors.formats = validationMessages.INVALID_CHESS_FORMAT;
+    }
+    if (!date.trim()) newErrors.date = validationMessages.REQUIRED_DATE;
+    if (!time.trim()) newErrors.time = validationMessages.REQUIRED_TIME;
+    if (!venue.trim()) newErrors.venue = validationMessages.REQUIRED_VENUE;
     if (!description.trim())
       newErrors.description = validationMessages.REQUIRED_DESCRIPTION;
-    if (!maxParticipantsCount || Number(maxParticipantsCount) <= 0)
-      newErrors.maxParticipantsCount = validationMessages.INVALID_TEAM_COUNT;
-    if (!registrationDeadline.trim())
-      newErrors.registrationDeadline = APP_STRINGS.eventFormScreen.registrationDeadlineRequired;
+    if (!rulesText.trim()) newErrors.rules = validationMessages.REQUIRED_RULES;
+    if (!firstPrize.trim() || !secondPrize.trim() || !thirdPrize.trim()) {
+      newErrors.prizes = validationMessages.REQUIRED_PRIZES;
+    }
 
-    const deadline = new Date(registrationDeadline);
-    const start    = new Date(startDate);
-    if (registrationDeadline && deadline >= start)
-      newErrors.registrationDeadline = APP_STRINGS.eventFormScreen.deadlineBeforeStart;
+    if (!totalTeams || Number(totalTeams) <= 0) {
+      newErrors.totalTeams = validationMessages.INVALID_TEAM_COUNT;
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const onSubmit = async () => {
+  const formattedRules = rulesText
+    .split(',')
+    .map((rule) => rule.trim())
+    .filter((rule) => rule.length > 0)
+    .map((rule) => rule.charAt(0).toUpperCase() + rule.slice(1));
+
+  const onSubmit = () => {
     if (!validate()) return;
 
-    try {
-      setSubmitting(true);
+    const updatedEvent: Event = {
+      id: event?.id ?? Date.now().toString(),
+      name,
+      sport,
+      format: selectedFormats,
+      date,
+      time,
+      venue,
+      totalTeams: Number(totalTeams),
 
-      if (isEdit) {
-        const payload: PatchEventPayload = {
-          action: 'update',
-          name: name.trim(),
-          description: description.trim(),
-          maxParticipantsCount: Number(maxParticipantsCount),
-          registrationDeadline,
-        };
+      status: event?.status ?? EventStatus.OPEN,
+      registeredTeams: event?.registeredTeams ?? 0,
+      registrationDeadline: event?.registrationDeadline ?? '',
 
-        await authFetch(`/events/${event!.id}`, {
-          method: 'PATCH',
-          body: JSON.stringify(payload),
-        });
+      teamsCreated: event?.teamsCreated ?? false,
+      fixturesCreated: event?.fixturesCreated ?? false,
 
-        Alert.alert(APP_STRINGS.common.success, APP_STRINGS.eventFormScreen.eventUpdated);
-      } else {
-        if (!eventRequest) return;
+      teams: event?.teams ?? [],
+      fixtures: event?.fixtures ?? [],
+      registrations: event?.registrations ?? [],
+      description,
+      rules: formattedRules,
+      prizes: [firstPrize, secondPrize, thirdPrize],
+      createdBy: event?.createdBy ?? user?.email,
+    };
 
-        const payload: CreateEventPayload = {
-          eventRequestId: eventRequest.id,
-          name: name.trim(),
-          registrationDeadline,
-          description: description.trim(),
-          maxParticipantsCount: Number(maxParticipantsCount),
-        };
-
-        await authFetch('/events', {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        });
-
-        Alert.alert(APP_STRINGS.common.success, APP_STRINGS.eventFormScreen.eventCreated);
-      }
-
-      navigation.navigate('AdminTabs', { screen: 'Events' });
-    } catch (e: any) {
-      Alert.alert(APP_STRINGS.common.error, e?.message ?? APP_STRINGS.eventFormScreen.somethingWentWrong);
-    } finally {
-      setSubmitting(false);
+    if (isEdit) {
+      updateEvent(updatedEvent);
+    } else {
+      createEvent(updatedEvent);
     }
+
+    navigation.goBack();
   };
 
-  const onDelete = async () => {
-    Alert.alert(
-      APP_STRINGS.eventFormScreen.cancelEvent,
-      APP_STRINGS.eventFormScreen.cancelEventConfirm,
-      [
-        { text: APP_STRINGS.eventFormScreen.cancelNo, style: 'cancel' },
-        {
-          text: APP_STRINGS.eventFormScreen.cancelYes,
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setSubmitting(true);
-              await authFetch(`/events/${event!.id}`, {
-                method: 'PATCH',
-                body: JSON.stringify({ action: 'cancel' }),
-              });
-              Alert.alert(APP_STRINGS.common.success, APP_STRINGS.eventFormScreen.eventCancelled);
-              navigation.navigate('AdminTabs', { screen: 'Events' });
-            } catch (e: any) {
-              Alert.alert(APP_STRINGS.common.error, e?.message ?? APP_STRINGS.eventFormScreen.failedToCancel);
-            } finally {
-              setSubmitting(false);
-            }
-          },
-        },
-      ],
-    );
+  const onBack = () => {
+    navigation.goBack();
   };
 
   return {
     isEdit,
-    submitting,
+
     name,
     sport,
+    selectedFormats,
+    date,
+    time,
     venue,
-    startDate,
-    endDate,
-    gender,
-    format,
+    totalTeams,
     description,
-    maxParticipantsCount,
-    registrationDeadline,
-    isDeadlinePickerVisible,
-    showDeadlinePicker,
-    hideDeadlinePicker,
-    handleConfirmDeadline,
+    rulesText,
+    firstPrize,
+    secondPrize,
+    thirdPrize,
+    isDatePickerVisible,
+    isTimePickerVisible,
+
     setName,
+    setSport,
+    toggleFormat,
+    setDate,
+    setTime,
+    setVenue,
+    setTotalTeams,
     setDescription,
-    setMaxParticipantsCount,
+    setRulesText,
+    setFirstPrize,
+    setSecondPrize,
+    setThirdPrize,
+    onSportChange,
+    showDatePicker,
+    showTimePicker,
+    handleConfirmDate,
+    handleConfirmTime,
+    hideDatePicker,
+    hideTimePicker,
+
     errors,
     onSubmit,
-    onDelete,
-    onBack: () => navigation.goBack(),
+    onBack,
   };
 };

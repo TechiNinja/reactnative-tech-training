@@ -4,8 +4,6 @@ import {
   GenderType,
   FormatType,
   Fixture,
-  Registration,
-  Team,
   MatchStatus,
 } from '../models/Event';
 import { MOCK_EVENTS } from '../constants/mockEvents';
@@ -74,7 +72,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({
     formats: FormatType[],
   ) => {
     setEvents((prev) =>
-      prev.map((event): Event => {  
+      prev.map((event) => {
         if (event.id !== eventId) return event;
 
         const newRegistrationId = `reg-${Date.now()}-${Math.random()
@@ -172,12 +170,12 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const createFixtures = (eventId: string) => {
     setEvents((prev) =>
-      prev.map((event): Event => {
+      prev.map((event) => {
         if (event.id !== eventId) return event;
 
         let fixtures: Fixture[] = [];
 
-        for (const eventFormat of event.formats) {
+        for (const eventFormat of event.format) {
           if (eventFormat === FormatType.Singles) {
             const males = event.registrations
               .filter(

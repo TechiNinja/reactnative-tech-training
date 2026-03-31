@@ -1,204 +1,291 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert } from 'react-native';
-import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { FormatType, GenderType, FixtureTabType } from '../models/Event';
+import {
+  ApiTeamResponse,
+  OrganizerService,
+} from '../services/organizerService';
+import { useEventStore } from '../store/EventStore';
 import { useAuthStore } from '../store/AuthStore';
 import { APP_STRINGS } from '../constants/appStrings';
-import { FixtureResponse, CategoryResponse } from '../models/ApiResponses';
 import {
-  getCategoryById,
-  generateFixtures,
-  getFixtures,
-  getParticipantsByCategory,
-} from '../services/categoryService';
-import { OrganizerService, ApiTeamResponse } from '../services/organizerService';
+  EventStatus,
+  FixtureTabType,
+  FormatType,
+  GenderType,
+  MatchStatus,
+  Team,
+} from '../models/Event';
+import { generateTeams } from '../utils/teamUtils';
+import { generateBracket, nextPowerOfTwo } from '../utils/fixtureUtils';
 
-type CategoryDetailsRouteProp = RouteProp<RootStackParamList, 'CategoryDetails'>;
-type Participant = { id: string; name: string };
-type ApiTeam = { id: string; name: string; members: string[] };
+const PARTICIPANTS_TAB = 'PARTICIPANTS';
+const TEAMS_TAB = 'TEAMS';
+const FIXTURES_TAB = 'FIXTURES';
 
-export const useCategoryDetailsScreenViewModel = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+type CategoryDetailsRouteProp = RouteProp<
+  RootStackParamList,
+  'CategoryDetails'
+>;
+
+export const useCategoryDetailsViewModel = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<CategoryDetailsRouteProp>();
-  const { eventId, gender, format, role, eventCategoryId, eventStartDate, eventEndDate, eventVenue } = route.params;
+  const { eventId, gender, format, role, eventCategoryId } = route.params;
+
+  const {
+    events,
+    updateEvent,
+    updateFixtureScore,
+    updateFixtureStatus,
+    completeFixture,
+  } = useEventStore();
+
   const { user } = useAuthStore();
 
-  const [category, setCategory] = useState<CategoryResponse | null>(null);
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [teams, setTeams] = useState<ApiTeam[]>([]);
-  const [fixtures, setFixtures] = useState<FixtureResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [activeMainTab, setActiveMainTab] = useState('');
-  const [activeFixtureTab, setActiveFixtureTab] = useState<FixtureTabType>(FixtureTabType.ALL);
-  const [searchQuery, setSearchQuery] = useState('');
+  const event = events.find((event) => event.id === eventId) ?? null;
 
   const mainTabs = useMemo(() => {
     const tabs: string[] = [];
-    if (role !== 'participant') tabs.push('PARTICIPANTS');
-    if (format === FormatType.Doubles) tabs.push('TEAMS');
-    tabs.push('FIXTURES');
+    if (role !== 'participant') tabs.push(PARTICIPANTS_TAB);
+    if (format === FormatType.Doubles) tabs.push(TEAMS_TAB);
+    tabs.push(FIXTURES_TAB);
     return tabs;
   }, [role, format]);
 
+  const [activeMainTab, setActiveMainTab] = useState(mainTabs[0]);
+  const [activeFixtureTab, setActiveFixtureTab] = useState<FixtureTabType>(
+    FixtureTabType.ALL,
+  );
+  const [searchQuery, setSearchQuery] = useState('');
+
   const isAdminOrOrganizer = role === 'admin' || role === 'organizer';
-  const canManageEvent = role === 'admin' || role === 'organizer';
-  const isAbandoned = category?.status === 'Abandoned';
-  const canCreateTeams = format === FormatType.Doubles && participants.length >= 2 && !isAbandoned;
-  const canCreateFixtures = participants.length >= 2;
 
-  const hasAnyLiveOrCompleted = useMemo(
-    () => fixtures.some((f) => f.status.toUpperCase() === 'LIVE' || f.status.toUpperCase() === 'COMPLETED'),
-    [fixtures],
-  );
+  const canManageEvent =
+    role === 'admin' ||
+    (role === 'organizer' && event?.createdBy === user?.email);
 
-  const loadData = useCallback(async (silent = false) => {
-    if (!eventCategoryId) return;
-    try {
-      if (!silent) setLoading(true);
-      const [cat, parts, fixtureList] = await Promise.all([
-        getCategoryById(eventCategoryId),
-        getParticipantsByCategory(eventCategoryId),
-        getFixtures(eventCategoryId),
-      ]);
-      setCategory(cat ?? null);
-      setParticipants((parts ?? []).map((p) => ({ id: String(p.id), name: p.name })));
-      setFixtures(fixtureList ?? []);
-      if (format === FormatType.Doubles) {
-        const apiTeams = await OrganizerService.getTeams(eventCategoryId);
-        setTeams((apiTeams ?? []).map((t: ApiTeamResponse) => ({
-          id: String(t.id),
-          name: t.name,
-          members: t.members ?? [],
-        })));
-      }
-    } catch {
-      Alert.alert(APP_STRINGS.fixtureScreen.error, APP_STRINGS.participantScreens.failedToLoadData);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+  const isMixedCategory = gender === GenderType.Mixed;
+
+  const participants = useMemo(() => {
+    if (!event) return [];
+    if (isMixedCategory) {
+      return event.registrations.filter((player) =>
+        player.formats?.includes(format),
+      );
     }
-  }, [eventCategoryId, format]);
+    return event.registrations.filter(
+      (player) => player.gender === gender && player.formats?.includes(format),
+    );
+  }, [event, isMixedCategory, format, gender]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  const teams = useMemo(() => {
+    if (!event) return [];
+    return event.teams.filter(
+      (team) => team.gender === gender && team.format === format,
+    );
+  }, [event, gender, format]);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadData(true);
-    }, [loadData]),
-  );
+  const filteredTeams = useMemo(() => {
+    if (!searchQuery.trim()) return teams;
+    return teams.filter((team) =>
+      team.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [teams, searchQuery]);
 
-  useEffect(() => {
-    if (activeMainTab === '' && mainTabs.length > 0) setActiveMainTab(mainTabs[0]);
-  }, [mainTabs, activeMainTab]);
-
-  const handleRefresh = useCallback(() => {
-    setRefreshing(true);
-    loadData(true);
-  }, [loadData]);
-
-  const filteredTeams = useMemo(
-    () => searchQuery.trim()
-      ? teams.filter((t) => t.name.toLowerCase().includes(searchQuery.toLowerCase()))
-      : teams,
-    [teams, searchQuery],
-  );
+  const fixtures = useMemo(() => {
+    if (!event) return [];
+    if (isMixedCategory) {
+      return event.fixtures.filter(
+        (fixture) =>
+          fixture.gender === GenderType.Mixed && fixture.format === format,
+      );
+    }
+    return event.fixtures.filter(
+      (fixture) => fixture.gender === gender && fixture.format === format,
+    );
+  }, [event, isMixedCategory, format, gender]);
 
   const filteredFixtures = useMemo(() => {
     let result = fixtures;
     if (activeFixtureTab !== FixtureTabType.ALL) {
-      result = result.filter((f) => f.status.toUpperCase() === activeFixtureTab);
+      result = result.filter(
+        (fixture) =>
+          fixture.status === (activeFixtureTab as unknown as MatchStatus),
+      );
     }
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
+      const query = searchQuery.toLowerCase();
       result = result.filter(
-        (f) => f.sideAName?.toLowerCase().includes(q) || f.sideBName?.toLowerCase().includes(q),
+        (fixture) =>
+          fixture.teamA?.toLowerCase().includes(query) ||
+          fixture.teamB?.toLowerCase().includes(query),
       );
     }
     return result;
   }, [fixtures, activeFixtureTab, searchQuery]);
 
-  const visibleFixtures = useMemo(
-    () => canManageEvent
-      ? filteredFixtures
-      : filteredFixtures.filter((f) => !(f.sideAName === 'BYE' && f.sideBName === 'BYE')),
-    [canManageEvent, filteredFixtures],
-  );
-
-  const getRoundName = (roundNumber: number, matchNumber: number) => {
-    const maxRound = fixtures.length > 0
-      ? Math.max(...fixtures.map((f) => f.roundNumber))
-      : 1;
-
-    const roundMatches = fixtures.filter((f) => f.roundNumber === roundNumber);
-    const totalMatchesInRound = roundMatches.length;
-
-    if (roundNumber === maxRound && totalMatchesInRound === 1) return APP_STRINGS.eventScreen.final;
-    if (roundNumber === maxRound - 1 && totalMatchesInRound === 2) return APP_STRINGS.eventScreen.semiFinal;
-    if (roundNumber === maxRound - 2 && totalMatchesInRound === 4) return APP_STRINGS.eventScreen.quarterFinal;
-
-    const matchIndexInRound = roundMatches
-      .sort((a, b) => a.matchNumber - b.matchNumber)
-      .findIndex((f) => f.matchNumber === matchNumber);
-
-    return APP_STRINGS.fixtureScreen.matchPrefix + (matchIndexInRound + 1);
+  const getRoundName = (round: number, totalCount: number) => {
+    const totalRounds = Math.log2(nextPowerOfTwo(totalCount));
+    if (round === totalRounds) return APP_STRINGS.eventScreen.final;
+    if (round === totalRounds - 1) return APP_STRINGS.eventScreen.semiFinal;
+    if (round === totalRounds - 2) return APP_STRINGS.eventScreen.quarterFinal;
+    return `Round ${round}`;
   };
 
-  const handleCreateTeams = async () => {
-    if (!eventCategoryId) return;
-    if (format === FormatType.Singles) { Alert.alert(APP_STRINGS.eventScreen.noTeamsRequired); return; }
-    if (participants.length < 2) { Alert.alert(APP_STRINGS.eventScreen.noEnoughRegistrations); return; }
-    try {
-      const apiTeams = await OrganizerService.createTeams(eventCategoryId);
-      setTeams((apiTeams ?? []).map((t: ApiTeamResponse) => ({ id: String(t.id), name: t.name, members: t.members ?? [] })));
-    } catch {
-      Alert.alert(APP_STRINGS.eventScreen.createTeam, APP_STRINGS.eventScreen.teamCreationFailed);
-    }
-  };
+  const totalParticipantsAllowed = event?.totalTeams ?? 0;
+  const minRequiredForTeams = Math.ceil(totalParticipantsAllowed * 0.2);
 
-  const handleCreateFixtures = async () => {
-    if (!eventCategoryId) return;
-    if (isAbandoned) {
-      Alert.alert(APP_STRINGS.eventScreen.categoryAbandoned, APP_STRINGS.eventScreen.categoryAbandonedDescription);
-      return;
-    }
-    try {
-      const generated = await generateFixtures(eventCategoryId);
-      setFixtures(generated ?? []);
-    } catch (e: any) {
-      Alert.alert(APP_STRINGS.eventScreen.createFixtures, e?.message ?? APP_STRINGS.eventScreen.teamCreationFailed);
-    }
-  };
+  const categoryId = isMixedCategory ? 'Mixed-Singles' : `${gender}-${format}`;
+  const isAbandoned = event?.abandonedCategories?.includes(categoryId) ?? false;
 
-  const handleFixturePress = (fixture: FixtureResponse) => {
-    navigation.navigate('MatchDetails', {
-      matchId: fixture.id,
-      role,
-      eventStartDate,
-      eventEndDate,
-      eventVenue,
-      categoryId: eventCategoryId ?? 0,
+  const canCreateTeams =
+    participants.length >= minRequiredForTeams && !isAbandoned;
+
+  const canCreateFixtures =
+    format === FormatType.Singles
+      ? participants.length >= 2
+      : teams.length >= 2;
+
+  const createTeamsInternal = () => {
+    if (!event) return;
+
+    const newTeams = generateTeams(
+      participants,
+      gender,
+      format,
+      event.teams.length,
+    );
+
+    const otherTeams = event.teams.filter(
+      (team) => !(team.gender === gender && team.format === format),
+    );
+
+    if (participants.length % 2 !== 0) {
+      Alert.alert(
+        APP_STRINGS.eventScreen.note,
+        APP_STRINGS.eventScreen.oddRegistrationsAlert,
+      );
+    }
+
+    updateEvent({
+      ...event,
+      teams: [...otherTeams, ...newTeams],
+      teamsCreated: true,
     });
   };
 
-  const handleScheduleFixture = (fixture: FixtureResponse) => {
-    navigation.navigate('MatchDetails', {
-      matchId: fixture.id,
-      role,
-      eventStartDate,
-      eventEndDate,
-      eventVenue,
-      categoryId: eventCategoryId ?? 0,
-      openSchedule: true,
+  const handleCreateTeams = async () => {
+    if (!event) return;
+
+    if (format === FormatType.Singles) {
+      Alert.alert(APP_STRINGS.eventScreen.noTeamsRequired);
+      return;
+    }
+
+    if (participants.length < 2) {
+      Alert.alert(APP_STRINGS.eventScreen.noEnoughRegistrations);
+      return;
+    }
+
+    if (typeof eventCategoryId === 'number') {
+      try {
+        const apiTeams = (await OrganizerService.createTeams(
+          eventCategoryId,
+        )) as ApiTeamResponse[];
+
+        const newTeams: Team[] = apiTeams.map((apiTeam) => ({
+          id: apiTeam.id.toString(),
+          name: apiTeam.name,
+          players: apiTeam.members.map((memberName, index) => ({
+            id: `${apiTeam.id}-${index}`,
+            name: memberName,
+            gender,
+            formats: [format],
+          })),
+          gender,
+          format,
+        }));
+
+        const otherTeams = event.teams.filter(
+          (team) => !(team.gender === gender && team.format === format),
+        );
+
+        updateEvent({
+          ...event,
+          teams: [...otherTeams, ...newTeams],
+          teamsCreated: true,
+        });
+      } catch {
+        Alert.alert(
+          APP_STRINGS.eventScreen.createTeam,
+          APP_STRINGS.eventScreen.teamCreationFailed,
+        );
+      }
+      return;
+    }
+
+    if (participants.length < totalParticipantsAllowed) {
+      Alert.alert(
+        APP_STRINGS.eventScreen.createTeam,
+        `You are about to create teams with ${
+          participants.length
+        } participants (${
+          totalParticipantsAllowed - participants.length
+        } slots remaining). Continue?`,
+        [
+          { text: APP_STRINGS.buttons.cancel, style: 'cancel' },
+          {
+            text: APP_STRINGS.buttons.continue,
+            onPress: createTeamsInternal,
+          },
+        ],
+      );
+    } else {
+      createTeamsInternal();
+    }
+  };
+
+  const handleCreateFixtures = () => {
+    if (!event) return;
+
+    if (isAbandoned) {
+      Alert.alert(
+        APP_STRINGS.eventScreen.categoryAbandoned,
+        APP_STRINGS.eventScreen.categoryAbandonedDescription,
+      );
+      return;
+    }
+
+    const names =
+      format === FormatType.Singles
+        ? participants.map((player) => player.name)
+        : teams.map((team) => team.name);
+
+    if (names.length < 2) {
+      Alert.alert(APP_STRINGS.eventScreen.notEnoughSameGenderParticipants);
+      return;
+    }
+
+    const newFixtures = generateBracket(names, gender, format);
+
+    const otherFixtures = event.fixtures.filter(
+      (fixture) => !(fixture.gender === gender && fixture.format === format),
+    );
+
+    updateEvent({
+      ...event,
+      fixtures: [...otherFixtures, ...newFixtures],
+      fixturesCreated: true,
+      status: EventStatus.LIVE,
     });
   };
 
   return {
-    category,
-    loading,
-    refreshing,
+    event,
     gender,
     format,
     role,
@@ -212,25 +299,23 @@ export const useCategoryDetailsScreenViewModel = () => {
     setSearchQuery,
     participants,
     teams: filteredTeams,
-    fixtures,
+    filteredFixtures,
     isAdminOrOrganizer,
     canManageEvent,
     isAbandoned,
-    filteredFixtures: visibleFixtures,
     canCreateTeams,
     canCreateFixtures,
-    hasAnyLiveOrCompleted,
-    minRequiredForTeams: 2,
+    minRequiredForTeams,
     hasTeamsForGender: teams.length > 0,
     hasFixturesForGender: fixtures.length > 0,
     getRoundName,
     handleCreateTeams,
     handleCreateFixtures,
-    handleFixturePress,
-    handleScheduleFixture,
-    handleRefresh,
-    eventVenue,
-    eventName: category?.eventName ?? '',
-    event: category ? { sport: category.eventName ?? '' } : null,
+    handleSetLive: (id: string) =>
+      updateFixtureStatus(eventId, id, MatchStatus.LIVE),
+    handleUpdateScore: (id: string, a: number, b: number) =>
+      updateFixtureScore(eventId, id, a, b),
+    handleCompleteFixture: (id: string, a: number, b: number) =>
+      completeFixture(eventId, id, a, b),
   };
 };

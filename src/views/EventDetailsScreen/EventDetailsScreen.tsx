@@ -1,21 +1,11 @@
 import React from 'react';
-import {
-  Text,
-  View,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
-  Modal,
-} from 'react-native';
+import { Text, View, ScrollView, Pressable } from 'react-native';
 import {
   ArrowLeft,
   Calendar,
   MapPin,
   Trophy,
-  UserCheck,
-  X,
-  Check,
-  Edit,
+  Trash2,
 } from 'lucide-react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import CategoryCard from '../../components/CategoryCard/CategoryCard';
@@ -24,70 +14,32 @@ import { colors } from '../../theme/colors';
 import { styles } from './EventDetailsScreenStyles';
 import { APP_STRINGS } from '../../constants/appStrings';
 import { useEventDetailsViewModel } from '../../viewModels/EventDetailsScreenViewModel';
-import { useAssignOrganizerScreenViewModel } from '../../viewModels/AssignOrganizerScreenViewModel';
-const statusStyleMap: Record<string, object> = {
-  LIVE:      styles.status_LIVE,
-  OPEN:      styles.status_OPEN,
-  UPCOMING:  styles.status_UPCOMING,
-  COMPLETED: styles.status_COMPLETED,
-  CANCELLED: styles.status_CANCELLED,
-};
+import { FormatType } from '../../models/Event';
 
 const EventDetailsScreen = () => {
   const {
     event,
-    loading,
-    error,
     role,
     categories,
     canEditOrDelete,
-    canAssignOrganizer,
     canRegister,
-    showAssignOrganizer,
     getRegisterButtonText,
     handleCategoryPress,
     handleEditEvent,
+    handleDeleteEvent,
     handleBack,
     handleRegister,
-    handleOpenAssignOrganizer,
-    handleCloseAssignOrganizer,
-    handleAssignOrganizerSuccess,
   } = useEventDetailsViewModel();
 
-  const {
-    organizers,
-    selectedOrganizerId,
-    setSelectedOrganizerId,
-    loading: loadingOrganizers,
-    saving,
-    handleAssign,
-  } = useAssignOrganizerScreenViewModel(
-    event?.id ?? 0,
-    event?.organizerName,
-    handleAssignOrganizerSuccess,
-  );
-
-  if (loading) {
-    return (
-      <ScreenWrapper>
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      </ScreenWrapper>
-    );
-  }
-
-  if (error || !event) {
+  if (!event) {
     return (
       <ScreenWrapper>
         <Text style={styles.errorText}>
-          {error ?? APP_STRINGS.eventScreen.noEventFound}
+          {APP_STRINGS.eventScreen.noEventFound}
         </Text>
       </ScreenWrapper>
     );
   }
-
-  const statusStyle = statusStyleMap[event.status.toUpperCase()] ?? {};
 
   return (
     <ScreenWrapper scrollable={false}>
@@ -103,8 +55,10 @@ const EventDetailsScreen = () => {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.infoCard}>
             <View style={styles.statusRow}>
-              <Text style={styles.sportBadge}>{event.sportName}</Text>
-              <Text style={[styles.statusBadge, statusStyle]}>
+              <Text style={styles.sportBadge}>{event.sport}</Text>
+              <Text
+                style={[styles.statusBadge, styles[`status_${event.status}`]]}
+              >
                 {event.status}
               </Text>
             </View>
@@ -112,48 +66,37 @@ const EventDetailsScreen = () => {
             <View style={styles.infoRow}>
               <Calendar size={18} color={colors.textSecondary} />
               <Text style={styles.infoText}>
-                {String(event.startDate)} — {String(event.endDate)}
+                {event.date} • {event.time}
               </Text>
             </View>
 
             <View style={styles.infoRow}>
               <MapPin size={18} color={colors.textSecondary} />
-              <Text style={styles.infoText}>{event.eventVenue}</Text>
+              <Text style={styles.infoText}>{event.venue}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Trophy size={18} color={colors.textSecondary} />
               <Text style={styles.infoText}>
                 Formats:{' '}
-                {[...new Set(event.categories?.map((c) => c.format) ?? [])].join(', ')}
+                {event.format
+                  .map((format) =>
+                    format === FormatType.Singles ? 'Singles' : 'Doubles',
+                  )
+                  .join(', ')}
               </Text>
             </View>
 
-            <View style={styles.infoRow}>
-              <Calendar size={18} color={colors.textSecondary} />
-              <Text style={styles.infoText}>
-                {APP_STRINGS.eventScreen.registrationDeadline}: {String(event.registrationDeadline)}
-              </Text>
-            </View>
-
-            {event.organizerName ? (
-              <View style={styles.infoRow}>
-                <UserCheck size={18} color={colors.textSecondary} />
-                <Text style={styles.infoText}>
-                  {APP_STRINGS.eventScreen.organizer}: {event.organizerName}
-                </Text>
-              </View>
-            ) : null}
-
-            {event.description ? (
+            {event.description && (
               <Text style={styles.description}>{event.description}</Text>
-            ) : null}
+            )}
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>
               {APP_STRINGS.eventScreen.categories}
             </Text>
+
             {categories.length > 0 ? (
               categories.map((category) => (
                 <CategoryCard
@@ -177,6 +120,30 @@ const EventDetailsScreen = () => {
             )}
           </View>
 
+          {event.prizes.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                {APP_STRINGS.eventScreen.prizes}
+              </Text>
+              <View style={styles.prizeList}>
+                {event.prizes.map((prize, index) => (
+                  <View key={index} style={styles.prizeItem}>
+                    <Text style={styles.prizeEmoji}>
+                      {index === 0 ? '🏆' : index === 1 ? '🥈' : '🥉'}
+                    </Text>
+                    <View>
+                      <Text style={styles.prizePosition}>
+                        {index === 0 ? '1st' : index === 1 ? '2nd' : '3rd'}
+                        Place
+                      </Text>
+                      <Text style={styles.prizeValue}>{prize}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
           <View style={styles.bottomPadding} />
         </ScrollView>
 
@@ -188,84 +155,24 @@ const EventDetailsScreen = () => {
               onPress={handleRegister}
             />
           )}
+
           {canEditOrDelete && (
-            <View style={styles.adminActionRow}>
-              <Pressable style={styles.adminActionBtn} onPress={handleEditEvent}>
-                <Edit size={20} color={colors.primary} />
-                <Text style={styles.adminActionText}>
-                  {APP_STRINGS.eventScreen.editAction}
-                </Text>
+            <View style={styles.buttonRow}>
+              <View style={styles.buttonFlex}>
+                <AppButton
+                  title={APP_STRINGS.eventScreen.edit}
+                  onPress={handleEditEvent}
+                />
+              </View>
+              <Pressable
+                style={styles.deleteButton}
+                onPress={handleDeleteEvent}
+              >
+                <Trash2 size={24} color={colors.error} />
               </Pressable>
-              {canAssignOrganizer && (
-                <Pressable style={styles.adminActionBtn} onPress={handleOpenAssignOrganizer}>
-                  <UserCheck size={20} color={colors.primary} />
-                  <Text style={styles.adminActionText}>
-                    {APP_STRINGS.eventScreen.organizerAction}
-                  </Text>
-                </Pressable>
-              )}
             </View>
           )}
         </View>
-
-        <Modal
-          visible={showAssignOrganizer}
-          transparent
-          animationType="slide"
-          onRequestClose={handleCloseAssignOrganizer}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalSheet}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>
-                  {APP_STRINGS.eventScreen.assignOrganizer}
-                </Text>
-                <Pressable onPress={handleCloseAssignOrganizer}>
-                  <X size={22} color={colors.textPrimary} />
-                </Pressable>
-              </View>
-
-              {event.organizerName ? (
-                <Text style={styles.currentOrganizer}>
-                  {APP_STRINGS.eventScreen.currentOrganizer}: {event.organizerName}
-                </Text>
-              ) : null}
-
-              {loadingOrganizers ? (
-                <ActivityIndicator color={colors.primary} style={styles.modalLoader} />
-              ) : organizers.length === 0 ? (
-                <Text style={styles.emptyText}>
-                  {APP_STRINGS.eventScreen.noOrganizersAvailable}
-                </Text>
-              ) : (
-                <ScrollView style={styles.organizerList}>
-                  {organizers.map((org) => {
-                    const isSelected = selectedOrganizerId === org.id;
-                    return (
-                      <Pressable
-                        key={org.id}
-                        style={[styles.organizerItem, isSelected && styles.organizerItemSelected]}
-                        onPress={() => setSelectedOrganizerId(org.id)}
-                      >
-                        <View style={styles.organizerInfo}>
-                          <Text style={styles.organizerName}>{org.fullName}</Text>
-                          <Text style={styles.organizerEmail}>{org.email}</Text>
-                        </View>
-                        {isSelected && <Check size={20} color={colors.primary} />}
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
-              )}
-
-              <AppButton
-                title={saving ? APP_STRINGS.eventScreen.assigning : APP_STRINGS.eventScreen.assignOrganizer}
-                disabled={saving || !selectedOrganizerId}
-                onPress={handleAssign}
-              />
-            </View>
-          </View>
-        </Modal>
       </View>
     </ScreenWrapper>
   );

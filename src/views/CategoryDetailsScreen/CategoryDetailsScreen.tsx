@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, Pressable, FlatList, TextInput, ActivityIndicator } from 'react-native';
+import { Text, View, Pressable, FlatList, TextInput } from 'react-native';
 import { ArrowLeft, User, Users, Search } from 'lucide-react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppButton from '../../components/AppButton/AppButton';
@@ -8,7 +8,7 @@ import FixtureManageCard from '../../components/FixtureManageCard/FixtureManageC
 import { colors } from '../../theme/colors';
 import { styles } from './CategoryDetailsScreenStyles';
 import { APP_STRINGS } from '../../constants/appStrings';
-import { useCategoryDetailsScreenViewModel } from '../../viewModels/CategoryDetailsScreenViewModel';
+import { useCategoryDetailsViewModel } from '../../viewModels/CategoryDetailsScreenViewModel';
 import { FixtureTabType, FormatType, GenderType } from '../../models/Event';
 
 const FIXTURE_TABS: FixtureTabType[] = [
@@ -19,27 +19,20 @@ const FIXTURE_TABS: FixtureTabType[] = [
 ];
 
 const CategoryDetailsScreen = () => {
-  const viewModel = useCategoryDetailsScreenViewModel();
+  const viewModel = useCategoryDetailsViewModel();
 
-  if (viewModel.loading) {
+  if (!viewModel.event) {
     return (
       <ScreenWrapper>
-        <View style={styles.emptyState}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      </ScreenWrapper>
-    );
-  }
-
-  if (!viewModel.category) {
-    return (
-      <ScreenWrapper>
-        <Text style={styles.errorText}>{APP_STRINGS.eventScreen.noEventFound}</Text>
+        <Text style={styles.errorText}>
+          {APP_STRINGS.eventScreen.noEventFound}
+        </Text>
       </ScreenWrapper>
     );
   }
 
   const {
+    event,
     gender,
     format,
     navigation,
@@ -64,24 +57,30 @@ const CategoryDetailsScreen = () => {
     getRoundName,
     handleCreateTeams,
     handleCreateFixtures,
-    handleFixturePress,
-    handleScheduleFixture,
-    eventVenue,
-    eventName,
-    event,
+    handleSetLive,
+    handleUpdateScore,
+    handleCompleteFixture,
   } = viewModel;
-  const { refreshing, handleRefresh } = viewModel;
-  const showSearchBar = activeMainTab === 'TEAMS' || activeMainTab === 'FIXTURES';
+
+  const showSearchBar =
+    activeMainTab === 'TEAMS' || activeMainTab === 'FIXTURES';
 
   return (
     <ScreenWrapper scrollable={false}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Pressable
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
             <ArrowLeft size={24} color={colors.textPrimary} />
           </Pressable>
           <Text style={styles.headerTitle}>
-            {gender === GenderType.Male ? "Men's" : gender === GenderType.Female ? "Women's" : 'Mixed'}{' '}
+            {gender === GenderType.Male
+              ? "Men's"
+              : gender === GenderType.Female
+              ? "Women's"
+              : 'Mixed'}{' '}
             {format}
             {isAbandoned && ' (Abandoned)'}
           </Text>
@@ -93,9 +92,17 @@ const CategoryDetailsScreen = () => {
             <Pressable
               key={tab}
               onPress={() => setActiveMainTab(tab)}
-              style={[styles.mainTabButton, activeMainTab === tab && styles.activeMainTab]}
+              style={[
+                styles.mainTabButton,
+                activeMainTab === tab && styles.activeMainTab,
+              ]}
             >
-              <Text style={[styles.mainTabText, activeMainTab === tab && styles.activeMainTabText]}>
+              <Text
+                style={[
+                  styles.mainTabText,
+                  activeMainTab === tab && styles.activeMainTabText,
+                ]}
+              >
                 {tab}
               </Text>
             </Pressable>
@@ -124,8 +131,6 @@ const CategoryDetailsScreen = () => {
             <FlatList
               data={participants}
               keyExtractor={(item) => item.id}
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
               contentContainerStyle={styles.listContent}
               renderItem={({ item, index }) => (
                 <View style={styles.participantCard}>
@@ -147,15 +152,13 @@ const CategoryDetailsScreen = () => {
                 <FlatList
                   data={teams}
                   keyExtractor={(item) => item.id}
-                  refreshing={refreshing}
-                  onRefresh={handleRefresh}
                   contentContainerStyle={styles.listContent}
                   renderItem={({ item }) => (
                     <MyTeamCard
                       logo={<Users color={colors.appBackground} />}
                       name={item.name}
-                      members={item.members}
-                      sport={event?.sport ?? ''}
+                      members={item.players.map((player) => player.name)}
+                      sport={event.sport}
                       wins={0}
                       losses={0}
                       winRate="0%"
@@ -167,7 +170,8 @@ const CategoryDetailsScreen = () => {
                   <View style={styles.centerButton}>
                     {!canCreateTeams && (
                       <Text style={styles.thresholdText}>
-                        Minimum {minRequiredForTeams} participants required
+                        Minimum {minRequiredForTeams} participants required (20%
+                        threshold)
                       </Text>
                     )}
                     <AppButton
@@ -188,9 +192,17 @@ const CategoryDetailsScreen = () => {
                   <Pressable
                     key={tab}
                     onPress={() => setActiveFixtureTab(tab)}
-                    style={[styles.fixtureTabButton, activeFixtureTab === tab && styles.activeFixtureTab]}
+                    style={[
+                      styles.fixtureTabButton,
+                      activeFixtureTab === tab && styles.activeFixtureTab,
+                    ]}
                   >
-                    <Text style={[styles.fixtureTabText, activeFixtureTab === tab && styles.activeFixtureTabText]}>
+                    <Text
+                      style={[
+                        styles.fixtureTabText,
+                        activeFixtureTab === tab && styles.activeFixtureTabText,
+                      ]}
+                    >
                       {tab}
                     </Text>
                   </Pressable>
@@ -200,19 +212,23 @@ const CategoryDetailsScreen = () => {
               {hasFixturesForGender ? (
                 <FlatList
                   data={filteredFixtures}
-                  keyExtractor={(item) => String(item.id)}
+                  keyExtractor={(item) => item.id}
                   contentContainerStyle={styles.listContent}
-                  refreshing={refreshing}
-                  onRefresh={handleRefresh}
                   renderItem={({ item }) => (
                     <FixtureManageCard
                       fixture={item}
-                      roundName={getRoundName(item.roundNumber, item.matchNumber)}
+                      roundName={getRoundName(
+                        item.round,
+                        format === FormatType.Singles
+                          ? participants.length
+                          : teams.length,
+                      )}
                       isOrganizer={isAdminOrOrganizer}
-                      eventVenue={eventVenue}
-                      eventName={eventName}
-                      onPress={() => handleFixturePress(item)}
-                      onSchedule={() => handleScheduleFixture(item)}
+                      onSetLive={() => handleSetLive(item.id)}
+                      onUpdateScore={(a, b) => handleUpdateScore(item.id, a, b)}
+                      onComplete={(a, b) =>
+                        handleCompleteFixture(item.id, a, b)
+                      }
                     />
                   )}
                 />
