@@ -70,7 +70,7 @@ export const eventRequestService = {
     return authFetch<EventRequestResponse>(
       API_ENDPOINTS.EVENT_REQUESTS.DECIDE(id),
       {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify(payload),
       },
     );

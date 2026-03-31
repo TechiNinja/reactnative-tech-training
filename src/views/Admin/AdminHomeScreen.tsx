@@ -21,20 +21,23 @@ import LiveMatchesCard from '../../components/MatchesCard/LiveMatchesCard';
 import { MOCK_MATCHES } from '../../constants/mockMatches';
 import { useAdminHomeViewModel } from '../../viewModels/AdminHomeScreenViewModel';
 import { useNotificationBadge } from '../../utils/useNotificationBadge';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigation/AppNavigator';
-import { useNavigation } from '@react-navigation/native';
+import {SportModal} from '../../components/SportModal/SportModal';
 
 const AdminHomeScreen = () => {
-  
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const {
+    onLogoutPress,
+    onRaiseRequest,
+    onAddUser,
+    analytics,
+    loading,
+    onGetNotification,
+    isSportModalVisible,
+    onOpenSportModal,
+    onCloseSportModal,
+  } = useAdminHomeViewModel();
 
-  const { onLogoutPress,onRaiseRequest, onAddUser, analytics, loading,onGetNotification } =
-    useAdminHomeViewModel();
+  const { count } = useNotificationBadge('Admin');
 
-  const { count} = useNotificationBadge("Admin");
- 
   return (
     <ScreenWrapper scrollable={true}>
       <View style={styles.container}>
@@ -65,6 +68,7 @@ const AdminHomeScreen = () => {
                   data={analytics.activeUsers}
                 />
               </View>
+
               <View style={styles.row}>
                 <AnalyticsCard
                   icon={
@@ -98,6 +102,7 @@ const AdminHomeScreen = () => {
                 onPress={onRaiseRequest}
               />
             </View>
+
             <View style={styles.actionCardWrapper}>
               <ActionCard
                 icon={<UserPlus size={20} color={colors.usersIconBackground} />}
@@ -108,16 +113,20 @@ const AdminHomeScreen = () => {
 
             <View style={styles.actionCardWrapper}>
               <ActionCard
+                icon={<Plus size={20} color={colors.primary} />}
+                title={APP_STRINGS.app.addSports}
+                onPress={onOpenSportModal}
+              />
+            </View>
+
+            <View style={styles.actionCardWrapper}>
+              <ActionCard
                 icon={
                   <View style={styles.countHeader}>
                     <Bell size={20} color={colors.primary} />
                     {count > 0 ? (
-                      <View
-                        style={styles.iconStyle}
-                      >
-                        <Text
-                          style={styles.countStyle}
-                        >
+                      <View style={styles.iconStyle}>
+                        <Text style={styles.countStyle}>
                           {count > 99 ? '99+' : count}
                         </Text>
                       </View>
@@ -128,7 +137,6 @@ const AdminHomeScreen = () => {
                 onPress={onGetNotification}
               />
             </View>
-
           </View>
         </View>
 
@@ -137,7 +145,7 @@ const AdminHomeScreen = () => {
             {APP_STRINGS.eventScreen.todaysMatches}
           </Text>
 
-          {MOCK_MATCHES.map((match) => (
+          {MOCK_MATCHES.map(match => (
             <LiveMatchesCard
               key={match.id}
               gameName={match.gameName}
@@ -153,7 +161,7 @@ const AdminHomeScreen = () => {
                 <View>
                   <Text>
                     {match.firstTeam[0]}
-                    {match.firstTeam[1].toUpperCase()}
+                    {match.firstTeam[1]?.toUpperCase()}
                   </Text>
                 </View>
               }
@@ -161,7 +169,7 @@ const AdminHomeScreen = () => {
                 <View>
                   <Text>
                     {match.secondTeam[0]}
-                    {match.secondTeam[1].toUpperCase()}
+                    {match.secondTeam[1]?.toUpperCase()}
                   </Text>
                 </View>
               }
@@ -169,6 +177,8 @@ const AdminHomeScreen = () => {
           ))}
         </View>
       </View>
+
+      <SportModal visible={isSportModalVisible} onClose={onCloseSportModal} />
     </ScreenWrapper>
   );
 };

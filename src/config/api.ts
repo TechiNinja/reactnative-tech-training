@@ -14,7 +14,7 @@ export const API_ENDPOINTS = {
     BASE: '/event-requests',
     BY_ID: (id: number) => `/event-requests/${id}`,
     WITHDRAW: (id: number) => `/event-requests/${id}/withdraw`,
-    DECIDE: (id: number) => `/Operation/${id}`,
+    DECIDE: (id: number) => `/event-requests/${id}/review`,
   },
   PARTICIPANT: {
     EVENTS: (userId: number) => `/events/user/${userId}`,
