@@ -215,6 +215,8 @@ export const useEventRequestFormViewModel = ({
         };
 
         await updateRequest(request.id, payload);
+        Alert.alert(APP_STRINGS.EventRequestScreen.requestUpdated);
+        navigation.navigate('AdminTabs', { screen: 'Request' });
       } else {
         const payload: CreateEventRequest = {
           eventName: eventName.trim(),
@@ -228,9 +230,9 @@ export const useEventRequestFormViewModel = ({
         };
 
         await createRequest(payload);
+        Alert.alert(APP_STRINGS.EventRequestScreen.requestCreated);
+        navigation.navigate('AdminTabs', { screen: 'Request' });
       }
-
-      navigation.navigate('AdminTabs', { screen: 'Request' });
     } catch (error: any) {
       Alert.alert(
         validationMessages.ERROR,

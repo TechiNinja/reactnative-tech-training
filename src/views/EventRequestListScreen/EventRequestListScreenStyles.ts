@@ -5,6 +5,7 @@ import { fontsSize } from '../../theme/fonts';
 export const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
+    paddingBottom: 60,
   },
 
   headerContainer: {

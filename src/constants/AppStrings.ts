@@ -7,7 +7,8 @@ export const APP_STRINGS = {
     create: 'Create',
     formats: 'Formats',
     addSports: 'Add Sports',
-    cancel: 'Cancel'
+    cancel: 'Cancel',
+    sportsCreated: 'Sport created successfully',
   },
   auth: {
     welcomeBack: 'Welcome Back',
@@ -272,6 +273,8 @@ export const APP_STRINGS = {
     new: 'New'
   },
   EventRequestScreen : {
-    request:  "Request",
+    request: "Request",
+    requestCreated: 'Request Created Successfully',
+    requestUpdated: 'Request Updated Successfully',
   }
 };

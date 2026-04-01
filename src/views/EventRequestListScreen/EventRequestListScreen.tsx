@@ -83,7 +83,7 @@ const EventRequestListScreen = ({ role }: EventRequestListScreenProps) => {
         ) : (
           <FlatList
             data={filteredRequests}
-            keyExtractor={item => String(item.id)}
+            keyExtractor={(item, index) => `${item.id}-${index}`}
             renderItem={({ item }) => (
               <EventRequestCard
                 request={item}

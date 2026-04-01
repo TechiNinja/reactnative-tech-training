@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { CreateSportRequest } from '../../models/Sport';
 import { sportService } from '../../services/sportService';
 import { styles } from './SportModalStyle';
@@ -91,6 +91,7 @@ export const SportModal = ({
     try {
       setLoading(true);
       await sportService.create(payload);
+      Alert.alert(APP_STRINGS.app.sportsCreated);
       resetForm();
       onClose();
     } catch (err) {

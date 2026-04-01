@@ -95,13 +95,6 @@ const AdminHomeScreen = () => {
           </Text>
 
           <View style={styles.actionCardContainer}>
-            <View style={styles.actionCardWrapper}>
-              <ActionCard
-                icon={<Plus size={20} color={colors.participantBackgroud} />}
-                title={APP_STRINGS.adminScreens.raiseEventRequest}
-                onPress={onRaiseRequest}
-              />
-            </View>
 
             <View style={styles.actionCardWrapper}>
               <ActionCard

@@ -4,6 +4,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuthStore } from '../store/AuthStore';
 import { useNotificationBadge } from '../utils/useNotificationBadge';
 import { AnalyticsService, OperationAnalytics} from '../services/analyticsService';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 export const useOperationHomeViewModel = (
@@ -15,11 +16,25 @@ export const useOperationHomeViewModel = (
   const [analytics, setAnalytics] = useState<OperationAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  useFocusEffect(
+  useCallback(() => {
+    let isActive = true;
+
+    setLoading(true);
+
     AnalyticsService.getOperationAnalytics()
-      .then(setAnalytics)
-      .finally(() => setLoading(false));
-  }, []);
+      .then(data => {
+        if (isActive) setAnalytics(data);
+      })
+      .finally(() => {
+        if (isActive) setLoading(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []),
+);
   
   const onLogoutPress = async () => {
     await logout();
