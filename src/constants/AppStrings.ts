@@ -13,6 +13,7 @@ export const APP_STRINGS = {
     createNewPasswordTagline: 'Create a new password for your account',
     somethingWentWrong: 'Something went wrong. Please try again.',
     loginFailed: 'Login failed',
+    passwordResetFailed: 'Failed to reset password',
   },
   buttons: {
     createAccount: 'Create Account',
@@ -206,5 +207,8 @@ export const APP_STRINGS = {
     inactive: 'Inactive',
     registrationFailed: 'Registration failed',
     failedUserLoad: 'Failed to load users',
+    alreadyRegistered: 'You have already registered in this category',
+    unknownTeam: 'Unknown Team',
+    unknownSport: 'Unknown Sport',
   },
 };

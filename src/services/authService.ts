@@ -20,6 +20,24 @@ const mapRole = (role: string): UserRoleType => {
 };
 
 export const AuthService = {
+  forgotPassword: async (email: string, newPassword: string): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE_URL}${API_ENDPOINTS.AUTH.FORGOT_PASSWORD}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, newPassword }),
+      },
+    );
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(
+        (data as { message?: string })?.message ??
+          APP_STRINGS.auth.passwordResetFailed,
+      );
+    }
+  },
   login: async (
     email: string,
     password: string,

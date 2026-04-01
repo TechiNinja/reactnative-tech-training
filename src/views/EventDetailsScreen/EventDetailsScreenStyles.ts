@@ -115,6 +115,7 @@ export const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: 12,
     borderWidth: 1,
+    marginBottom: 14,
     padding: 12,
   },
   prizePosition: {
