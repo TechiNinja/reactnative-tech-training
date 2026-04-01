@@ -6,19 +6,13 @@ import {
   getMyTeams,
   ApiScheduleRaw,
   ApiEvent,
+  ApiTeam,
 } from '../services/participantService';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Alert } from 'react-native';
 import { APP_STRINGS } from '../constants/appStrings';
-
-type ApiTeam = {
-  id: number;
-  name: string;
-  members: string[];
-  eventCategoryId: number;
-};
 
 type ApiSchedule = {
   id: number;
@@ -150,7 +144,7 @@ export const useParticipantHomeViewModel = () => {
 
     if (event && event.eventName) {
       const eventPattern = event.eventName.replace(
-        /\s+(Event|Tournament|Championship|Competetion|Match|Game)\s*$/i,
+        /\s+(Event|Tournament|Championship|Competition|Match|Game)\s*$/i,
         '',
       );
 
