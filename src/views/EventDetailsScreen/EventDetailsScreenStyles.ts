@@ -3,6 +3,45 @@ import { colors } from '../../theme/colors';
 import { fontsSize } from '../../theme/fonts';
 
 export const styles = StyleSheet.create({
+  adminActionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 8,
+  },
+  adminActionBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.primary + '15',
+    borderColor: colors.primary,
+    borderRadius: 12,
+    borderWidth: 1,
+    flex: 1,
+    gap: 4,
+    justifyContent: 'center',
+    marginHorizontal: 4,
+    paddingVertical: 10,
+  },
+  adminActionBtnPublish: {
+    backgroundColor: '#22c55e15',
+    borderColor: '#22c55e',
+  },
+  adminActionTextPublish: {
+    color: '#22c55e',
+  },
+  adminActionText: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  assignButton: {
+    alignItems: 'center',
+    backgroundColor: colors.primary + '15',
+    borderColor: colors.primary,
+    borderRadius: 12,
+    borderWidth: 1,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
+  },
   backButton: {
     padding: 4,
   },
@@ -19,6 +58,11 @@ export const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  currentOrganizer: {
+    color: colors.textSecondary,
+    fontSize: fontsSize.medium,
+    marginBottom: 12,
   },
   deleteButton: {
     alignItems: 'center',
@@ -101,6 +145,68 @@ export const styles = StyleSheet.create({
     fontSize: fontsSize.medium,
     marginLeft: 10,
   },
+  loaderContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  modalLoader: {
+    marginVertical: 24,
+  },
+  modalHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  modalOverlay: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: colors.appBackground,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '70%',
+    padding: 24,
+  },
+  modalTitle: {
+    color: colors.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  organizerEmail: {
+    color: colors.textSecondary,
+    fontSize: fontsSize.small,
+  },
+  organizerInfo: {
+    flex: 1,
+  },
+  organizerItem: {
+    alignItems: 'center',
+    backgroundColor: colors.cardBackgroud,
+    borderColor: colors.border,
+    borderRadius: 10,
+    borderWidth: 1,
+    flexDirection: 'row',
+    marginBottom: 10,
+    padding: 14,
+  },
+  organizerItemSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '10',
+  },
+  organizerList: {
+    marginBottom: 16,
+    maxHeight: 300,
+  },
+  organizerName: {
+    color: colors.textPrimary,
+    fontSize: fontsSize.medium,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
   prizeEmoji: {
     fontSize: 24,
     marginRight: 12,
@@ -148,7 +254,8 @@ export const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   statusBadge: {
-    backgroundColor : colors.primary,
+    color: colors.textPrimary,
+    backgroundColor: colors.status,
     borderRadius: 12,
     fontSize: 13,
     fontWeight: '600',

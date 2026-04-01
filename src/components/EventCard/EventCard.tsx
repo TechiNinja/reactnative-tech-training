@@ -1,13 +1,14 @@
 import { Text, TouchableOpacity, View } from 'react-native';
-import { Event } from '../../models/Event';
+import { EventResponse } from '../../models/EventResponse';
 import { styles } from './EventCardStyles';
 import { colors } from '../../theme/colors';
 import { Calendar, MapPin } from 'lucide-react-native';
 import { useState } from 'react';
 import { UserRoleType } from '../../models/User';
+import { formatDisplayDate } from '../../utils/dateUtils';
 
 type EventCardProps = {
-  event: Event;
+  event: EventResponse;
   role: UserRoleType;
   onPress: () => void;
 };
@@ -24,8 +25,8 @@ const EventCard = ({ event, onPress }: EventCardProps) => {
     >
       <View style={styles.container}>
         <View style={styles.status}>
-          <Text style={styles.sportText}>{event.sport}</Text>
-          <Text style={[styles.statusText, styles[`status_${event.status}`]]}>
+          <Text style={styles.sportText}>{event.sportName}</Text>
+          <Text style={[styles.statusText, styles[`status_${event.status.toUpperCase()}` as keyof typeof styles]]}>
             {event.status}
           </Text>
         </View>
@@ -34,11 +35,11 @@ const EventCard = ({ event, onPress }: EventCardProps) => {
             <Text style={styles.title}>{event.name}</Text>
             <View style={styles.details}>
               <Calendar color={colors.textSecondary} />
-              <Text style={styles.detailsText}>{event.date}</Text>
+              <Text style={styles.detailsText}>{formatDisplayDate(event.startDate)}</Text>
             </View>
             <View style={styles.details}>
               <MapPin color={colors.textSecondary} />
-              <Text style={styles.detailsText}>{event.venue}</Text>
+              <Text style={styles.detailsText}>{event.eventVenue}</Text>
             </View>
           </View>
         </View>

@@ -153,11 +153,8 @@ export const useEventRequestDetailsViewModel = () => {
   };
 
   const handleCreateEvent = () => {
-    if (!request || !canCreateEvent) {
-      return;
-    }
-
-    navigation.navigate('EventForm', { mode: 'create' });
+    if (!request || !canCreateEvent) return;
+    navigation.navigate('EventForm', { mode: 'create', eventRequest: request });
   };
 
   const handleWithdraw = () => {

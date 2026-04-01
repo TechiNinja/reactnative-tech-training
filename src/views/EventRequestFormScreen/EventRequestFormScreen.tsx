@@ -104,7 +104,7 @@ const EventRequestFormScreen = ({ route, navigation }: Props) => {
 
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabels}>
-            {APP_STRINGS.eventScreen.gender}
+            {APP_STRINGS.RequestScreen.gender}
           </Text>
           <View style={styles.formatOptions}>
             {vm.genderOptions.map((option) => (
