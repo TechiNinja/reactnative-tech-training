@@ -1,14 +1,13 @@
 export enum EventStatus {
-  OPEN = 'OPEN',
-  UPCOMING = 'UPCOMING',
-  LIVE = 'LIVE',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
+  UPCOMING  = 'Upcoming',   
+  LIVE      = 'Live',
+  COMPLETED = 'Completed',
+  CANCELLED = 'Cancelled',
 }
 
 export enum CategoryStatus {
-  ACTIVE = 'ACTIVE',
-  ABANDONED = 'ABANDONED',
+  ACTIVE    = 'Active',
+  ABANDONED = 'Abandoned',
 }
 
 export enum GenderType {
@@ -20,7 +19,6 @@ export enum GenderType {
 export enum FormatType {
   Singles = 'Singles',
   Doubles = 'Doubles',
-  Both = 'Both'
 }
 
 export enum MatchStatus {
@@ -43,9 +41,10 @@ export enum FixtureTabType {
 
 export enum EventStatusTab {
   ALL = 'ALL',
-  LIVE = 'LIVE',
   UPCOMING = 'UPCOMING',
-  OPEN = 'OPEN',
+  LIVE = 'LIVE',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = "CANCELLED",
 }
 
 export interface Registration {
@@ -86,28 +85,20 @@ export interface Event {
   date: string;
   time: string;
   venue: string;
-
   status: EventStatus;
   format: FormatType[];
-
+  formats: FormatType[];
   registeredTeams: number;
   totalTeams: number;
-
   registrationDeadline: string;
   registrations: Registration[];
-
   teamsCreated: boolean;
   fixturesCreated: boolean;
-
   teams: Team[];
   fixtures: Fixture[];
-
   description: string;
   rules: string[];
   prizes: string[];
-
   createdBy?: string;
-
   abandonedCategories?: string[];
 }
-

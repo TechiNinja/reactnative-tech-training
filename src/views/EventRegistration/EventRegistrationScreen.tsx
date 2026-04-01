@@ -11,17 +11,10 @@ import { styles } from './EventRegistrationScreenStyles';
 import { useEventRegistrationViewModel } from '../../viewModels/EventRegistrationViewModel';
 import { FormatType, GenderType } from '../../models/Event';
 
-type EventRegistrationProps = NativeStackScreenProps<
-  RootStackParamList,
-  'EventRegister'
->;
+type EventRegistrationProps = NativeStackScreenProps<RootStackParamList, 'EventRegister'>;
 
-const EventRegistrationScreen = ({
-  navigation,
-  route,
-}: EventRegistrationProps) => {
+const EventRegistrationScreen = ({ navigation, route }: EventRegistrationProps) => {
   const viewModel = useEventRegistrationViewModel(navigation, route);
-
   const formatOptions: FormatType[] = viewModel.availableFormats;
 
   return (
@@ -48,18 +41,22 @@ const EventRegistrationScreen = ({
         <View style={styles.formatContainer}>
           {[GenderType.Male, GenderType.Female].map((item) => {
             const isActive = viewModel.gender === item;
+            const isLocked =
+              viewModel.myRegisteredGender !== null &&
+              viewModel.myRegisteredGender !== item;
+
             return (
               <Pressable
                 key={item}
                 onPress={() => viewModel.setGender(item)}
-                style={[styles.formatTab, isActive && styles.activeFormatTab]}
+                disabled={isLocked}
+                style={[
+                  styles.formatTab,
+                  isActive && styles.activeFormatTab,
+                  isLocked && styles.formatOptionCardDisabled,
+                ]}
               >
-                <Text
-                  style={[
-                    styles.formatText,
-                    isActive && styles.activeFormatText,
-                  ]}
-                >
+                <Text style={[styles.formatText, isActive && styles.activeFormatText]}>
                   {item}
                 </Text>
               </Pressable>
@@ -67,18 +64,18 @@ const EventRegistrationScreen = ({
           })}
         </View>
 
-        <Text style={styles.label}>
-          {APP_STRINGS.eventScreen.selectFormats}
-        </Text>
-        <Text style={styles.subLabel}>
-          {APP_STRINGS.eventScreen.chooseFormat}
-        </Text>
+        <Text style={styles.label}>{APP_STRINGS.eventScreen.selectFormats}</Text>
+        <Text style={styles.subLabel}>{APP_STRINGS.eventScreen.chooseFormat}</Text>
+
         <View style={styles.formatSelectionContainer}>
           {formatOptions.map((format) => {
             const isSelected = viewModel.selectedFormats.includes(format);
             const isFull =
               viewModel.gender !== '' &&
               viewModel.isCategoryFull(viewModel.gender, format);
+            const alreadyRegistered =
+              viewModel.gender !== '' &&
+              viewModel.isAlreadyRegistered(viewModel.gender, format);
             const count =
               viewModel.gender !== ''
                 ? viewModel.getCategoryCount(viewModel.gender, format)
@@ -91,7 +88,7 @@ const EventRegistrationScreen = ({
                 style={[
                   styles.formatOptionCard,
                   isSelected && styles.formatOptionCardActive,
-                  isFull && styles.formatOptionCardDisabled,
+                  (isFull || alreadyRegistered) && styles.formatOptionCardDisabled,
                 ]}
               >
                 <View style={styles.formatOptionContent}>
@@ -99,21 +96,22 @@ const EventRegistrationScreen = ({
                     <Text
                       style={[
                         styles.formatOptionTitle,
-                        isFull && styles.formatOptionTitleDisabled,
+                        (isFull || alreadyRegistered) && styles.formatOptionTitleDisabled,
                       ]}
                     >
                       {format}
                     </Text>
-                    {isFull && (
-                      <Text style={styles.fullBadge}>
-                        {APP_STRINGS.eventScreen.full}
-                      </Text>
+                    {alreadyRegistered && (
+                      <Text style={styles.fullBadge}>{APP_STRINGS.registrationScreen.registeredBadge}</Text>
+                    )}
+                    {!alreadyRegistered && isFull && (
+                      <Text style={styles.fullBadge}>{APP_STRINGS.eventScreen.full}</Text>
                     )}
                   </View>
                   <Text
                     style={[
                       styles.formatOptionDesc,
-                      isFull && styles.formatOptionDescDisabled,
+                      (isFull || alreadyRegistered) && styles.formatOptionDescDisabled,
                     ]}
                   >
                     {format === FormatType.Singles
@@ -121,14 +119,12 @@ const EventRegistrationScreen = ({
                       : APP_STRINGS.eventScreen.teamOfPlayers}
                   </Text>
                   {viewModel.gender !== '' && (
-                    <Text
-                      style={[styles.slotsText, isFull && styles.slotsTextFull]}
-                    >
+                    <Text style={[styles.slotsText, isFull && styles.slotsTextFull]}>
                       {count}/{viewModel.totalSlotsPerCategory} slots filled
                     </Text>
                   )}
                 </View>
-                {isSelected && !isFull && (
+                {isSelected && !isFull && !alreadyRegistered && (
                   <View style={styles.checkIcon}>
                     <Check size={16} color={colors.primaryText} />
                   </View>
@@ -140,9 +136,13 @@ const EventRegistrationScreen = ({
 
         <View style={styles.buttonContainer}>
           <AppButton
-            title={APP_STRINGS.eventScreen.register}
+            title={
+              viewModel.isAlreadyFullyRegistered
+                ? APP_STRINGS.registrationScreen.alreadyRegistered
+                : APP_STRINGS.eventScreen.register
+            }
             onPress={viewModel.onRegister}
-            disabled={!viewModel.isFormValid}
+            disabled={!viewModel.isFormValid || viewModel.isAlreadyFullyRegistered}
           />
         </View>
       </View>
