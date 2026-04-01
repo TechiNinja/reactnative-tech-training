@@ -74,7 +74,6 @@ const UserFormScreen = ({ route, navigation }: UserFormScreenProps) => {
             }
             value={viewModel.password}
             onChangeText={viewModel.setPassword}
-            secureTextEntry
             error={viewModel.errors.password}
           />
         </View>

@@ -1,11 +1,10 @@
-import { Alert, Text, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { useForgotPasswordViewModel } from '../../viewModels/ForgotPasswordViewModel';
-import { Lock, Mail, Trophy } from 'lucide-react-native';
+import { ArrowLeft, Lock, Mail, Trophy } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
 import AppButton from '../../components/AppButton/AppButton';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppInput from '../../components/AppInput/AppInput';
-import { validationMessages } from '../../constants/validationMessages';
 import { styles } from './ForgotPasswordScreenStyles';
 import { APP_STRINGS } from '../../constants/appStrings';
 import { useEffect } from 'react';
@@ -18,7 +17,8 @@ const ForgotPasswordScreen = () => {
     emailError,
     passwordError,
     confirmPasswordError,
-    successMessage,
+    loading,
+    goBack,
     setEmail,
     setNewPassword,
     setConfirmPassword,
@@ -29,30 +29,26 @@ const ForgotPasswordScreen = () => {
     isFormValid,
   } = useForgotPasswordViewModel();
 
-  useEffect(() => {
-    if (successMessage) {
-      Alert.alert(
-        validationMessages.PASSWORD_UPDATED,
-        validationMessages.PASSWORD_UPDATED_DESCRIPTION,
-      );
-    }
-  }, [successMessage]);
-
   return (
     <ScreenWrapper scrollable={true}>
       <View style={styles.container}>
+        <TouchableOpacity onPress={goBack} style={styles.backButton}>
+          <ArrowLeft size={24} color={colors.textPrimary} />
+        </TouchableOpacity>
+
         <View style={styles.headingContainer}>
           <View style={styles.trophyContainer}>
             <Trophy size={40} />
           </View>
-          <Text style={styles.headingText}>
-            {APP_STRINGS.auth.resetPassword}
-          </Text>
+          <View>
+            <Text style={styles.headingText}>
+              {APP_STRINGS.auth.resetPassword}
+            </Text>
+            <Text style={styles.subText}>
+              {APP_STRINGS.auth.createNewPasswordTagline}
+            </Text>
+          </View>
         </View>
-
-        <Text style={styles.subText}>
-          {APP_STRINGS.auth.createNewPasswordTagline}
-        </Text>
 
         <Text style={styles.inputLabel}>{APP_STRINGS.labels.email}</Text>
         <AppInput
@@ -94,7 +90,7 @@ const ForgotPasswordScreen = () => {
         <AppButton
           title={APP_STRINGS.buttons.updatePassword}
           onPress={onSubmitPress}
-          disabled={!isFormValid}
+          disabled={!isFormValid || loading}
         />
       </View>
     </ScreenWrapper>

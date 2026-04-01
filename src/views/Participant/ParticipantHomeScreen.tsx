@@ -33,7 +33,7 @@ const ParticipantHomeScreen = () => {
       <View style={styles.container}>
         <View style={styles.headerRow}>
           <Text style={styles.greeting}>
-            Hello, {viewModel.user?.name ?? 'Participant'}! 👋
+            Hello, {viewModel.user?.name?.split(' ')[0] ?? 'Participant'}! 👋
           </Text>
 
           <TouchableOpacity onPress={viewModel.onLogout}>
@@ -75,17 +75,17 @@ const ParticipantHomeScreen = () => {
           </Text>
 
           {viewModel.myTeams.length > 0 ? (
-            viewModel.myTeams.map((teamData) => (
+            viewModel.myTeams.map((teamData, index) => (
               <MyTeamCard
-                key={teamData.teamId}
+                key={teamData.id || `team-${index}`}
                 logo={
                   <Text style={styles.logoStyle}>
-                    {teamData.teamName.substring(0, 2).toUpperCase()}
+                    {(teamData.name || '').substring(0, 2).toUpperCase()}
                   </Text>
                 }
-                name={teamData.teamName}
-                members={[teamData.eventName]}
-                sport={teamData.category}
+                name={teamData.name}
+                members={teamData.members}
+                sport={viewModel.resolveCategoryName(teamData.eventCategoryId)}
                 wins={0}
                 losses={0}
                 winRate="0%"

@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
+    FORGOT_PASSWORD: '/auth/forgot-password',
   },
   USERS: '/Users',
   ROLES: '/Roles',
@@ -21,6 +22,17 @@ export const API_ENDPOINTS = {
   },
 
   PARTICIPANT: {
+    EVENTS: (userId: number) => `/events/${userId}`,
+    TEAM: (userId: number) => `/teams?userid=${userId}`,
+    SCHEDULE: (userId: number) => `/schedules/${userId}`,
+    REGISTER: '/participantregistrations',
+  },
+  ORGANIZER: {
+    CREATE_TEAMS: '/teams/create',
+    GET_TEAMS: (eventCategoryId: number) =>
+      `/teams?categoryid=${eventCategoryId}`,
+    GET_PARTICIPANTS: (eventCategoryId: number) =>
+      `/participantregistrations/${eventCategoryId}`,
     EVENTS: (userId: number) => `/events/user/${userId}`,
     SCHEDULE: (userId: number) => `/Schedules/${userId}`,
     REGISTER: '/ParticipantRegistrations',

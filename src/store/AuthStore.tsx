@@ -45,8 +45,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => {
     try {
       const result = await AuthService.register(fullName, email, password);
-      setUser(result.user);
       await saveUser(result.user, result.token);
+      setUser(result.user);
       return true;
     } catch (error) {
       Alert.alert(
@@ -63,8 +63,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const result = await AuthService.login(email, password);
       if (!result) return null;
-      setUser(result.user);
       await saveUser(result.user, result.token);
+      setUser(result.user);
       return result.user;
     } catch {
       Alert.alert(

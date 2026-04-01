@@ -87,9 +87,6 @@ const UsersListScreen = () => {
                 tintColor={colors.primary}
               />
             }
-            contentContainerStyle={{
-              paddingBottom: viewModel.tabBarHeight + 65,
-            }}
           />
         )}
       </View>

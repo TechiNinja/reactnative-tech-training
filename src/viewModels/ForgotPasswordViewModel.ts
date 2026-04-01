@@ -1,8 +1,17 @@
 import { useState } from 'react';
+import { Alert } from 'react-native';
 import { isValidEmail, isValidPassword } from '../utils/validation';
 import { validationMessages } from '../constants/validationMessages';
+import { AuthService } from '../services/authService';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
+import { APP_STRINGS } from '../constants/appStrings';
 
 export const useForgotPasswordViewModel = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -10,8 +19,7 @@ export const useForgotPasswordViewModel = () => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
-
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const validateEmail = (): boolean => {
     if (!email.trim()) {
@@ -55,17 +63,36 @@ export const useForgotPasswordViewModel = () => {
     return true;
   };
 
-  const onSubmitPress = (): boolean => {
+  const onSubmitPress = async (): Promise<void> => {
     const isEmailValid = validateEmail();
     const isPasswordValid = validatePassword();
     const isConfirmValid = validateConfirmPassword();
 
-    if (!isEmailValid || !isPasswordValid || !isConfirmValid) {
-      return false;
-    }
+    if (!isEmailValid || !isPasswordValid || !isConfirmValid) return;
 
-    setSuccessMessage(validationMessages.PASSWORD_UPDATED);
-    return true;
+    setLoading(true);
+    try {
+      await AuthService.forgotPassword(email, newPassword);
+      Alert.alert(
+        validationMessages.PASSWORD_UPDATED,
+        validationMessages.PASSWORD_UPDATED_DESCRIPTION,
+        [
+          {
+            text: 'Ok',
+            onPress: () => navigation.navigate('Auth', { screen: 'Login' }),
+          },
+        ],
+      );
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        error instanceof Error
+          ? error.message
+          : APP_STRINGS.auth.somethingWentWrong,
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isFormValid =
@@ -76,6 +103,8 @@ export const useForgotPasswordViewModel = () => {
     isValidPassword(newPassword) &&
     isValidPassword(confirmPassword);
 
+  const goBack = () => navigation.goBack();
+
   return {
     email,
     newPassword,
@@ -83,7 +112,8 @@ export const useForgotPasswordViewModel = () => {
     emailError,
     passwordError,
     confirmPasswordError,
-    successMessage,
+    loading,
+    goBack,
     setEmail,
     setNewPassword,
     setConfirmPassword,

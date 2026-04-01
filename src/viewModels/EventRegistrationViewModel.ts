@@ -110,7 +110,7 @@ export const useEventRegistrationViewModel = (
       if (alreadyRegisteredInSelected) {
         Alert.alert(
           APP_STRINGS.eventScreen.registrationFailed,
-          APP_STRINGS.eventScreen.registered,
+          APP_STRINGS.eventScreen.alreadyRegistered,
         );
         return;
       }

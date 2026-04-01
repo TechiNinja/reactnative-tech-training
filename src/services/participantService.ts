@@ -10,10 +10,10 @@ export type ApiParticipantRegistration = {
 };
 
 export type ApiTeam = {
-  teamId: number;
-  teamName: string;
-  category: string;
-  eventName: string;
+  id: number;
+  name: string;
+  members: string[];
+  eventCategoryId: number;
 };
 
 export type ApiEvent = {

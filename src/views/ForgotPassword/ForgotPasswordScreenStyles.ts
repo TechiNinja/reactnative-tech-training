@@ -3,6 +3,11 @@ import { colors } from '../../theme/colors';
 import { fontsSize } from '../../theme/fonts';
 
 export const styles = StyleSheet.create({
+  backButton: {
+    alignSelf: 'flex-start',
+    marginTop: 10,
+    padding: 4,
+  },
   container: {
     flex: 1,
     padding: 20,
@@ -11,7 +16,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 12,
-    justifyContent: 'center',
     marginTop: 30,
   },
   headingText: {
@@ -27,8 +31,7 @@ export const styles = StyleSheet.create({
   subText: {
     color: colors.textSecondary,
     fontSize: fontsSize.regular,
-    marginTop: 20,
-    textAlign: 'center',
+    marginTop: 4,
   },
   trophyContainer: {
     backgroundColor: colors.primary,
