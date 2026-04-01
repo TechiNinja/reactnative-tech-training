@@ -8,9 +8,14 @@ export type ApiTeamResponse = {
 };
 
 export const OrganizerService = {
-  createTeams: (eventCategoryId: number) =>
+  createTeams: (eventCategoryId: number): Promise<ApiTeamResponse[]> =>
     authFetch(API_ENDPOINTS.ORGANIZER.CREATE_TEAMS, {
       method: 'POST',
       body: JSON.stringify({ EventCategoryId: eventCategoryId }),
+    }),
+
+  getTeams: (eventCategoryId: number): Promise<ApiTeamResponse[]> =>
+    authFetch(API_ENDPOINTS.ORGANIZER.GET_TEAMS(eventCategoryId), {
+      method: 'GET',
     }),
 };

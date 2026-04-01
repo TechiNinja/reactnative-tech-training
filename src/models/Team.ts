@@ -1,10 +1,8 @@
 export type Team = {
   id: string;
   name: string;
-  captain: string;
-  currentPlayers: number;
-  totalPlayers: number;
-  sport: 'BADMINTON' | 'CARROM' | 'FOOSBALL' | 'TABLE TENNIS' | 'POOL';
+  members: string[];
+  eventCategoryId: number;
   wins: number;
   losses: number;
 };
