@@ -6,7 +6,7 @@ import {
   StoredUser,
 } from '../utils/authStorage';
 import { Alert } from 'react-native';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { APP_STRINGS } from '../constants/appStrings';
 import { AuthService } from '../services/authService';
 
 type AuthContextType = {

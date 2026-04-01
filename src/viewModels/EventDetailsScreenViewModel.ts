@@ -6,7 +6,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { EventStatus, FormatType, GenderType } from '../models/Event';
 import { useEventStore } from '../store/EventStore';
 import { useAuthStore } from '../store/AuthStore';
-import { APP_STRINGS } from '../constants/AppStrings';
+import { APP_STRINGS } from '../constants/appStrings';
 
 type EventDetailsRouteProp = RouteProp<RootStackParamList, 'EventDetails'>;
 

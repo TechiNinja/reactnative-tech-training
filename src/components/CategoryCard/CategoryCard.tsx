@@ -3,7 +3,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { styles } from './CategoryCardStyles';
 import { useCategoryCardViewModel } from './CategoryCardViewModel';
 import { colors } from '../../theme/colors';
-import { APP_STRINGS } from '../../constants/AppStrings';
+import { APP_STRINGS } from '../../constants/appStrings';
 import { FormatType, GenderType } from '../../models/Event';
 
 type CategoryCardProps = {
