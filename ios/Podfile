@@ -12,12 +12,20 @@ prepare_react_native_project!
 use_modular_headers!
 use_frameworks! :linkage => :static
 
+linkage = ENV['USE_FRAMEWORKS']
+if linkage != nil
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+  use_frameworks! :linkage => linkage.to_sym
+end
+
 target 'SportsCarnivalManagementApp' do
   config = use_native_modules!
 
   use_react_native!(
     :path => config[:reactNativePath],
     :app_path => "#{Pod::Config.instance.installation_root}/.."
+    # If you want to disable Hermes temporarily, uncomment this:
+    # :hermes_enabled => false
   )
 
   post_install do |installer|
@@ -25,6 +33,7 @@ target 'SportsCarnivalManagementApp' do
       installer,
       config[:reactNativePath],
       :mac_catalyst_enabled => false
+      # :ccache_enabled => true
     )
 
     installer.pods_project.targets.each do |target|
@@ -33,6 +42,11 @@ target 'SportsCarnivalManagementApp' do
         if target.name == 'fmt'
           build_config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
         end
+    # FIX for Intel Mac: Hermes script was trying /opt/homebrew/.../node (doesn't exist on Intel)
+    # Force Xcode scripts to use the correct node binary.
+    installer.pods_project.targets.each do |t|
+      t.build_configurations.each do |bc|
+        bc.build_settings['NODE_BINARY'] = '/usr/local/bin/node'
       end
     end
   end

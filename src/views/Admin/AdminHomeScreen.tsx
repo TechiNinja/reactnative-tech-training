@@ -4,12 +4,12 @@ import { APP_STRINGS } from '../../constants/appStrings';
 import { styles } from './AdminHomeScreenStyles';
 import AnalyticsCard from '../../components/AnalyticsCard/AnalyticsCard';
 import {
+  Bell,
   Calendar,
   Clock,
   LogOut,
   MapPin,
   Plus,
-  Settings,
   TrendingUp,
   Trophy,
   UserPlus,
@@ -20,10 +20,23 @@ import ActionCard from '../../components/ActionsCard/ActionCard';
 import LiveMatchesCard from '../../components/MatchesCard/LiveMatchesCard';
 import { MOCK_MATCHES } from '../../constants/mockMatches';
 import { useAdminHomeViewModel } from '../../viewModels/AdminHomeScreenViewModel';
+import { useNotificationBadge } from '../../utils/useNotificationBadge';
+import {SportModal} from '../../components/SportModal/SportModal';
 
 const AdminHomeScreen = () => {
-  const { onLogoutPress, onAddEvent, onAddUser, analytics, loading } =
-    useAdminHomeViewModel();
+  const {
+    onLogoutPress,
+    onRaiseRequest,
+    onAddUser,
+    analytics,
+    loading,
+    onGetNotification,
+    isSportModalVisible,
+    onOpenSportModal,
+    onCloseSportModal,
+  } = useAdminHomeViewModel();
+
+  const { count } = useNotificationBadge('Admin');
 
   return (
     <ScreenWrapper scrollable={true}>
@@ -55,6 +68,7 @@ const AdminHomeScreen = () => {
                   data={analytics.activeUsers}
                 />
               </View>
+
               <View style={styles.row}>
                 <AnalyticsCard
                   icon={
@@ -83,11 +97,12 @@ const AdminHomeScreen = () => {
           <View style={styles.actionCardContainer}>
             <View style={styles.actionCardWrapper}>
               <ActionCard
-                icon={<Plus size={20} color={colors.primary} />}
-                title={APP_STRINGS.adminScreens.addEvent}
-                onPress={onAddEvent}
+                icon={<Plus size={20} color={colors.participantBackgroud} />}
+                title={APP_STRINGS.adminScreens.raiseEventRequest}
+                onPress={onRaiseRequest}
               />
             </View>
+
             <View style={styles.actionCardWrapper}>
               <ActionCard
                 icon={<UserPlus size={20} color={colors.usersIconBackground} />}
@@ -95,10 +110,31 @@ const AdminHomeScreen = () => {
                 onPress={onAddUser}
               />
             </View>
+
             <View style={styles.actionCardWrapper}>
               <ActionCard
-                icon={<Settings size={20} color={colors.textSecondary} />}
-                title={APP_STRINGS.adminScreens.settings}
+                icon={<Plus size={20} color={colors.primary} />}
+                title={APP_STRINGS.app.addSports}
+                onPress={onOpenSportModal}
+              />
+            </View>
+
+            <View style={styles.actionCardWrapper}>
+              <ActionCard
+                icon={
+                  <View style={styles.countHeader}>
+                    <Bell size={20} color={colors.primary} />
+                    {count > 0 ? (
+                      <View style={styles.iconStyle}>
+                        <Text style={styles.countStyle}>
+                          {count > 99 ? '99+' : count}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                }
+                title={APP_STRINGS.adminScreens.bell}
+                onPress={onGetNotification}
               />
             </View>
           </View>
@@ -109,7 +145,7 @@ const AdminHomeScreen = () => {
             {APP_STRINGS.eventScreen.todaysMatches}
           </Text>
 
-          {MOCK_MATCHES.map((match) => (
+          {MOCK_MATCHES.map(match => (
             <LiveMatchesCard
               key={match.id}
               gameName={match.gameName}
@@ -125,7 +161,7 @@ const AdminHomeScreen = () => {
                 <View>
                   <Text>
                     {match.firstTeam[0]}
-                    {match.firstTeam[1].toUpperCase()}
+                    {match.firstTeam[1]?.toUpperCase()}
                   </Text>
                 </View>
               }
@@ -133,7 +169,7 @@ const AdminHomeScreen = () => {
                 <View>
                   <Text>
                     {match.secondTeam[0]}
-                    {match.secondTeam[1].toUpperCase()}
+                    {match.secondTeam[1]?.toUpperCase()}
                   </Text>
                 </View>
               }
@@ -141,6 +177,8 @@ const AdminHomeScreen = () => {
           ))}
         </View>
       </View>
+
+      <SportModal visible={isSportModalVisible} onClose={onCloseSportModal} />
     </ScreenWrapper>
   );
 };

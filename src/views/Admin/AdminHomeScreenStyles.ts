@@ -12,6 +12,8 @@ export const styles = StyleSheet.create({
   actionCardContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 4,
   },
   actionCardWrapper: {
     width: ACTION_CARD_WIDTH,
@@ -50,5 +52,25 @@ export const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 18,
     paddingTop: 10,
+  },
+  countHeader: { 
+    position: 'relative'
+  },
+  iconStyle: {
+    position: 'absolute',
+    top: -8,
+    right: -10,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: 'red',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  countStyle: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: '700',
   },
 });

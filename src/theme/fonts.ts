@@ -10,4 +10,5 @@ export const fontsSize = {
   regular: 16,
   small: 11,
   large: 20,
+  veryLarge: 24,
 };

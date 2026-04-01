@@ -12,10 +12,15 @@ type AuthApiResponse = {
 };
 
 const mapRole = (role: string): UserRoleType => {
-  const normalized = role.toLowerCase();
+  const normalized = role.trim().toLowerCase();
+
   if (normalized === 'admin') return 'admin';
   if (normalized === 'organizer') return 'organizer';
   if (normalized === 'operations') return 'operations';
+  if (normalized === 'opsteam') return 'operations';
+  if (normalized === 'operations team') return 'operations';
+  if (normalized === 'ops') return 'operations';
+
   return 'participant';
 };
 
@@ -51,6 +56,7 @@ export const AuthService = {
     if (!res.ok) return null;
 
     const data: AuthApiResponse = await res.json();
+
     const user: StoredUser = {
       id: data.id,
       name: data.fullName,
@@ -73,13 +79,16 @@ export const AuthService = {
     });
 
     if (!res.ok) {
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       throw new Error(
-        data?.message ?? APP_STRINGS.eventScreen.registrationFailed,
+        data?.detail ??
+          data?.title ??
+          APP_STRINGS.eventScreen.registrationFailed,
       );
     }
 
     const data: AuthApiResponse = await res.json();
+
     const user: StoredUser = {
       id: data.id,
       name: data.fullName,

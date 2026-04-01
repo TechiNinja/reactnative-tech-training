@@ -20,6 +20,7 @@ export enum GenderType {
 export enum FormatType {
   Singles = 'Singles',
   Doubles = 'Doubles',
+  Both = 'Both'
 }
 
 export enum MatchStatus {
@@ -109,3 +110,4 @@ export interface Event {
 
   abandonedCategories?: string[];
 }
+

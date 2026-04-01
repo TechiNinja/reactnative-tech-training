@@ -9,8 +9,10 @@ export const useAdminHomeViewModel = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { logout } = useAuthStore();
+
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSportModalVisible, setIsSportModalVisible] = useState(false);
 
   useEffect(() => {
     AnalyticsService.getAdminAnalytics()
@@ -27,19 +29,35 @@ export const useAdminHomeViewModel = () => {
     });
   };
 
-  const onAddEvent = () => {
-    navigation.navigate('EventForm', { mode: 'create' });
-  };
-
   const onAddUser = () => {
     navigation.navigate('UserForm', { mode: 'create' });
   };
 
+  const onRaiseRequest = () => {
+    navigation.navigate('EventRequestForm', { mode: 'create' });
+  };
+
+  const onGetNotification = () => {
+    navigation.navigate('Notification', { audience: 'Admin' });
+  };
+
+  const onOpenSportModal = () => {
+    setIsSportModalVisible(true);
+  };
+
+  const onCloseSportModal = () => {
+    setIsSportModalVisible(false);
+  };
+
   return {
     onLogoutPress,
-    onAddEvent,
     onAddUser,
     analytics,
     loading,
+    onRaiseRequest,
+    onGetNotification,
+    isSportModalVisible,
+    onOpenSportModal,
+    onCloseSportModal,
   };
 };

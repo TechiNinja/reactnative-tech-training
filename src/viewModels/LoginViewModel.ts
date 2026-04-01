@@ -77,6 +77,13 @@ export const useLoginViewModel = () => {
           routes: [{ name: 'ParticipantTabs' }],
         });
         break;
+
+      case 'operations':
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'OperationTabs' }],
+        });
+        break;  
     }
   };
 

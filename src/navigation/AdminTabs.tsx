@@ -1,12 +1,20 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, Calendar, Users } from 'lucide-react-native';
+import { Home, Calendar, Users, ClipboardList } from 'lucide-react-native';
 import { colors } from '../theme/colors';
 
 import AdminHomeScreen from '../views/Admin/AdminHomeScreen';
 import EventsListScreen from '../views/EventListScreen/EventsListScreen';
 import { fonts } from '../theme/fonts';
 import UsersListScreen from '../views/UsersListScreen/UsersListScreen';
+import EventRequestListScreen from '../views/EventRequestListScreen/EventRequestListScreen';
+
+export type AdminTabParamList = {
+  Home: undefined;
+  Events: undefined;
+  Users : undefined;
+  Request: undefined;
+};
 
 const Tab = createBottomTabNavigator();
 
@@ -56,6 +64,15 @@ const AdminTabs = () => {
             );
           }
 
+          if (route.name === 'Request') {
+            return (
+              <ClipboardList
+                size={22}
+                color={focused ? colors.primary : colors.textSecondary}
+              />
+            );
+          }
+
           return null;
         },
       })}
@@ -65,6 +82,9 @@ const AdminTabs = () => {
         {() => <EventsListScreen role="admin" />}
       </Tab.Screen>
       <Tab.Screen name="Users" component={UsersListScreen} />
+      <Tab.Screen name="Request">
+        {() => <EventRequestListScreen role="admin" />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };
