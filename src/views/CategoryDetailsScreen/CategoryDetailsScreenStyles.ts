@@ -19,33 +19,6 @@ export const categoryDetailsStyles = StyleSheet.create({
     color: colors.primaryText,
     fontWeight: '600',
   },
-  ampmBtn: {
-    alignItems: 'center',
-    paddingVertical: 11,
-  },
-  ampmBtnActive: {
-    backgroundColor: colors.primary,
-  },
-  ampmDivider: {
-    backgroundColor: colors.border,
-    height: 1,
-    width: '100%',
-  },
-  ampmText: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  ampmTextActive: {
-    color: colors.primaryText,
-  },
-  ampmWrap: {
-    borderColor: colors.border,
-    borderRadius: 12,
-    borderWidth: 1,
-    overflow: 'hidden',
-    width: '100%',
-  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.7)',
@@ -61,22 +34,6 @@ export const categoryDetailsStyles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  datePickerBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.cardBackgroud,
-    borderColor: colors.border,
-    borderRadius: 8,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  datePickerText: {
-    color: colors.textPrimary,
-    fontSize: 14,
   },
   emptyContainer: {
     alignItems: 'center',
@@ -222,14 +179,6 @@ export const categoryDetailsStyles = StyleSheet.create({
     fontWeight: '500',
     marginBottom: 4,
   },
-  modalOverlay: {
-    flex: 1,
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'flex-end',
-    elevation: Platform.OS === 'android' ? 10 : 0,
-  },
   modalSheet: {
     backgroundColor: colors.cardBackgroud,
     borderTopLeftRadius: 24,
@@ -299,35 +248,6 @@ export const categoryDetailsStyles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
   },
-  pickerDoneBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    marginTop: 12,
-    paddingHorizontal: 32,
-    paddingVertical: 10,
-  },
-  pickerDoneBtnText: {
-    color: colors.primaryText,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  pickerModalOverlay: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  pickerModalSheet: {
-    alignItems: 'center',
-    backgroundColor: colors.cardBackgroud,
-    borderRadius: 16,
-    padding: 20,
-    width: '85%',
-  },
-  pickerRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
   rescheduleActions: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -371,16 +291,6 @@ export const categoryDetailsStyles = StyleSheet.create({
     fontStyle: 'italic',
     marginBottom: 16,
     marginTop: 8,
-  },
-  rescheduleSheet: {
-    backgroundColor: colors.cardBackgroud,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    minHeight: SCREEN_HEIGHT * 0.5,
-    maxHeight: SCREEN_HEIGHT * 0.92,
-    padding: 20,
-    paddingBottom: Platform.OS === 'android' ? 32 : 40,
-    elevation: Platform.OS === 'android' ? 20 : 0,
   },
   searchContainer: {
     alignItems: 'center',
@@ -447,53 +357,17 @@ export const categoryDetailsStyles = StyleSheet.create({
     paddingBottom: 36,
     zIndex: 10000,
   },
-  stepArrow: {
-    alignItems: 'center',
-    paddingVertical: 6,
-    width: '100%',
-  },
-  stepBox: {
-    alignItems: 'center',
-    backgroundColor: colors.cardBackgroud,
+  pickerWrapper: {
+    backgroundColor: colors.inputField,
+    borderRadius: 12,
+    borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingVertical: 4,
+    overflow: 'hidden',
+    marginBottom: 4,
+  },
+  datePicker: {
     width: '100%',
-  },
-  stepCol: {
-    alignItems: 'center',
-  },
-  stepLabel: {
-    color: colors.textSecondary,
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: 0.4,
-    marginBottom: 4,
-    textTransform: 'uppercase',
-  },
-  stepValue: {
-    color: colors.textPrimary,
-    fontSize: 17,
-    fontWeight: '700',
-    paddingVertical: 4,
-    textAlign: 'center',
-  },
-  summary: {
-    alignItems: 'center',
-    backgroundColor: colors.primary + '18',
-    borderColor: colors.primary,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginTop: 16,
-    marginBottom: 4,
-    paddingVertical: 12,
-  },
-  summaryText: {
-    color: colors.primary,
-    fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+    height: 120,
   },
   thresholdText: {
     color: colors.textSecondary,

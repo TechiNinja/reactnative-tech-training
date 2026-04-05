@@ -14,7 +14,7 @@ import { formatDisplayDateTime } from '../../utils/dateUtils';
 
 const SetStatus = {
   COMPLETED: 'Completed',
-  LIVE:      'Live',
+  LIVE: 'Live',
 } as const;
 
 const MatchDetailsScreen = () => {
@@ -57,22 +57,32 @@ const MatchDetailsScreen = () => {
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <View style={styles.matchCard}>
             <View style={styles.statusRow}>
-              <View style={[
-                styles.statusBadge,
-                isLive && styles.statusLive,
-                isUpcoming && styles.statusUpcoming,
-                isCompleted && styles.statusCompleted,
-              ]}>
-                {isLive ? <View style={styles.liveDot} /> : null}
-                <Text style={[
-                  styles.statusText,
-                  isLive && styles.statusTextLive,
-                  isUpcoming && styles.statusTextUpcoming,
-                  isCompleted && styles.statusTextCompleted,
-                ]}>
-                  {isLive ? APP_STRINGS.eventScreen.live.toUpperCase() : match.status}
-                </Text>
-              </View>
+              {isLive ? (
+                <View style={styles.liveIndicator}>
+                  <View style={styles.liveDot} />
+                  <Text style={[styles.statusText, styles.statusTextLive]}>
+                    {APP_STRINGS.eventScreen.live.toUpperCase()}
+                  </Text>
+                </View>
+              ) : (
+                <View
+                  style={[
+                    styles.statusBadge,
+                    isUpcoming && styles.statusUpcoming,
+                    isCompleted && styles.statusCompleted,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusText,
+                      isUpcoming && styles.statusTextUpcoming,
+                      isCompleted && styles.statusTextCompleted,
+                    ]}
+                  >
+                    {match.status}
+                  </Text>
+                </View>
+              )}
             </View>
 
             <View style={styles.teamsRow}>

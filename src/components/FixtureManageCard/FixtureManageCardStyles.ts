@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     marginTop: 2,
   },
   header: {
-    alignItems: 'flex-start',
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
@@ -80,6 +80,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 12,
     flexDirection: 'row',
+    flexShrink: 1,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
@@ -90,6 +91,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.participantBackgroud + '20',
   },
   statusText: {
+    flexShrink: 1,
     fontSize: fontsSize.small,
     fontWeight: '600',
   },
@@ -180,6 +182,7 @@ export const styles = StyleSheet.create({
   },
   headerLeft: {
     flex: 1,
+    marginRight: 8,
   },
   liveWatchContainer: {
     marginTop: 8,

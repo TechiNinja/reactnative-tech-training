@@ -47,8 +47,8 @@ const FixtureManageCard = ({
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.roundName}>{roundName}</Text>
-          {eventName ? <Text style={styles.eventName}>{eventName}</Text> : null}
+          <Text style={styles.roundName} numberOfLines={1}>{roundName}</Text>
+          {eventName ? <Text style={styles.eventName} numberOfLines={1}>{eventName}</Text> : null}
         </View>
         <View style={[
           styles.statusBadge,
@@ -56,12 +56,16 @@ const FixtureManageCard = ({
           isUpcoming && styles.statusUpcoming,
           isCompleted && styles.statusCompleted,
         ]}>
-          <Text style={[
-            styles.statusText,
-            isLive && styles.statusTextLive,
-            isUpcoming && styles.statusTextUpcoming,
-            isCompleted && styles.statusTextCompleted,
-          ]}>
+          {isLive && <View style={styles.liveDot} />}
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.statusText,
+              isLive && styles.statusTextLive,
+              isUpcoming && styles.statusTextUpcoming,
+              isCompleted && styles.statusTextCompleted,
+            ]}
+          >
             {isLive ? APP_STRINGS.eventScreen.live.toUpperCase() : fixture.status}
           </Text>
         </View>

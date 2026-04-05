@@ -49,10 +49,6 @@ export const useEventsListViewModel = (role: UserRoleType) => {
     });
   };
 
-  const onCreateEvent = () => {
-    navigation.navigate('EventForm', { mode: 'create' });
-  };
-
   return {
     activeTab,
     setActiveTab,
@@ -60,6 +56,5 @@ export const useEventsListViewModel = (role: UserRoleType) => {
     loading,
     listContentStyle,
     onEventPress,
-    onCreateEvent,
   };
 };

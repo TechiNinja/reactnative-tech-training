@@ -4,7 +4,6 @@ import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import EventCard from '../../components/EventCard/EventCard';
 import { styles } from './EventsListScreenStyles';
 import EventStatusTabs from '../../components/EventStatusTabs/EventStatusTabs';
-import AppButton from '../../components/AppButton/AppButton';
 import { APP_STRINGS } from '../../constants/appStrings';
 import { useEventsListViewModel } from '../../viewModels/EventListScreenViewModel';
 import { colors } from '../../theme/colors';
@@ -21,18 +20,9 @@ const EventsListScreen = ({ role }: EventListScreenProps) => {
   return (
     <ScreenWrapper scrollable={false}>
       <View style={styles.container}>
-        <View style={styles.headerContainer}>
           <Text style={role === 'participant' ? styles.headingParticipant : styles.heading}>
             {APP_STRINGS.eventScreen.allEvents}
           </Text>
-          {(role === 'admin' || role === 'organizer') && (
-            <AppButton
-              title={APP_STRINGS.eventScreen.createEvent}
-              onPress={viewModel.onCreateEvent}
-            />
-          )}
-        </View>
-
         <EventStatusTabs
           activeTab={viewModel.activeTab}
           onChange={viewModel.setActiveTab}

@@ -52,6 +52,8 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
   },
   statusBadge: {
+    alignItems: 'center',     
+    flexDirection: 'row',
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 4,

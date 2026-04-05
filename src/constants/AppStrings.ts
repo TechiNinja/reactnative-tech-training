@@ -3,6 +3,11 @@ export const APP_STRINGS = {
     name: 'SportsCarnival',
     loginTagline: 'Manage your events',
     registerTagline: 'Join the competition',
+    sportsName: 'Sport Name',
+    create: 'Create',
+    formats: 'Formats',
+    addSports: 'Add Sports',
+    cancel: 'Cancel', 
   },
   auth: {
     welcomeBack: 'Welcome Back',
@@ -189,6 +194,7 @@ export const APP_STRINGS = {
     final: 'Final',
     semiFinal: 'Semi-Final',
     quarterFinal: 'Quarter-Final',
+    eliminator: 'Eliminator',
     notEnoughCompletedMatches: 'Not Enough Completed Matches',
     noEnoughRegistrations: 'No Enough Registrations',
     eventFull: 'Event Full',
@@ -247,6 +253,7 @@ export const APP_STRINGS = {
     womens: "Women's",
     mens: "Men's",
     mixed: 'Mixed',
+    gender: 'Gender *',
   },
   eventFormScreen: {
     registrationDeadlineRequired: 'Registration deadline is required',

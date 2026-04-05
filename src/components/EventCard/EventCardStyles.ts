@@ -128,7 +128,7 @@ export const styles = StyleSheet.create({
   status_CANCELLED: {
     backgroundColor: colors.error + '20',
     borderRadius: 20,
-    color: colors.error,
+    color: colors.disabled,  
     paddingHorizontal: 10,
     paddingVertical: 4,
   },

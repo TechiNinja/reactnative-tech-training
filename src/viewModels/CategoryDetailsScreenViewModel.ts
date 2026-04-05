@@ -15,23 +15,13 @@ import {
 } from '../services/categoryService';
 import { updateSetScore, rescheduleMatch } from '../services/matchService';
 import { OrganizerService, ApiTeamResponse } from '../services/organizerService';
-import {
-  clamp,
-  daysInMonth,
-  safeParse,
-  toLocalISO,
-  to24Hour,
-  prefillDateFields,
-  shiftDateByDelta,
-} from '../utils/dateHelpers';
+import { safeParse, toLocalISO, shiftDateByDelta } from '../utils/dateUtils';
 
 type CategoryDetailsRouteProp = RouteProp<RootStackParamList, 'CategoryDetails'>;
 type Participant = { id: string; name: string };
 type ApiTeam = { id: string; name: string; members: string[] };
 
 const LIVE_POLL_MS = 4000;
-
-export const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 export const useCategoryDetailsScreenViewModel = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -59,58 +49,18 @@ export const useCategoryDetailsScreenViewModel = () => {
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [rescheduleFixture, setRescheduleFixture] = useState<FixtureResponse | null>(null);
   const [rescheduleStep, setRescheduleStep] = useState<'select' | 'datetime'>('select');
-
-  const [rDay, setRDay] = useState(1);
-  const [rMonth, setRMonth] = useState(0);
-  const [rYear, setRYear] = useState(new Date().getFullYear());
-  const [rHour12, setRHour12] = useState(12);
-  const [rMinute, setRMinute] = useState(0);
-  const [rAmPm, setRAmPm] = useState<'AM' | 'PM'>('AM');
-
+  const [rDate, setRDate] = useState(new Date());
   const [rescheduleLoading, setRescheduleLoading] = useState(false);
   const [rescheduleError, setRescheduleError] = useState('');
 
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
-  const rHour24 = useMemo(() => to24Hour(rHour12, rAmPm), [rHour12, rAmPm]);
-
-  const rDate = useMemo(
-    () => new Date(rYear, rMonth, rDay, rHour24, rMinute, 0),
-    [rYear, rMonth, rDay, rHour24, rMinute],
-  );
-
   const rLocalISO = useMemo(() => toLocalISO(rDate), [rDate]);
 
-  const adjustDay = (delta: number) =>
-    setRDay((p) => clamp(p + delta, 1, daysInMonth(rMonth, rYear)));
-
-  const adjustMonth = (delta: number) =>
-    setRMonth((p) => { const n = p + delta; return n < 0 ? 11 : n > 11 ? 0 : n; });
-
-  const adjustYear = (delta: number) => {
-    const min = safeParse(eventStartDate)?.getFullYear() ?? new Date().getFullYear();
-    const max = safeParse(eventEndDate)?.getFullYear() ?? new Date().getFullYear() + 5;
-    setRYear((p) => clamp(p + delta, min, max));
-  };
-
-  const adjustHour = (delta: number) =>
-    setRHour12((p) => { const n = p + delta; return n < 1 ? 12 : n > 12 ? 1 : n; });
-
-  const adjustMinute = (delta: number) =>
-    setRMinute((p) => { const n = p + delta; return n < 0 ? 55 : n > 59 ? 0 : n; });
-
-  const toggleAmPm = () => setRAmPm((p) => (p === 'AM' ? 'PM' : 'AM'));
-
-  const prefillFromDate = (d: Date) => {
-    const fields = prefillDateFields(d);
-    setRDay(fields.day);
-    setRMonth(fields.month);
-    setRYear(fields.year);
-    setRHour12(fields.hour12);
-    setRMinute(fields.minute);
-    setRAmPm(fields.amPm);
-  };
+  const onDateChange = useCallback((_: any, selected?: Date) => {
+    if (selected) setRDate(selected);
+  }, []);
 
   const mainTabs = useMemo(() => {
     const tabs: string[] = [];
@@ -146,7 +96,7 @@ export const useCategoryDetailsScreenViewModel = () => {
     if (!eventCategoryId) return;
     try {
       if (!silent) setLoading(true);
-      if (!silent) setTeams([]); 
+      if (!silent) setTeams([]);
       const [cat, parts, fixtureList] = await Promise.all([
         getCategoryById(eventCategoryId),
         getParticipantsByCategory(eventCategoryId),
@@ -162,7 +112,9 @@ export const useCategoryDetailsScreenViewModel = () => {
         })));
       }
     } catch {
-      Alert.alert(APP_STRINGS.common.error, APP_STRINGS.eventScreen.failedToLoad);
+      setTimeout(() => {
+        Alert.alert(APP_STRINGS.common.error, APP_STRINGS.eventScreen.failedToLoad);
+      }, 500);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -170,14 +122,14 @@ export const useCategoryDetailsScreenViewModel = () => {
   }, [eventCategoryId, eventFormat]);
 
   const refreshFixtures = useCallback(async () => {
-  if (!eventCategoryId) return;
-  try {
-    const list = await getFixtures(eventCategoryId);
-    setFixtures(list ?? []);
-  } catch (err) {
-    console.error(APP_STRINGS.goLiveModal.livePollFailed, err);
-  }
-}, [eventCategoryId]);
+    if (!eventCategoryId) return;
+    try {
+      const list = await getFixtures(eventCategoryId);
+      setFixtures(list ?? []);
+    } catch (err) {
+      console.error(APP_STRINGS.goLiveModal.livePollFailed, err);
+    }
+  }, [eventCategoryId]);
 
   useEffect(() => { loadData(); }, [loadData]);
   useFocusEffect(useCallback(() => { loadData(true); }, [loadData]));
@@ -234,15 +186,38 @@ export const useCategoryDetailsScreenViewModel = () => {
   );
 
   const getRoundName = (roundNumber: number, matchNumber: number) => {
-    const maxRound = fixtures.length > 0 ? Math.max(...fixtures.map((f) => f.roundNumber)) : 1;
-    const roundMatches = fixtures.filter((f) => f.roundNumber === roundNumber);
-    if (roundNumber === maxRound && roundMatches.length === 1) return APP_STRINGS.eventScreen.final;
-    if (roundNumber === maxRound - 1 && roundMatches.length === 2) return APP_STRINGS.eventScreen.semiFinal;
-    if (roundNumber === maxRound - 2 && roundMatches.length === 4) return APP_STRINGS.eventScreen.quarterFinal;
-    const idx = roundMatches
-      .sort((a, b) => a.matchNumber - b.matchNumber)
-      .findIndex((f) => f.matchNumber === matchNumber);
-    return APP_STRINGS.fixtureScreen.matchPrefix + (idx + 1);
+    const maxRound = fixtures.length > 0
+      ? Math.max(...fixtures.map((f) => f.roundNumber))
+      : 1;
+
+    const isOddBracket = fixtures.some(
+      (f) => f.roundNumber === maxRound && (f.bracketPosition ?? 0) === 1,
+    );
+
+    const fixture = fixtures.find(
+      (f) => f.roundNumber === roundNumber && f.matchNumber === matchNumber,
+    );
+    const bp = fixture?.bracketPosition ?? 0;
+
+    if (roundNumber === maxRound) {
+      return bp === 1
+        ? APP_STRINGS.eventScreen.eliminator
+        : APP_STRINGS.eventScreen.final;
+    }
+
+    if (isOddBracket && roundNumber === maxRound - 1) {
+      return APP_STRINGS.eventScreen.semiFinal;
+    }
+
+    if (!isOddBracket) {
+      if (roundNumber === maxRound - 1) return APP_STRINGS.eventScreen.semiFinal;
+      if (roundNumber === maxRound - 2) return APP_STRINGS.eventScreen.quarterFinal;
+    }
+
+    const matchesInRound = fixtures.filter((f) => f.roundNumber === roundNumber);
+    const sorted = [...matchesInRound].sort((a, b) => a.matchNumber - b.matchNumber);
+    const idx = sorted.findIndex((f) => f.matchNumber === matchNumber);
+    return `Round ${roundNumber} - Match ${idx + 1}`;
   };
 
   const handleCreateTeams = async () => {
@@ -294,31 +269,29 @@ export const useCategoryDetailsScreenViewModel = () => {
       if (n < 1) return 1;
       if (n > 9) return 9;
       return n;
-  });
+    });
 
   const handleConfirmGoLive = async () => {
-  if (!goLiveFixture || !eventCategoryId) return;
-  try {
-    setGoLiveLoading(true);
-    console.log('FIXTURE ID:', goLiveFixture.id);
-    console.log('TOTAL SETS BEING SENT:', goLiveTotalSets);
-    await updateSetScore(goLiveFixture.id, {
-      scoreA: 0,
-      scoreB: 0,
-      isCompleted: false,
-      totalSets: goLiveTotalSets,
-    });
-    setGoLiveFixture(null);
-    navigation.navigate('MatchDetails', {
-      matchId: goLiveFixture.id, role,
-      eventStartDate, eventEndDate, eventVenue, categoryId: eventCategoryId,
-    });
-  } catch (e: any) {
-    Alert.alert(APP_STRINGS.matchScreen.cannotStartMatch, e?.message ?? APP_STRINGS.goLiveModal.failedToGoLive);
-  } finally {
-    setGoLiveLoading(false);
-  }
-};
+    if (!goLiveFixture || !eventCategoryId) return;
+    try {
+      setGoLiveLoading(true);
+      await updateSetScore(goLiveFixture.id, {
+        scoreA: 0,
+        scoreB: 0,
+        isCompleted: false,
+        totalSets: goLiveTotalSets,
+      });
+      setGoLiveFixture(null);
+      navigation.navigate('MatchDetails', {
+        matchId: goLiveFixture.id, role,
+        eventStartDate, eventEndDate, eventVenue, categoryId: eventCategoryId,
+      });
+    } catch (e: any) {
+      Alert.alert(APP_STRINGS.matchScreen.cannotStartMatch, e?.message ?? APP_STRINGS.goLiveModal.failedToGoLive);
+    } finally {
+      setGoLiveLoading(false);
+    }
+  };
 
   const handleOpenReschedule = () => {
     setRescheduleFixture(null);
@@ -336,7 +309,7 @@ export const useCategoryDetailsScreenViewModel = () => {
 
   const handleSelectRescheduleFixture = (fixture: FixtureResponse) => {
     setRescheduleFixture(fixture);
-    prefillFromDate(safeParse(fixture.matchDateTime) ?? new Date());
+    setRDate(safeParse(fixture.matchDateTime) ?? new Date());
     setRescheduleStep('datetime');
   };
 
@@ -407,14 +380,13 @@ export const useCategoryDetailsScreenViewModel = () => {
     eventName: category?.eventName ?? '',
     event: category ? { sport: category.eventName ?? '' } : null,
     showRescheduleModal, rescheduleFixture, rescheduleStep,
-    rDay, rMonth, rYear, rHour12, rMinute, rAmPm,
-    adjustDay, adjustMonth, adjustYear, adjustHour, adjustMinute, toggleAmPm,
+    rDate,
+    onDateChange,
     rLocalISO,
     rescheduleLoading, rescheduleError,
     upcomingFixtures,
     handleOpenReschedule, handleCloseReschedule,
     handleSelectRescheduleFixture,
     handleBackToSelect, handleConfirmReschedule,
-    MONTHS,
   };
 };

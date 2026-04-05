@@ -18,7 +18,7 @@ export const useMatchDetailsScreenViewModel = () => {
   const route = useRoute<MatchDetailsRouteProp>();
   const { matchId, role, eventStartDate, eventEndDate, eventVenue, categoryId, openSchedule } = route.params;
 
-  const isOrganizer   = role === 'admin' || role === 'organizer';
+  const isOrganizer = role === 'admin' || role === 'organizer';
   const isParticipant = role === 'participant';
 
   const [match, setMatch] = useState<FixtureResponse | null>(null);
@@ -38,10 +38,11 @@ export const useMatchDetailsScreenViewModel = () => {
   const [tempScoreB, setTempScoreB] = useState(0);
   const [editingSetId, setEditingSetId] = useState<number | null>(null);
 
+  const prevEditingSetId = useRef<number | null>(null);
   const initializedSetId = useRef<number | null>(null);
-  const scoresDirty      = useRef(false);
-  const pollingRef       = useRef<ReturnType<typeof setInterval> | null>(null);
-  const appStateRef      = useRef<AppStateStatus>(AppState.currentState);
+  const scoresDirty = useRef(false);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
   const fetchMatchFull = useCallback(async () => {
     try {
@@ -147,12 +148,12 @@ export const useMatchDetailsScreenViewModel = () => {
     }
   };
 
-  const isMatchLive      = match?.status?.toUpperCase() === 'LIVE';
+  const isMatchLive = match?.status?.toUpperCase() === 'LIVE';
   const isMatchCompleted = match?.status?.toUpperCase() === 'COMPLETED';
-  const isMatchUpcoming  = match?.status?.toUpperCase() === 'UPCOMING';
-  const canEditScore     = isOrganizer && isMatchLive;
+  const isMatchUpcoming = match?.status?.toUpperCase() === 'UPCOMING';
+  const canEditScore = isOrganizer && isMatchLive;
 
-  const activeSet     = sets.find((s) => s.status === 'Live') ?? null;
+  const activeSet = sets.find((s) => s.status === 'Live') ?? null;
   const completedSets = sets.filter((s) => s.status === 'Completed');
 
   const currentSetNumber = activeSet
@@ -162,7 +163,18 @@ export const useMatchDetailsScreenViewModel = () => {
     : null;
 
   useEffect(() => {
+    const wasEditing = prevEditingSetId.current !== null;
+    prevEditingSetId.current = editingSetId;
+
     if (editingSetId !== null) return;
+
+    if (wasEditing) {
+      scoresDirty.current = false;
+      setTempScoreA(activeSet?.scoreA ?? 0);
+      setTempScoreB(activeSet?.scoreB ?? 0);
+      initializedSetId.current = activeSet?.id ?? null;
+      return;
+    }
     const newId = activeSet?.id ?? null;
     if (newId !== initializedSetId.current) {
       initializedSetId.current = newId;
@@ -170,7 +182,7 @@ export const useMatchDetailsScreenViewModel = () => {
       setTempScoreA(activeSet?.scoreA ?? 0);
       setTempScoreB(activeSet?.scoreB ?? 0);
     }
-  }, [activeSet?.id, editingSetId]);
+  }, [activeSet?.id, activeSet?.scoreA, activeSet?.scoreB, editingSetId]);
 
   const handleEditCompletedSet = (set: MatchSetResponse) => {
     setEditingSetId(set.id);

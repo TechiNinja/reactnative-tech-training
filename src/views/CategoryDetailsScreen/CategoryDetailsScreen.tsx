@@ -3,9 +3,10 @@ import {
   Text, View, Pressable, FlatList, TextInput,
   ActivityIndicator, ScrollView,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   ArrowLeft, User, Users, Search,
-  Minus, Plus, X, ChevronLeft, ChevronUp, ChevronDown,
+  Minus, Plus, X, ChevronLeft,
 } from 'lucide-react-native';
 import ScreenWrapper from '../../components/ScreenWrapper/ScreenWrapper';
 import AppButton from '../../components/AppButton/AppButton';
@@ -14,7 +15,7 @@ import FixtureManageCard from '../../components/FixtureManageCard/FixtureManageC
 import { colors } from '../../theme/colors';
 import { categoryDetailsStyles as s } from './CategoryDetailsScreenStyles';
 import { APP_STRINGS } from '../../constants/appStrings';
-import { useCategoryDetailsScreenViewModel, MONTHS } from '../../viewModels/CategoryDetailsScreenViewModel';
+import { useCategoryDetailsScreenViewModel } from '../../viewModels/CategoryDetailsScreenViewModel';
 import { FixtureTabType, FormatType, GenderType } from '../../models/Event';
 import { formatDisplayDateTime } from '../../utils/dateUtils';
 
@@ -24,29 +25,6 @@ const FIXTURE_TABS: FixtureTabType[] = [
   FixtureTabType.UPCOMING,
   FixtureTabType.COMPLETED,
 ];
-
-type StepperProps = {
-  label: string;
-  value: string;
-  onUp: () => void;
-  onDown: () => void;
-  flex?: number;
-};
-
-const Stepper = ({ label, value, onUp, onDown, flex = 1 }: StepperProps) => (
-  <View style={[s.stepCol, { flex }]}>
-    <Text style={s.stepLabel}>{label}</Text>
-    <View style={s.stepBox}>
-      <Pressable onPress={onUp} style={s.stepArrow} hitSlop={10}>
-        <ChevronUp size={18} color={colors.primary} />
-      </Pressable>
-      <Text style={s.stepValue}>{value}</Text>
-      <Pressable onPress={onDown} style={s.stepArrow} hitSlop={10}>
-        <ChevronDown size={18} color={colors.primary} />
-      </Pressable>
-    </View>
-  </View>
-);
 
 const CategoryDetailsScreen = () => {
   const vm = useCategoryDetailsScreenViewModel();
@@ -83,8 +61,7 @@ const CategoryDetailsScreen = () => {
     handleCloseGoLiveModal, adjustGoLiveSets, handleConfirmGoLive,
     eventVenue, eventName, event, role,
     showRescheduleModal, rescheduleFixture, rescheduleStep,
-    rDay, rMonth, rYear, rHour12, rMinute, rAmPm,
-    adjustDay, adjustMonth, adjustYear, adjustHour, adjustMinute, toggleAmPm,
+    rDate, onDateChange,
     rescheduleLoading, rescheduleError,
     upcomingFixtures,
     handleOpenReschedule, handleCloseReschedule,
@@ -95,9 +72,6 @@ const CategoryDetailsScreen = () => {
   const { refreshing, handleRefresh } = vm;
   const showSearchBar = activeMainTab === 'TEAMS' || activeMainTab === 'FIXTURES';
   const shouldShowRescheduleBtn = canManageEvent && hasFixturesForGender && upcomingFixtures.length > 0;
-
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const summaryText = `${pad(rDay)} ${MONTHS[rMonth]} ${rYear}   ${pad(rHour12)}:${pad(rMinute)} ${rAmPm}`;
 
   return (
     <View style={{ flex: 1 }}>
@@ -346,10 +320,6 @@ const CategoryDetailsScreen = () => {
                     ))}
                   </ScrollView>
                 )}
-
-                <Pressable style={[s.rescheduleBackBtn, { marginTop: 12 }]} onPress={handleCloseReschedule}>
-                  <Text style={s.rescheduleBackBtnText}>{APP_STRINGS.buttons.cancel}</Text>
-                </Pressable>
               </>
             )}
 
@@ -377,65 +347,29 @@ const CategoryDetailsScreen = () => {
                 </View>
 
                 <Text style={s.sectionLabel}>{APP_STRINGS.rescheduleModal.date}</Text>
-                <View style={s.pickerRow}>
-                  <Stepper
-                    label="Day"
-                    value={pad(rDay)}
-                    onUp={() => adjustDay(1)}
-                    onDown={() => adjustDay(-1)}
-                  />
-                  <Stepper
-                    label="Month"
-                    value={MONTHS[rMonth]}
-                    onUp={() => adjustMonth(1)}
-                    onDown={() => adjustMonth(-1)}
-                    flex={2}
-                  />
-                  <Stepper
-                    label="Year"
-                    value={String(rYear)}
-                    onUp={() => adjustYear(1)}
-                    onDown={() => adjustYear(-1)}
-                    flex={2}
+                <View style={s.pickerWrapper}>
+                  <DateTimePicker
+                    value={rDate}
+                    mode="date"
+                    display="spinner"
+                    onChange={onDateChange}
+                    style={s.datePicker}
+                    textColor={colors.textPrimary}
                   />
                 </View>
 
-                <Text style={[s.sectionLabel, { marginTop: 14 }]}>{APP_STRINGS.rescheduleModal.time}</Text>
-                <View style={s.pickerRow}>
-                  <Stepper
-                    label="Hour"
-                    value={pad(rHour12)}
-                    onUp={() => adjustHour(1)}
-                    onDown={() => adjustHour(-1)}
+                <Text style={[s.sectionLabel, { marginTop: 12 }]}>{APP_STRINGS.rescheduleModal.time}</Text>
+                <View style={s.pickerWrapper}>
+                  <DateTimePicker
+                    value={rDate}
+                    mode="time"
+                    display="spinner"
+                    onChange={onDateChange}
+                    style={s.datePicker}
+                    textColor={colors.textPrimary}
+                    is24Hour={false}
+                    locale="en-US"
                   />
-                  <Stepper
-                    label="Min"
-                    value={pad(rMinute)}
-                    onUp={() => adjustMinute(5)}
-                    onDown={() => adjustMinute(-5)}
-                  />
-                  <View style={[s.stepCol, { flex: 1 }]}>
-                    <Text style={s.stepLabel}>AM/PM</Text>
-                    <View style={s.ampmWrap}>
-                      <Pressable
-                        style={[s.ampmBtn, rAmPm === 'AM' && s.ampmBtnActive]}
-                        onPress={() => { if (rAmPm !== 'AM') toggleAmPm(); }}
-                      >
-                        <Text style={[s.ampmText, rAmPm === 'AM' && s.ampmTextActive]}>AM</Text>
-                      </Pressable>
-                      <View style={s.ampmDivider} />
-                      <Pressable
-                        style={[s.ampmBtn, rAmPm === 'PM' && s.ampmBtnActive]}
-                        onPress={() => { if (rAmPm !== 'PM') toggleAmPm(); }}
-                      >
-                        <Text style={[s.ampmText, rAmPm === 'PM' && s.ampmTextActive]}>PM</Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                </View>
-
-                <View style={s.summary}>
-                  <Text style={s.summaryText}>{summaryText}</Text>
                 </View>
 
                 <Text style={s.rescheduleNote}>{APP_STRINGS.rescheduleModal.noteShift}</Text>

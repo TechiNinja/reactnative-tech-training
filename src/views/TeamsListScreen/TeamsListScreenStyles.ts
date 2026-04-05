@@ -10,22 +10,22 @@ export const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontSize: fontsSize.extraLarge,
     fontWeight: 'bold',
-    marginVertical: 20,
+    marginBottom: 20,
   },
-  headingParticipant: {
-    color: colors.textPrimary,
+  logo: {
+    color: colors.appBackground,
     fontSize: fontsSize.extraLarge,
-    fontWeight: 'bold',
-    marginVertical: 20,
   },
-  noEventStyle: {
+  logoContainer: {
+    backgroundColor: colors.primary,
+    borderRadius: 40,
+    padding: 10,
+  },
+  noTeamStyle: {
     color: colors.textPrimary,
     fontSize: fontsSize.extraLarge,
     fontWeight: 'bold',
     marginVertical: 20,
     textAlign: 'center',
-  },
-  loader: {
-    marginTop: 40,
   },
 });

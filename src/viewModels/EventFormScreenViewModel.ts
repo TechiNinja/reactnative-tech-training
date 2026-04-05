@@ -8,6 +8,7 @@ import { EventRequestResponse } from '../models/EventRequest';
 import { EventResponse } from '../models/EventResponse';
 import { APP_STRINGS } from '../constants/appStrings';
 import { createEvent, patchEvent, CreateEventPayload, PatchEventPayload } from '../services/eventService';
+import { useAuthStore } from '../store/AuthStore';
 
 type Mode = 'create' | 'edit';
 
@@ -26,6 +27,7 @@ type EventFormErrors = {
 
 export const useEventFormScreenViewModel = ({ mode, eventRequest, event }: EventFormParams) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { user } = useAuthStore();
 
   const isEdit = mode === 'edit' && !!event;
 
@@ -56,6 +58,14 @@ export const useEventFormScreenViewModel = ({ mode, eventRequest, event }: Event
   const handleConfirmDeadline = (date: Date) => {
     setRegistrationDeadline(date.toISOString().split('T')[0]);
     hideDeadlinePicker();
+  };
+
+  const navigateAfterSubmit = () => {
+    if (user?.role === 'organizer') {
+      navigation.navigate('OrganizerTabs', { screen: 'Events' } as any);
+    } else {
+      navigation.navigate('AdminTabs', { screen: 'Events' });
+    }
   };
 
   const validate = () => {
@@ -108,7 +118,7 @@ export const useEventFormScreenViewModel = ({ mode, eventRequest, event }: Event
         Alert.alert(APP_STRINGS.common.success, APP_STRINGS.eventFormScreen.eventCreated);
       }
 
-      navigation.navigate('AdminTabs', { screen: 'Events' });
+      navigateAfterSubmit();
     } catch (e: any) {
       Alert.alert(APP_STRINGS.common.error, e?.message ?? APP_STRINGS.eventFormScreen.somethingWentWrong);
     } finally {
@@ -131,7 +141,7 @@ export const useEventFormScreenViewModel = ({ mode, eventRequest, event }: Event
               const payload: PatchEventPayload = { action: 'cancel' };
               await patchEvent(event!.id, payload);
               Alert.alert(APP_STRINGS.common.success, APP_STRINGS.eventFormScreen.eventCancelled);
-              navigation.navigate('AdminTabs', { screen: 'Events' });
+              navigateAfterSubmit();
             } catch (e: any) {
               Alert.alert(APP_STRINGS.common.error, e?.message ?? APP_STRINGS.eventFormScreen.failedToCancel);
             } finally {
