@@ -2,11 +2,9 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Home, Calendar } from 'lucide-react-native';
 import { colors } from '../theme/colors';
-
 import ParticipantHomeScreen from '../views/Participant/ParticipantHomeScreen';
 import EventsListScreen from '../views/EventListScreen/EventsListScreen';
 import { fonts } from '../theme/fonts';
-// import TeamsListScreen from '../views/TeamsListScreen/TeamsListScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -31,32 +29,11 @@ const ParticipantTabs = () => {
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarIcon: ({ focused }) => {
           if (route.name === 'Home') {
-            return (
-              <Home
-                size={22}
-                color={focused ? colors.primary : colors.textSecondary}
-              />
-            );
+            return <Home size={22} color={focused ? colors.primary : colors.textSecondary} />;
           }
-
           if (route.name === 'Events') {
-            return (
-              <Calendar
-                size={22}
-                color={focused ? colors.primary : colors.textSecondary}
-              />
-            );
+            return <Calendar size={22} color={focused ? colors.primary : colors.textSecondary} />;
           }
-
-          // if (route.name === 'Teams') {
-          //   return (
-          //     <Users
-          //       size={22}
-          //       color={focused ? colors.primary : colors.textSecondary}
-          //     />
-          //   );
-          // }
-
           return null;
         },
       })}
@@ -65,7 +42,6 @@ const ParticipantTabs = () => {
       <Tab.Screen name="Events">
         {() => <EventsListScreen role="participant" />}
       </Tab.Screen>
-      {/* <Tab.Screen name="Teams" component={TeamsListScreen} /> */}
     </Tab.Navigator>
   );
 };

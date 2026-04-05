@@ -72,7 +72,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({
     formats: FormatType[],
   ) => {
     setEvents((prev) =>
-      prev.map((event) => {
+      prev.map((event): Event => {  
         if (event.id !== eventId) return event;
 
         const newRegistrationId = `reg-${Date.now()}-${Math.random()
@@ -170,12 +170,12 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const createFixtures = (eventId: string) => {
     setEvents((prev) =>
-      prev.map((event) => {
+      prev.map((event): Event => {
         if (event.id !== eventId) return event;
 
         let fixtures: Fixture[] = [];
 
-        for (const eventFormat of event.format) {
+        for (const eventFormat of event.formats) {
           if (eventFormat === FormatType.Singles) {
             const males = event.registrations
               .filter(

@@ -1,321 +1,392 @@
-import { useMemo, useState } from 'react';
-import { Alert } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Alert, AppState, AppStateStatus } from 'react-native';
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import {
-  ApiTeamResponse,
-  OrganizerService,
-} from '../services/organizerService';
-import { useEventStore } from '../store/EventStore';
+import { FormatType, FixtureTabType } from '../models/Event';
 import { useAuthStore } from '../store/AuthStore';
 import { APP_STRINGS } from '../constants/appStrings';
+import { FixtureResponse, CategoryResponse } from '../models/ApiResponses';
 import {
-  EventStatus,
-  FixtureTabType,
-  FormatType,
-  GenderType,
-  MatchStatus,
-  Team,
-} from '../models/Event';
-import { generateTeams } from '../utils/teamUtils';
-import { generateBracket, nextPowerOfTwo } from '../utils/fixtureUtils';
+  getCategoryById,
+  generateFixtures,
+  getFixtures,
+  getParticipantsByCategory,
+} from '../services/categoryService';
+import { updateSetScore, rescheduleMatch } from '../services/matchService';
+import { OrganizerService, ApiTeamResponse } from '../services/organizerService';
+import { safeParse, toLocalISO, shiftDateByDelta } from '../utils/dateUtils';
 
-const PARTICIPANTS_TAB = 'PARTICIPANTS';
-const TEAMS_TAB = 'TEAMS';
-const FIXTURES_TAB = 'FIXTURES';
+type CategoryDetailsRouteProp = RouteProp<RootStackParamList, 'CategoryDetails'>;
+type Participant = { id: string; name: string };
+type ApiTeam = { id: string; name: string; members: string[] };
 
-type CategoryDetailsRouteProp = RouteProp<
-  RootStackParamList,
-  'CategoryDetails'
->;
+const LIVE_POLL_MS = 4000;
 
-export const useCategoryDetailsViewModel = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+export const useCategoryDetailsScreenViewModel = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<CategoryDetailsRouteProp>();
-  const { eventId, gender, format, role, eventCategoryId } = route.params;
-
   const {
-    events,
-    updateEvent,
-    updateFixtureScore,
-    updateFixtureStatus,
-    completeFixture,
-  } = useEventStore();
-
+    eventId, gender, format: eventFormat, role,
+    eventCategoryId, eventStartDate, eventEndDate, eventVenue,
+  } = route.params;
   const { user } = useAuthStore();
 
-  const event = events.find((event) => event.id === eventId) ?? null;
+  const [category, setCategory] = useState<CategoryResponse | null>(null);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [teams, setTeams] = useState<ApiTeam[]>([]);
+  const [fixtures, setFixtures] = useState<FixtureResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [activeMainTab, setActiveMainTab] = useState('');
+  const [activeFixtureTab, setActiveFixtureTab] = useState<FixtureTabType>(FixtureTabType.ALL);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const [goLiveFixture, setGoLiveFixture] = useState<FixtureResponse | null>(null);
+  const [goLiveTotalSets, setGoLiveTotalSets] = useState(1);
+  const [goLiveLoading, setGoLiveLoading] = useState(false);
+
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [rescheduleFixture, setRescheduleFixture] = useState<FixtureResponse | null>(null);
+  const [rescheduleStep, setRescheduleStep] = useState<'select' | 'datetime'>('select');
+  const [rDate, setRDate] = useState(new Date());
+  const [rescheduleLoading, setRescheduleLoading] = useState(false);
+  const [rescheduleError, setRescheduleError] = useState('');
+
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+
+  const rLocalISO = useMemo(() => toLocalISO(rDate), [rDate]);
+
+  const onDateChange = useCallback((_: any, selected?: Date) => {
+    if (selected) setRDate(selected);
+  }, []);
 
   const mainTabs = useMemo(() => {
     const tabs: string[] = [];
-    if (role !== 'participant') tabs.push(PARTICIPANTS_TAB);
-    if (format === FormatType.Doubles) tabs.push(TEAMS_TAB);
-    tabs.push(FIXTURES_TAB);
+    if (role !== 'participant') tabs.push('PARTICIPANTS');
+    if (eventFormat === FormatType.Doubles) tabs.push('TEAMS');
+    tabs.push('FIXTURES');
     return tabs;
-  }, [role, format]);
-
-  const [activeMainTab, setActiveMainTab] = useState(mainTabs[0]);
-  const [activeFixtureTab, setActiveFixtureTab] = useState<FixtureTabType>(
-    FixtureTabType.ALL,
-  );
-  const [searchQuery, setSearchQuery] = useState('');
+  }, [role, eventFormat]);
 
   const isAdminOrOrganizer = role === 'admin' || role === 'organizer';
+  const canManageEvent = role === 'admin' || role === 'organizer';
+  const isAbandoned = category?.status === 'Abandoned';
+  const canCreateTeams = eventFormat === FormatType.Doubles && participants.length >= 4 && !isAbandoned;
+  const canCreateFixtures = participants.length >= 2;
 
-  const canManageEvent =
-    role === 'admin' ||
-    (role === 'organizer' && event?.createdBy === user?.email);
+  const hasAnyLive = useMemo(
+    () => fixtures.some((f) => f.status.toUpperCase() === 'LIVE'),
+    [fixtures],
+  );
 
-  const isMixedCategory = gender === GenderType.Mixed;
+  const hasAnyLiveOrCompleted = useMemo(
+    () => fixtures.some((f) =>
+      f.status.toUpperCase() === 'LIVE' || f.status.toUpperCase() === 'COMPLETED'),
+    [fixtures],
+  );
 
-  const participants = useMemo(() => {
-    if (!event) return [];
-    if (isMixedCategory) {
-      return event.registrations.filter((player) =>
-        player.formats?.includes(format),
-      );
+  const upcomingFixtures = useMemo(
+    () => fixtures.filter((f) => f.status.toUpperCase() === 'UPCOMING' && !f.isBye),
+    [fixtures],
+  );
+
+  const loadData = useCallback(async (silent = false) => {
+    if (!eventCategoryId) return;
+    try {
+      if (!silent) setLoading(true);
+      if (!silent) setTeams([]);
+      const [cat, parts, fixtureList] = await Promise.all([
+        getCategoryById(eventCategoryId),
+        getParticipantsByCategory(eventCategoryId),
+        getFixtures(eventCategoryId),
+      ]);
+      setCategory(cat ?? null);
+      setParticipants((parts ?? []).map((p) => ({ id: String(p.id), name: p.name })));
+      setFixtures(fixtureList ?? []);
+      if (eventFormat === FormatType.Doubles) {
+        const apiTeams = await OrganizerService.getTeams(eventCategoryId);
+        setTeams((apiTeams ?? []).map((t: ApiTeamResponse) => ({
+          id: String(t.id), name: t.name, members: t.members ?? [],
+        })));
+      }
+    } catch {
+      setTimeout(() => {
+        Alert.alert(APP_STRINGS.common.error, APP_STRINGS.eventScreen.failedToLoad);
+      }, 500);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
-    return event.registrations.filter(
-      (player) => player.gender === gender && player.formats?.includes(format),
-    );
-  }, [event, isMixedCategory, format, gender]);
+  }, [eventCategoryId, eventFormat]);
 
-  const teams = useMemo(() => {
-    if (!event) return [];
-    return event.teams.filter(
-      (team) => team.gender === gender && team.format === format,
-    );
-  }, [event, gender, format]);
-
-  const filteredTeams = useMemo(() => {
-    if (!searchQuery.trim()) return teams;
-    return teams.filter((team) =>
-      team.name.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [teams, searchQuery]);
-
-  const fixtures = useMemo(() => {
-    if (!event) return [];
-    if (isMixedCategory) {
-      return event.fixtures.filter(
-        (fixture) =>
-          fixture.gender === GenderType.Mixed && fixture.format === format,
-      );
+  const refreshFixtures = useCallback(async () => {
+    if (!eventCategoryId) return;
+    try {
+      const list = await getFixtures(eventCategoryId);
+      setFixtures(list ?? []);
+    } catch (err) {
+      console.error(APP_STRINGS.goLiveModal.livePollFailed, err);
     }
-    return event.fixtures.filter(
-      (fixture) => fixture.gender === gender && fixture.format === format,
-    );
-  }, [event, isMixedCategory, format, gender]);
+  }, [eventCategoryId]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+  useFocusEffect(useCallback(() => { loadData(true); }, [loadData]));
+
+  useEffect(() => {
+    const start = () => {
+      if (pollingRef.current) return;
+      pollingRef.current = setInterval(refreshFixtures, LIVE_POLL_MS);
+    };
+    const stop = () => {
+      if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
+    };
+    if (hasAnyLive) {
+      if (appStateRef.current === 'active') start();
+      const sub = AppState.addEventListener('change', (s: AppStateStatus) => {
+        appStateRef.current = s;
+        s === 'active' ? start() : stop();
+      });
+      return () => { stop(); sub.remove(); };
+    } else { stop(); }
+  }, [hasAnyLive, refreshFixtures]);
+
+  useEffect(() => {
+    if (activeMainTab === '' && mainTabs.length > 0) setActiveMainTab(mainTabs[0]);
+  }, [mainTabs, activeMainTab]);
+
+  const handleRefresh = useCallback(() => { setRefreshing(true); loadData(true); }, [loadData]);
+
+  const filteredTeams = useMemo(
+    () => searchQuery.trim()
+      ? teams.filter((t) => t.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      : teams,
+    [teams, searchQuery],
+  );
 
   const filteredFixtures = useMemo(() => {
     let result = fixtures;
-    if (activeFixtureTab !== FixtureTabType.ALL) {
-      result = result.filter(
-        (fixture) =>
-          fixture.status === (activeFixtureTab as unknown as MatchStatus),
-      );
-    }
+    if (activeFixtureTab !== FixtureTabType.ALL)
+      result = result.filter((f) => f.status.toUpperCase() === activeFixtureTab);
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase();
       result = result.filter(
-        (fixture) =>
-          fixture.teamA?.toLowerCase().includes(query) ||
-          fixture.teamB?.toLowerCase().includes(query),
+        (f) => f.sideAName?.toLowerCase().includes(q) || f.sideBName?.toLowerCase().includes(q),
       );
     }
     return result;
   }, [fixtures, activeFixtureTab, searchQuery]);
 
-  const getRoundName = (round: number, totalCount: number) => {
-    const totalRounds = Math.log2(nextPowerOfTwo(totalCount));
-    if (round === totalRounds) return APP_STRINGS.eventScreen.final;
-    if (round === totalRounds - 1) return APP_STRINGS.eventScreen.semiFinal;
-    if (round === totalRounds - 2) return APP_STRINGS.eventScreen.quarterFinal;
-    return `Round ${round}`;
-  };
+  const visibleFixtures = useMemo(
+    () => canManageEvent
+      ? filteredFixtures
+      : filteredFixtures.filter((f) => !(f.sideAName === 'BYE' && f.sideBName === 'BYE')),
+    [canManageEvent, filteredFixtures],
+  );
 
-  const totalParticipantsAllowed = event?.totalTeams ?? 0;
-  const minRequiredForTeams = Math.ceil(totalParticipantsAllowed * 0.2);
+  const getRoundName = (roundNumber: number, matchNumber: number) => {
+    const maxRound = fixtures.length > 0
+      ? Math.max(...fixtures.map((f) => f.roundNumber))
+      : 1;
 
-  const categoryId = isMixedCategory ? 'Mixed-Singles' : `${gender}-${format}`;
-  const isAbandoned = event?.abandonedCategories?.includes(categoryId) ?? false;
-
-  const canCreateTeams =
-    participants.length >= minRequiredForTeams && !isAbandoned;
-
-  const canCreateFixtures =
-    format === FormatType.Singles
-      ? participants.length >= 2
-      : teams.length >= 2;
-
-  const createTeamsInternal = () => {
-    if (!event) return;
-
-    const newTeams = generateTeams(
-      participants,
-      gender,
-      format,
-      event.teams.length,
+    const isOddBracket = fixtures.some(
+      (f) => f.roundNumber === maxRound && (f.bracketPosition ?? 0) === 1,
     );
 
-    const otherTeams = event.teams.filter(
-      (team) => !(team.gender === gender && team.format === format),
+    const fixture = fixtures.find(
+      (f) => f.roundNumber === roundNumber && f.matchNumber === matchNumber,
     );
+    const bp = fixture?.bracketPosition ?? 0;
 
-    if (participants.length % 2 !== 0) {
-      Alert.alert(
-        APP_STRINGS.eventScreen.note,
-        APP_STRINGS.eventScreen.oddRegistrationsAlert,
-      );
+    if (roundNumber === maxRound) {
+      return bp === 1
+        ? APP_STRINGS.eventScreen.eliminator
+        : APP_STRINGS.eventScreen.final;
     }
 
-    updateEvent({
-      ...event,
-      teams: [...otherTeams, ...newTeams],
-      teamsCreated: true,
-    });
+    if (isOddBracket && roundNumber === maxRound - 1) {
+      return APP_STRINGS.eventScreen.semiFinal;
+    }
+
+    if (!isOddBracket) {
+      if (roundNumber === maxRound - 1) return APP_STRINGS.eventScreen.semiFinal;
+      if (roundNumber === maxRound - 2) return APP_STRINGS.eventScreen.quarterFinal;
+    }
+
+    const matchesInRound = fixtures.filter((f) => f.roundNumber === roundNumber);
+    const sorted = [...matchesInRound].sort((a, b) => a.matchNumber - b.matchNumber);
+    const idx = sorted.findIndex((f) => f.matchNumber === matchNumber);
+    return `Round ${roundNumber} - Match ${idx + 1}`;
   };
 
   const handleCreateTeams = async () => {
-    if (!event) return;
-
-    if (format === FormatType.Singles) {
-      Alert.alert(APP_STRINGS.eventScreen.noTeamsRequired);
-      return;
-    }
-
-    if (participants.length < 2) {
-      Alert.alert(APP_STRINGS.eventScreen.noEnoughRegistrations);
-      return;
-    }
-
-    if (typeof eventCategoryId === 'number') {
-      try {
-        const apiTeams = (await OrganizerService.createTeams(
-          eventCategoryId,
-        )) as ApiTeamResponse[];
-
-        const newTeams: Team[] = apiTeams.map((apiTeam) => ({
-          id: apiTeam.id.toString(),
-          name: apiTeam.name,
-          players: apiTeam.members.map((memberName, index) => ({
-            id: `${apiTeam.id}-${index}`,
-            name: memberName,
-            gender,
-            formats: [format],
-          })),
-          gender,
-          format,
-        }));
-
-        const otherTeams = event.teams.filter(
-          (team) => !(team.gender === gender && team.format === format),
-        );
-
-        updateEvent({
-          ...event,
-          teams: [...otherTeams, ...newTeams],
-          teamsCreated: true,
-        });
-      } catch {
-        Alert.alert(
-          APP_STRINGS.eventScreen.createTeam,
-          APP_STRINGS.eventScreen.teamCreationFailed,
-        );
-      }
-      return;
-    }
-
-    if (participants.length < totalParticipantsAllowed) {
-      Alert.alert(
-        APP_STRINGS.eventScreen.createTeam,
-        `You are about to create teams with ${
-          participants.length
-        } participants (${
-          totalParticipantsAllowed - participants.length
-        } slots remaining). Continue?`,
-        [
-          { text: APP_STRINGS.buttons.cancel, style: 'cancel' },
-          {
-            text: APP_STRINGS.buttons.continue,
-            onPress: createTeamsInternal,
-          },
-        ],
-      );
-    } else {
-      createTeamsInternal();
+    if (!eventCategoryId) return;
+    if (participants.length < 4) { Alert.alert(APP_STRINGS.goLiveModal.minimumParticipants(4)); return; }
+    try {
+      const apiTeams = await OrganizerService.createTeams(eventCategoryId);
+      setTeams((apiTeams ?? []).map((t: ApiTeamResponse) => ({
+        id: String(t.id), name: t.name, members: t.members ?? [],
+      })));
+      setFixtures((await generateFixtures(eventCategoryId)) ?? []);
+      Alert.alert(APP_STRINGS.common.success, APP_STRINGS.goLiveModal.teamsAndFixturesCreated);
+    } catch (e: any) {
+      Alert.alert(APP_STRINGS.eventScreen.createTeam, e?.message ?? APP_STRINGS.eventScreen.teamCreationFailed);
     }
   };
 
-  const handleCreateFixtures = () => {
-    if (!event) return;
-
+  const handleCreateFixtures = async () => {
+    if (!eventCategoryId) return;
     if (isAbandoned) {
-      Alert.alert(
-        APP_STRINGS.eventScreen.categoryAbandoned,
-        APP_STRINGS.eventScreen.categoryAbandonedDescription,
-      );
+      Alert.alert(APP_STRINGS.eventScreen.categoryAbandoned, APP_STRINGS.eventScreen.categoryAbandonedDescription);
       return;
     }
-
-    const names =
-      format === FormatType.Singles
-        ? participants.map((player) => player.name)
-        : teams.map((team) => team.name);
-
-    if (names.length < 2) {
-      Alert.alert(APP_STRINGS.eventScreen.notEnoughSameGenderParticipants);
-      return;
+    try {
+      setFixtures((await generateFixtures(eventCategoryId)) ?? []);
+    } catch (e: any) {
+      Alert.alert(APP_STRINGS.eventScreen.createFixtures, e?.message ?? APP_STRINGS.eventScreen.fixtureNotCreated);
     }
+  };
 
-    const newFixtures = generateBracket(names, gender, format);
+  const handleFixturePress = (fixture: FixtureResponse) => {
+    if (fixture.status?.toUpperCase() === 'UPCOMING' && canManageEvent) {
+      setGoLiveFixture(fixture);
+      setGoLiveTotalSets(1);
+    } else {
+      navigation.navigate('MatchDetails', {
+        matchId: fixture.id, role,
+        eventStartDate, eventEndDate, eventVenue,
+        categoryId: eventCategoryId ?? 0,
+      });
+    }
+  };
 
-    const otherFixtures = event.fixtures.filter(
-      (fixture) => !(fixture.gender === gender && fixture.format === format),
+  const handleCloseGoLiveModal = () => setGoLiveFixture(null);
+
+  const adjustGoLiveSets = (delta: number) =>
+    setGoLiveTotalSets((p) => {
+      const n = p + delta;
+      if (n < 1) return 1;
+      if (n > 9) return 9;
+      return n;
+    });
+
+  const handleConfirmGoLive = async () => {
+    if (!goLiveFixture || !eventCategoryId) return;
+    try {
+      setGoLiveLoading(true);
+      await updateSetScore(goLiveFixture.id, {
+        scoreA: 0,
+        scoreB: 0,
+        isCompleted: false,
+        totalSets: goLiveTotalSets,
+      });
+      setGoLiveFixture(null);
+      navigation.navigate('MatchDetails', {
+        matchId: goLiveFixture.id, role,
+        eventStartDate, eventEndDate, eventVenue, categoryId: eventCategoryId,
+      });
+    } catch (e: any) {
+      Alert.alert(APP_STRINGS.matchScreen.cannotStartMatch, e?.message ?? APP_STRINGS.goLiveModal.failedToGoLive);
+    } finally {
+      setGoLiveLoading(false);
+    }
+  };
+
+  const handleOpenReschedule = () => {
+    setRescheduleFixture(null);
+    setRescheduleStep('select');
+    setRescheduleError('');
+    setShowRescheduleModal(true);
+  };
+
+  const handleCloseReschedule = () => {
+    setShowRescheduleModal(false);
+    setRescheduleFixture(null);
+    setRescheduleStep('select');
+    setRescheduleError('');
+  };
+
+  const handleSelectRescheduleFixture = (fixture: FixtureResponse) => {
+    setRescheduleFixture(fixture);
+    setRDate(safeParse(fixture.matchDateTime) ?? new Date());
+    setRescheduleStep('datetime');
+  };
+
+  const handleBackToSelect = () => {
+    setRescheduleStep('select');
+    setRescheduleFixture(null);
+    setRescheduleError('');
+  };
+
+  const handleConfirmReschedule = async () => {
+    if (!rescheduleFixture) return;
+    setRescheduleError('');
+
+    const oldDate = safeParse(rescheduleFixture.matchDateTime);
+    const deltaMs = oldDate ? rDate.getTime() - oldDate.getTime() : 0;
+
+    const sorted = [...upcomingFixtures].sort((a, b) =>
+      (safeParse(a.matchDateTime ?? '')?.getTime() ?? 0) -
+      (safeParse(b.matchDateTime ?? '')?.getTime() ?? 0),
     );
 
-    updateEvent({
-      ...event,
-      fixtures: [...otherFixtures, ...newFixtures],
-      fixturesCreated: true,
-      status: EventStatus.LIVE,
-    });
+    const idx = sorted.findIndex((f) => f.id === rescheduleFixture.id);
+    const toUpdate = sorted.slice(idx);
+
+    try {
+      setRescheduleLoading(true);
+      for (let i = 0; i < toUpdate.length; i++) {
+        const f = toUpdate[i];
+        const iso = i === 0 ? rLocalISO : shiftDateByDelta(f.matchDateTime, deltaMs, rDate);
+        await rescheduleMatch(f.id, iso);
+      }
+      await loadData(true);
+      handleCloseReschedule();
+      Alert.alert(
+        APP_STRINGS.common.success,
+        toUpdate.length > 1
+          ? `${toUpdate.length} ${APP_STRINGS.rescheduleModal.success}`
+          : APP_STRINGS.rescheduleModal.success,
+      );
+    } catch (e: any) {
+      setRescheduleError(e?.message ?? APP_STRINGS.rescheduleModal.failed);
+    } finally {
+      setRescheduleLoading(false);
+    }
   };
 
   return {
-    event,
-    gender,
-    format,
-    role,
-    navigation,
-    mainTabs,
-    activeMainTab,
-    setActiveMainTab,
-    activeFixtureTab,
-    setActiveFixtureTab,
-    searchQuery,
-    setSearchQuery,
-    participants,
-    teams: filteredTeams,
-    filteredFixtures,
-    isAdminOrOrganizer,
-    canManageEvent,
-    isAbandoned,
-    canCreateTeams,
-    canCreateFixtures,
-    minRequiredForTeams,
+    category, loading, refreshing, gender,
+    format: eventFormat,
+    role, navigation,
+    mainTabs, activeMainTab, setActiveMainTab,
+    activeFixtureTab, setActiveFixtureTab,
+    searchQuery, setSearchQuery,
+    participants, teams: filteredTeams, fixtures,
+    isAdminOrOrganizer, canManageEvent, isAbandoned,
+    filteredFixtures: visibleFixtures,
+    canCreateTeams, canCreateFixtures,
+    hasAnyLiveOrCompleted,
+    minRequiredForTeams: 4,
     hasTeamsForGender: teams.length > 0,
     hasFixturesForGender: fixtures.length > 0,
     getRoundName,
-    handleCreateTeams,
-    handleCreateFixtures,
-    handleSetLive: (id: string) =>
-      updateFixtureStatus(eventId, id, MatchStatus.LIVE),
-    handleUpdateScore: (id: string, a: number, b: number) =>
-      updateFixtureScore(eventId, id, a, b),
-    handleCompleteFixture: (id: string, a: number, b: number) =>
-      completeFixture(eventId, id, a, b),
+    handleCreateTeams, handleCreateFixtures, handleFixturePress,
+    goLiveFixture, goLiveTotalSets, goLiveLoading,
+    handleCloseGoLiveModal, adjustGoLiveSets, handleConfirmGoLive,
+    handleRefresh,
+    eventVenue, eventStartDate, eventEndDate, eventCategoryId,
+    eventName: category?.eventName ?? '',
+    event: category ? { sport: category.eventName ?? '' } : null,
+    showRescheduleModal, rescheduleFixture, rescheduleStep,
+    rDate,
+    onDateChange,
+    rLocalISO,
+    rescheduleLoading, rescheduleError,
+    upcomingFixtures,
+    handleOpenReschedule, handleCloseReschedule,
+    handleSelectRescheduleFixture,
+    handleBackToSelect, handleConfirmReschedule,
   };
 };

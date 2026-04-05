@@ -26,7 +26,7 @@ export const useEventRequestListViewModel = (
 
   useEffect(() => {
     fetchRequests();
-  }, [fetchRequests]);
+  }, []);
 
   const filteredRequests = useMemo(
     () => requests.filter(request => request.status === activeTab),

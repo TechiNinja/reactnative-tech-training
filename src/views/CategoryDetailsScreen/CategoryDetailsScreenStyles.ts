@@ -1,8 +1,10 @@
-import { StyleSheet } from 'react-native';
+import { Dimensions, Platform, StyleSheet } from 'react-native';
 import { colors } from '../../theme/colors';
 import { fontsSize } from '../../theme/fonts';
 
-export const styles = StyleSheet.create({
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
+
+export const categoryDetailsStyles = StyleSheet.create({
   activeFixtureTab: {
     backgroundColor: colors.primary + '20',
     borderColor: colors.primary,
@@ -16,6 +18,10 @@ export const styles = StyleSheet.create({
   activeMainTabText: {
     color: colors.primaryText,
     fontWeight: '600',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.7)',
   },
   backButton: {
     padding: 4,
@@ -48,7 +54,7 @@ export const styles = StyleSheet.create({
   errorText: {
     color: colors.error,
     fontSize: fontsSize.regular,
-    marginTop: 40,
+    marginTop: 8,
     textAlign: 'center',
   },
   fixtureTabButton: {
@@ -117,6 +123,97 @@ export const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 13,
   },
+  matchCard: {
+    backgroundColor: colors.primary + '12',
+    borderColor: colors.primary + '40',
+    borderRadius: 10,
+    borderWidth: 1,
+    marginBottom: 16,
+    padding: 12,
+  },
+  matchCurrent: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  matchName: {
+    color: colors.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  matchSelectItem: {
+    backgroundColor: colors.cardBackgroud,
+    borderColor: colors.border,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginBottom: 10,
+    padding: 14,
+  },
+  matchSelectItemActive: {
+    backgroundColor: colors.primary + '15',
+    borderColor: colors.primary,
+  },
+  matchSelectList: {
+    maxHeight: 260,
+    marginTop: 8,
+  },
+  matchSelectName: {
+    color: colors.textPrimary,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  matchSelectTime: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  modalHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  modalLabel: {
+    color: colors.textPrimary,
+    fontSize: 15,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  modalSheet: {
+    backgroundColor: colors.cardBackgroud,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    minHeight: 320,
+    padding: 20,
+    paddingBottom: 40,
+  },
+  modalSubLabel: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginBottom: 8,
+    marginTop: 12,
+  },
+  modalTitle: {
+    color: colors.textPrimary,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  noMatchesText: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    marginTop: 20,
+    textAlign: 'center',
+  },
+  overlay: {
+    bottom: 0,
+    elevation: 9999,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 9999,
+    justifyContent: 'flex-end',
+  },
   participantAvatar: {
     alignItems: 'center',
     backgroundColor: colors.primary + '20',
@@ -151,6 +248,50 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
   },
+  rescheduleActions: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  rescheduleBackBtn: {
+    backgroundColor: colors.cardBackgroud,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+  },
+  rescheduleBackBtnText: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  rescheduleButton: {
+    backgroundColor: colors.cardBackgroud,
+    borderColor: colors.primary,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
+  rescheduleButtonRow: {
+    alignItems: 'flex-end',
+    paddingHorizontal: 16,
+    paddingBottom: 4,
+  },
+  rescheduleButtonText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  rescheduleNote: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginBottom: 16,
+    marginTop: 8,
+  },
   searchContainer: {
     alignItems: 'center',
     backgroundColor: colors.cardBackgroud,
@@ -169,6 +310,64 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     marginLeft: 8,
     padding: 0,
+  },
+  sectionLabel: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  setsBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.border,
+    borderRadius: 22,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  setsHint: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  setsRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 24,
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  setsValue: {
+    color: colors.textPrimary,
+    fontSize: 32,
+    fontWeight: '700',
+    minWidth: 50,
+    textAlign: 'center',
+  },
+  sheet: {
+    backgroundColor: colors.cardBackgroud,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    elevation: 10000,
+    maxHeight: '92%',
+    padding: 20,
+    paddingBottom: 36,
+    zIndex: 10000,
+  },
+  pickerWrapper: {
+    backgroundColor: colors.inputField,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+    marginBottom: 4,
+  },
+  datePicker: {
+    width: '100%',
+    height: 120,
   },
   thresholdText: {
     color: colors.textSecondary,
