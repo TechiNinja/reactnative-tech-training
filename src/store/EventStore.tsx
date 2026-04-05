@@ -4,8 +4,6 @@ import {
   GenderType,
   FormatType,
   Fixture,
-  Registration,
-  Team,
   MatchStatus,
 } from '../models/Event';
 import { MOCK_EVENTS } from '../constants/mockEvents';
