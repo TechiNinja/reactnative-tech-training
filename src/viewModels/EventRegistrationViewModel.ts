@@ -70,7 +70,12 @@ export const useEventRegistrationViewModel = (
         }
       }
     } catch {
-      Alert.alert(APP_STRINGS.common.error, APP_STRINGS.registrationScreen.failedToLoadEvent);
+      setTimeout(() => {
+        Alert.alert(
+          APP_STRINGS.common.error,
+          APP_STRINGS.registrationScreen.failedToLoadEvent,
+        );
+      }, 500);
     } finally {
       setLoading(false);
     }
@@ -80,8 +85,12 @@ export const useEventRegistrationViewModel = (
     fetchEventData();
   }, [fetchEventData]);
 
-  const getCategory = (g: GenderType, format: FormatType): EventCategoryResponse | undefined =>
-    event?.categories?.find((cat) => cat.gender === g && cat.format === format);
+  const getCategory = (g: GenderType, format: FormatType) =>
+  event?.categories?.find(
+    (cat) =>
+      (cat.gender === g || cat.gender === 'Mixed') &&
+      cat.format === format
+  );
 
   const totalSlotsPerCategory = event?.maxParticipantsCount ?? 0;
 
@@ -113,7 +122,7 @@ export const useEventRegistrationViewModel = (
   const toggleFormat = (format: FormatType) => {
     if (!gender) return;
 
-    if (isAlreadyRegistered(gender, format)) {
+    if (isAlreadyRegistered(gender as GenderType, format)) {
       Alert.alert(
         APP_STRINGS.registrationScreen.alreadyRegistered,
         APP_STRINGS.registrationScreen.alreadyRegisteredForFormat(gender, format),
@@ -121,7 +130,19 @@ export const useEventRegistrationViewModel = (
       return;
     }
 
-    if (isCategoryFull(gender, format)) {
+    const alreadyRegisteredInSelected = selectedFormats.some((f) =>
+      isAlreadyRegistered(gender as GenderType, f),
+    );
+
+    if (alreadyRegisteredInSelected) {
+      Alert.alert(
+        APP_STRINGS.eventScreen.registrationFailed,
+        'Already Registred',
+      );
+      return;
+    }
+
+    if (isCategoryFull(gender as GenderType, format)) {
       Alert.alert(
         APP_STRINGS.eventScreen.registrationClosed,
         APP_STRINGS.registrationScreen.categoryFullAlert(gender, format),
@@ -153,7 +174,9 @@ export const useEventRegistrationViewModel = (
   const onRegister = async () => {
     if (!user || !gender || selectedFormats.length === 0) return;
 
-    const alreadyRegisteredFormats = selectedFormats.filter((f) => isAlreadyRegistered(gender, f));
+    const alreadyRegisteredFormats = selectedFormats.filter((f) =>
+      isAlreadyRegistered(gender as GenderType, f),
+    );
     if (alreadyRegisteredFormats.length > 0) {
       Alert.alert(
         APP_STRINGS.registrationScreen.alreadyRegistered,
@@ -165,7 +188,11 @@ export const useEventRegistrationViewModel = (
     try {
       await Promise.all(
         selectedFormats.map((format) => {
-          const cat = getCategory(gender, format);
+          const cat = getCategory(gender as GenderType, format);
+
+          console.log('Selected Gender:', gender);
+console.log('Selected Format:', format);
+console.log('All Categories:', event?.categories);
           if (!cat) throw new Error(APP_STRINGS.registrationScreen.categoryNotFound(gender, format));
           return authFetch(API_ENDPOINTS.PARTICIPANT.REGISTER, {
             method: 'POST',
@@ -175,12 +202,18 @@ export const useEventRegistrationViewModel = (
       );
       Alert.alert(APP_STRINGS.common.success, APP_STRINGS.eventScreen.registrationSuccessfull);
       navigation.goBack();
-    } catch {
-      Alert.alert(APP_STRINGS.common.error, APP_STRINGS.eventScreen.registrationFailed);
+    } catch(error){ if(error instanceof Error){
+        Alert.alert(APP_STRINGS.common.error,
+    error?.message);
+
+    console.log(error)
+      }
     }
   };
 
-  const isAlreadyFullyRegistered = gender !== '' ? isFullyRegistered(gender as GenderType) : false;
+  const isAlreadyFullyRegistered = Object.values(GenderType).includes(gender as GenderType)
+    ? isFullyRegistered(gender as GenderType)
+    : false;
 
   const isFormValid =
     playerName.length > 0 &&

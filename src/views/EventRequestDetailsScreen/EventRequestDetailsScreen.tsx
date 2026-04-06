@@ -164,11 +164,14 @@ const EventRequestDetailsScreen = ({ route }: Props) => {
 
               {request.status === RequestStatus.APPROVED && (
                 <View style={styles.buttonFlex}>
-                  <AppButton
-                    title={APP_STRINGS.RequestScreen.createEvent}
-                    disabled={!canCreateEvent}
-                    onPress={handleCreateEvent}
-                  />
+                  {canCreateEvent ? (
+                    <AppButton
+                      title={APP_STRINGS.RequestScreen.createEvent}
+                      onPress={handleCreateEvent}
+                    />
+                  ) : (
+                    <Text style={styles.infoAlreadyEvent}>Event Already Created</Text>
+                  )}
                 </View>
               )}
             </View>

@@ -151,3 +151,4 @@ const EventRegistrationScreen = ({ navigation, route }: EventRegistrationProps) 
 };
 
 export default EventRegistrationScreen;
+ 

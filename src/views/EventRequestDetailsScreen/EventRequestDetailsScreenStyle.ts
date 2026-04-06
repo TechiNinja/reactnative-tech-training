@@ -223,4 +223,10 @@ export const styles = StyleSheet.create({
     padding: 16,
   },
 
+  infoAlreadyEvent: {
+    color: colors.error,
+    fontSize: 20,
+    margin :10,
+    textAlign: 'center',
+  },
 });

@@ -1,8 +1,8 @@
 import { Platform } from 'react-native';
 
 const HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-export const API_BASE_URL = `http://${HOST}:5000/api`;
-export const API_WS_BASE_URL = `http://${HOST}:5000`;
+export const API_BASE_URL = `https://dotnet-tech-training.onrender.com/api`;
+export const API_WS_BASE_URL = `https://dotnet-tech-training.onrender.com`;
 
 export const API_ENDPOINTS = {
   AUTH: {
